@@ -4,6 +4,7 @@ from ursina.prefabs.file_browser import *
 from parts import *
 from loader import *
 from settings import *
+import os
 
 app = Ursina()
 window.borderless = False
@@ -15,6 +16,9 @@ light.look_at(Vec3(50, -50, 50))
 
 current_entity = {}
 dataStore = {}
+loadedFile = "no file loaded"
+
+originArrows()
 
 # handler to select components on screen
 def click():
@@ -24,13 +28,12 @@ def click():
     current_entity = mouse.hovered_entity
     current_entity.color = color.rgb(150, 255, 150)
 
-
-originArrows()
-
 def on_submit(paths):
-    print('--------', paths)
-    global dataStore
-    dataStore = loadComponents(filename="test.net", clickFunction=click)
+    global loadedFile, dataStore
+    # save input filename for display
+    loadedFile = os.fspath(paths[0])
+    # parse netlist and create all components
+    dataStore = loadComponents(filename=loadedFile, clickFunction=click)
     print(dataStore)
 
 # load file, either savestate or netlist
@@ -41,35 +44,22 @@ def loadDialog():
     if dataStore == {}:
         fb.enabled = True
 
-def newButtonFunction():
+def newDocument():
     global dataStore, current_entity
     # destroy all Entites individually
     deleteAllEntities(dataStore)
     # blank the dataStore and currentEntity
     dataStore = {}
     current_entity = {}
+    loadedFile = "no file loaded"
     # reset the initPosition for the part placing
     parts.initPosition = parts.posGenerator()
 
 
 # basic menu structure with buttons
-DropdownMenu("Menu", [DropdownMenuButton('New', on_click=newButtonFunction),
+DropdownMenu("Menu", [DropdownMenuButton('New', on_click=newDocument),
                       DropdownMenuButton('Load', on_click=loadDialog),
                       DropdownMenuButton('Save', on_click=saveButtonFunction)])
-
-
-# add all components, in future according to a parsed netlist
-# Q1 = BC547(click)
-# Q2 = BC547(click)
-# Q3 = BC547(click)
-# V1 = LED5MM(click)
-# R1 = RES0603(click)
-# R2 = RES0603(click)
-# R3 = RES0603(click)
-
-
-
-# parse netlist and create all components
 
 
 print("dataStore", dataStore)
