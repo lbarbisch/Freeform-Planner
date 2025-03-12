@@ -2,7 +2,7 @@
 
 rotation_increment = 15
 translation_increment = 1
-
+airwire_thickness = 5
 
 ### Keybindings ###
 

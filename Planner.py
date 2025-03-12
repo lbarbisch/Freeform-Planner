@@ -1,7 +1,8 @@
 from ursina import *
 from ursina.prefabs.dropdown_menu import DropdownMenu, DropdownMenuButton
 from ursina.prefabs.file_browser import *
-from Parts import *
+from parts import *
+from loader import *
 from settings import *
 
 app = Ursina()
@@ -13,6 +14,7 @@ light.look_at(Vec3(50, -50, 50))
 
 
 current_entity = {}
+dataStore = {}
 
 # handler to select components on screen
 def click():
@@ -25,8 +27,14 @@ def click():
 
 originArrows()
 
+def on_submit(paths):
+    print('--------', paths)
+    global dataStore
+    dataStore = loadComponents(filename="test.net", clickFunction=click)
+
 # load file, either savestate or netlist
-FileBrowser()
+fb = FileBrowser(file_types=(".net", ".ffls"))
+fb.on_submit = on_submit
 
 # basic menu structure with buttons
 DropdownMenu("test", [DropdownMenuButton('New'),
@@ -35,17 +43,24 @@ DropdownMenu("test", [DropdownMenuButton('New'),
 
 
 # add all components, in future according to a parsed netlist
-Q1 = BC547(click)
-Q2 = BC547(click)
-Q3 = BC547(click)
-V1 = LED5MM(click)
-R1 = RES0603(click)
-R2 = RES0603(click)
-R3 = RES0603(click)
+# Q1 = BC547(click)
+# Q2 = BC547(click)
+# Q3 = BC547(click)
+# V1 = LED5MM(click)
+# R1 = RES0603(click)
+# R2 = RES0603(click)
+# R3 = RES0603(click)
+
+
+
+# parse netlist and create all components
+
+
+print("dataStore", dataStore)
 
 # define air wire  placeholders
-net1 = Entity(model=Mesh(vertices=[(0,0,0), (0,0,0)], mode='line', thickness=5), color=color.yellow)
-net2 = Entity(model=Mesh(vertices=[(0,0,0), (0,0,0)], mode='line', thickness=5), color=color.yellow)
+# net1 = Entity(model=Mesh(vertices=[(0,0,0), (0,0,0)], mode='line', thickness=5), color=color.yellow)
+# net2 = Entity(model=Mesh(vertices=[(0,0,0), (0,0,0)], mode='line', thickness=5), color=color.yellow)
 
 # Rotation and Translation of selected object
 def input(key):
@@ -109,10 +124,11 @@ def input(key):
 
 # update positions of existing air wires
 def update():
-    net1.model.vertices=[Q2.getPinPos(0), Q3.getPinPos(1)]
-    net1.model.generate()
-    net2.model.vertices=[Q1.getPinPos(2), Q2.getPinPos(1)]
-    net2.model.generate()
+    pass
+    # net1.model.vertices=[Q2.getPinPos(0), Q3.getPinPos(1)]
+    # net1.model.generate()
+    # net2.model.vertices=[Q1.getPinPos(2), Q2.getPinPos(1)]
+    # net2.model.generate()
 
 
 EditorCamera()

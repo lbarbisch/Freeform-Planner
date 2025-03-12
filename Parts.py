@@ -27,10 +27,19 @@ class Component(Entity):
         super().__init__(**kwargs)
     
     def getPinPos(self, pinNumber):
-        return self.Pin[pinNumber].world_position
+        # pinNumber-1 so pin number 1 is index 0
+        return self.Pin[pinNumber-1].world_position
 
 # extends Component class by specific 3D model, initial position and pin positions relative to part origin
 class BC547(Component):
+    def __init__(self, clickFunction):
+        super().__init__(model='SOT23-3', collider='mesh', position=next(initPosition), on_click=clickFunction)
+        self.Pin = [Entity(position=Vec3(-1.2,  1, 0), parent=self),
+                    Entity(position=Vec3(-1.2, -1, 0), parent=self),
+                    Entity(position=Vec3( 1.2,  0, 0), parent=self)]
+
+# DELETE ME AFTERWARDS solely for testing
+class BC807(Component):
     def __init__(self, clickFunction):
         super().__init__(model='SOT23-3', collider='mesh', position=next(initPosition), on_click=clickFunction)
         self.Pin = [Entity(position=Vec3(-1.2,  1, 0), parent=self),
@@ -51,6 +60,14 @@ class RES0603(Component):
         self.Pin = [Entity(position=Vec3(0.8,  0, 0.2), parent=self),
                     Entity(position=Vec3(-0.8, 0, 0.2), parent=self)]
 
+class PORT(Component):
+    def __init__(self, clickFunction):
+        super().__init__(model='RES0603', collider='mesh', position=next(initPosition), on_click=clickFunction)
+        raise("implement pin position first!!!")
+
+class AIRWIRE(Entity):
+    def __init__(self, start, end):
+        super().__init__(model=Mesh(vertices=[start, end], mode='line', thickness=airwire_thickness), color=color.yellow)
 
 
 if __name__ == '__main__':
