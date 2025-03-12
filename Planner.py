@@ -31,14 +31,30 @@ def on_submit(paths):
     print('--------', paths)
     global dataStore
     dataStore = loadComponents(filename="test.net", clickFunction=click)
+    print(dataStore)
 
 # load file, either savestate or netlist
-fb = FileBrowser(file_types=(".net", ".ffls"))
+fb = FileBrowser(file_types=(".net", ".ffls"), enabled=False)
 fb.on_submit = on_submit
 
+def loadDialog():
+    if dataStore == {}:
+        fb.enabled = True
+
+def newButtonFunction():
+    global dataStore, current_entity
+    # destroy all Entites individually
+    deleteAllEntities(dataStore)
+    # blank the dataStore and currentEntity
+    dataStore = {}
+    current_entity = {}
+    # reset the initPosition for the part placing
+    parts.initPosition = parts.posGenerator()
+
+
 # basic menu structure with buttons
-DropdownMenu("test", [DropdownMenuButton('New'),
-                      DropdownMenuButton('Load', on_click=loadButtonFunction),
+DropdownMenu("Menu", [DropdownMenuButton('New', on_click=newButtonFunction),
+                      DropdownMenuButton('Load', on_click=loadDialog),
                       DropdownMenuButton('Save', on_click=saveButtonFunction)])
 
 
@@ -124,7 +140,8 @@ def input(key):
 
 # update positions of existing air wires
 def update():
-    pass
+    global dataStore
+    dataStore = updateAirwires(dataStore)
     # net1.model.vertices=[Q2.getPinPos(0), Q3.getPinPos(1)]
     # net1.model.generate()
     # net2.model.vertices=[Q1.getPinPos(2), Q2.getPinPos(1)]
