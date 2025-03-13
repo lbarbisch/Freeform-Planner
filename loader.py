@@ -1,5 +1,6 @@
 import parts
 import re
+import pickle
 
 def parseKicadNetlist(file_path):
     components = {}
@@ -27,12 +28,69 @@ def parseKicadNetlist(file_path):
     return components, connections
 
 # main loading function
-def loadComponents(filename, clickFunction={}, dataStore={}):
+def loadComponents(filename, clickFunction={}):
     # detect fileending if it is a netlist or a save file
-    if filename[-5:] == ".ffls":
-        print("to be implemented :D")
+    if filename[-5:] == ".ffps":
+        return _loadProjectFile(filename, clickFunction)
     elif filename[-4:] == ".net":
-        return _loadNetlist(filename, clickFunction, dataStore)
+        return _loadNetlist(filename, clickFunction)
+
+# parses and loads a project file
+def _loadProjectFile(filename, clickFunction):
+    # first read in the file and unpickle it
+    loadStore = {}
+    with open(filename, "br") as file:
+        loadStore = pickle.load(file)
+    
+    # print("loadStore", loadStore)
+
+    components = loadStore['components']
+    dataStore = {}
+    # instantiate all components from their respective class and add them to the components subdict
+    dataStore["components"] = {}
+    for designator in list(components.keys()):
+        try:
+            componentClass = getattr(parts, components[designator]['name'])
+            dataStore["components"][designator] = componentClass(clickFunction)     # add the actual component
+            dataStore["components"][designator].rotation = components[designator]['rotation']
+        except:
+            print("No component candidate found for", components[designator]['name'], "skipping")
+    
+    # print('dataStore', dataStore)
+    # add all nets to the nets subdict
+    dataStore['nets'] = {}
+    connections = loadStore['nets']
+    for netname in list(connections.keys()):
+        nets = connections[netname]
+        if "unconnected" not in netname:
+            dataStore['nets'][netname] = nets
+    
+    # add airwires
+    # print(connections)
+    dataStore['airwires'] = {}
+    # iterate over every netname
+    for netname in list(connections.keys()):
+        if "unconnected" not in netname:
+            # prepare 
+            dataStore['airwires'][netname] = {}
+            # print(netname)
+            for i in range(1, len(connections[netname])):
+                startPart = list(connections[netname].keys())[i-1]
+                startPin  = int(list(connections[netname].values())[i-1])
+                endPart   = list(connections[netname].keys())[i]
+                endPin    = int(list(connections[netname].values())[i])
+
+                startPosition = dataStore['components'][startPart].getPinPos(startPin)
+                endPosition   = dataStore['components'][endPart].getPinPos(endPin)
+
+                # print("net", netname, "wire", i, startPart, startPin, endPart, endPin, startPosition, endPosition)
+
+                if clickFunction != {}:
+                    dataStore['airwires'][netname][str(i)] = parts.AIRWIRE(startPosition, endPosition)
+                else:
+                    dataStore['airwires'][netname][str(i)] = "wire" + str(i)
+            # print(connections[netname])
+    return dataStore
 
 # parses and loads netlists
 def _loadNetlist(filename, clickFunction={}, dataStore={}):
@@ -86,8 +144,23 @@ def _loadNetlist(filename, clickFunction={}, dataStore={}):
             # print(connections[netname])
     return dataStore
 
+def makeSaveStore(dataStore):
+    saveStore = {}
+    saveStore["components"]= {}
+    saveStore['nets'] = dataStore['nets']
+
+    for designatorName in dataStore['components'].keys():
+        designatorObject = dataStore['components'][designatorName]
+        saveStore['components'][designatorName] = {'name': designatorObject.name, 'rotation': designatorObject.rotation}
+    
+    print("saveStore", saveStore)
+
+    return pickle.dumps(saveStore, protocol=pickle.HIGHEST_PROTOCOL)
+
+
 if __name__ == "__main__":
-    dataStore = loadComponents("test.net")
+    print(parseKicadNetlist("test.net"))
+    # dataStore = loadComponents("test.net")
     # print(dataStore['components'])
     # print(dataStore['nets'])
-    print(dataStore['airwires'])
+    # print(dataStore['airwires'])

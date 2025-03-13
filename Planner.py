@@ -1,34 +1,39 @@
 from ursina import *
 from ursina.prefabs.dropdown_menu import DropdownMenu, DropdownMenuButton
 from ursina.prefabs.file_browser import *
+from ursina.prefabs.file_browser_save import *
 from parts import *
 from loader import *
 from settings import *
 import os
 
 app = Ursina()
+Sky()
 window.borderless = False
 window.exit_button.enabled = False
 
 light = AmbientLight(shadows=True)
 light.look_at(Vec3(50, -50, 50))
 
+fb = FileBrowserBetterSave(enabled=False)
+currentEntityDescriptor = Text(text="nothing selected", position=(0.8, 0.45), origin = (.5, -.5))
 
-current_entity = {}
+currentEntity = {}
 dataStore = {}
 loadedFile = "no file loaded"
+savedFile = "no file saved yet"
 
 originArrows()
 
 # handler to select components on screen
 def click():
-    global current_entity
-    if current_entity != {}:
-        current_entity.color = color.rgb(255, 255, 255)
-    current_entity = mouse.hovered_entity
-    current_entity.color = color.rgb(150, 255, 150)
+    global currentEntity
+    if currentEntity != {}:
+        currentEntity.color = color.rgb(255, 255, 255)
+    currentEntity = mouse.hovered_entity
+    currentEntity.color = color.rgb(150, 255, 150)
 
-def on_submit(paths):
+def on_submit_load(paths):
     global loadedFile, dataStore
     # save input filename for display
     loadedFile = os.fspath(paths[0])
@@ -36,30 +41,52 @@ def on_submit(paths):
     dataStore = loadComponents(filename=loadedFile, clickFunction=click)
     print(dataStore)
 
-# load file, either savestate or netlist
-fb = FileBrowser(file_types=(".net", ".ffls"), enabled=False)
-fb.on_submit = on_submit
+def on_submit_save(paths):
+    global savedFile, dataStore
+    if type(paths) == list:
+        path = paths[0]
+    else:
+        path = paths
+    
+    with open(os.fspath(path), '+bw') as file:
+        file.write(makeSaveStore(dataStore))
 
-def loadDialog():
+
+def menuButtonLoad():
+    global fb
     if dataStore == {}:
+        # load file, either savestate or netlist
+        # fb = FileBrowser(enabled=False)
+        fb.file_type = (".net", ".ffps")
+        fb.on_submit = on_submit_load
+        fb.title_bar.text = "Load Netlist or Project File"
         fb.enabled = True
 
-def newDocument():
-    global dataStore, current_entity
+def menuButtonSave():
+    global fb
+    if dataStore != {}:
+        fb.file_type = '.ffps'
+        fb.on_submit = on_submit_save
+        fb.title_bar.text = "Save Project"
+        fb.enabled = True
+        print("done")
+
+def menuButtonNew():
+    global dataStore, currentEntity, loadedFile
     # destroy all Entites individually
     deleteAllEntities(dataStore)
     # blank the dataStore and currentEntity
     dataStore = {}
-    current_entity = {}
+    currentEntity = {}
     loadedFile = "no file loaded"
     # reset the initPosition for the part placing
     parts.initPosition = parts.posGenerator()
 
 
 # basic menu structure with buttons
-DropdownMenu("Menu", [DropdownMenuButton('New', on_click=newDocument),
-                      DropdownMenuButton('Load', on_click=loadDialog),
-                      DropdownMenuButton('Save', on_click=saveButtonFunction)])
+DropdownMenu("Menu", [DropdownMenuButton('New', on_click=menuButtonNew),
+                      DropdownMenuButton('Load', on_click=menuButtonLoad),
+                      DropdownMenuButton('Save', on_click=menuButtonSave)])
 
 
 print("dataStore", dataStore)
@@ -70,62 +97,65 @@ print("dataStore", dataStore)
 
 # Rotation and Translation of selected object
 def input(key):
-    if current_entity != {}:
+    if currentEntity != {} and fb.enabled == False:
         if key == key_rotate_y_pos:
-            current_entity.rotation_y += rotation_increment
+            currentEntity.rotation_y += rotation_increment
         elif held_keys[key_rotate_y_pos]:
-            current_entity.rotation_y += rotation_increment
+            currentEntity.rotation_y += rotation_increment
         if key == key_rotate_y_neg:
-            current_entity.rotation_y -= rotation_increment
+            currentEntity.rotation_y -= rotation_increment
         elif held_keys[key_rotate_y_neg]:
-            current_entity.rotation_y -= rotation_increment
+            currentEntity.rotation_y -= rotation_increment
 
         if key == key_rotate_x_pos:
-            current_entity.rotation_x += rotation_increment
+            currentEntity.rotation_x += rotation_increment
         elif held_keys[key_rotate_x_pos]:
-            current_entity.rotation_x += rotation_increment
+            currentEntity.rotation_x += rotation_increment
         if key == key_rotate_x_neg:
-            current_entity.rotation_x -= rotation_increment
+            currentEntity.rotation_x -= rotation_increment
         elif held_keys[key_rotate_x_neg]:
-            current_entity.rotation_x -= rotation_increment
+            currentEntity.rotation_x -= rotation_increment
 
         if key == key_rotate_z_pos:
-            current_entity.rotation_z += rotation_increment
+            currentEntity.rotation_z += rotation_increment
         elif held_keys[key_rotate_z_pos]:
-            current_entity.rotation_z += rotation_increment
+            currentEntity.rotation_z += rotation_increment
         if key == key_rotate_z_neg:
-            current_entity.rotation_z -= rotation_increment
+            currentEntity.rotation_z -= rotation_increment
         elif held_keys[key_rotate_z_neg]:
-            current_entity.rotation_z -= rotation_increment
+            currentEntity.rotation_z -= rotation_increment
 
         if key == key_translate_x_pos:
-            current_entity.x += translation_increment/2
+            currentEntity.x += translation_increment/2
         elif held_keys[key_translate_x_pos]:
-            current_entity.x += translation_increment
+            currentEntity.x += translation_increment
         if key == key_translate_x_neg:
-            current_entity.x -= translation_increment/2
+            currentEntity.x -= translation_increment/2
         elif held_keys[key_translate_x_neg]:
-            current_entity.x -= translation_increment
+            currentEntity.x -= translation_increment
 
         if key == key_translate_z_pos:
-            current_entity.z += translation_increment/2
+            currentEntity.z += translation_increment/2
         elif held_keys[key_translate_z_pos]:
-            current_entity.z += translation_increment
+            currentEntity.z += translation_increment
         if key == key_translate_z_neg:
-            current_entity.z -= translation_increment/2
+            currentEntity.z -= translation_increment/2
         elif held_keys[key_translate_z_neg]:
-            current_entity.z -= translation_increment
+            currentEntity.z -= translation_increment
 
         if key == key_translate_y_pos:
-            current_entity.y += translation_increment/2
+            currentEntity.y += translation_increment/2
         elif held_keys[key_translate_y_pos]:
-            current_entity.y += translation_increment
+            currentEntity.y += translation_increment
         if key == key_translate_y_neg:
-            current_entity.y -= translation_increment/2
+            currentEntity.y -= translation_increment/2
         elif held_keys[key_translate_y_neg]:
-            current_entity.y -= translation_increment
+            currentEntity.y -= translation_increment
 
-    if key == key_exit:
+        currentEntityDescriptor.text = currentEntity
+        print(dir(currentEntity))
+
+    if key == key_exit:     #### ONLY USEFULL FOR DEBUGGING ####
         app.userExit()
 
 # update positions of existing air wires

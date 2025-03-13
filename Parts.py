@@ -13,11 +13,11 @@ def originArrows():
 
 # only needed for test in this file
 def click():
-    global current_entity
-    if current_entity != {}:
-        current_entity.color = color.rgb(255, 255, 255)
-    current_entity = mouse.hovered_entity
-    current_entity.color = color.rgb(150, 255, 150)
+    global currentEntity
+    if currentEntity != {}:
+        currentEntity.color = color.rgb(255, 255, 255)
+    currentEntity = mouse.hovered_entity
+    currentEntity.color = color.rgb(150, 255, 150)
 
 # adds Pin array and pinPos get function to Entity class
 class Component(Entity):
@@ -37,6 +37,7 @@ class BC547(Component):
         self.Pin = [Entity(position=Vec3(-1.2,  1, 0), parent=self),
                     Entity(position=Vec3(-1.2, -1, 0), parent=self),
                     Entity(position=Vec3( 1.2,  0, 0), parent=self)]
+        self.name = "BC547"
 
 # DELETE ME AFTERWARDS solely for testing
 class BC807(Component):
@@ -45,6 +46,7 @@ class BC807(Component):
         self.Pin = [Entity(position=Vec3(-1.2,  1, 0), parent=self),
                     Entity(position=Vec3(-1.2, -1, 0), parent=self),
                     Entity(position=Vec3( 1.2,  0, 0), parent=self)]
+        self.name = "BC807"
 
 # extends Component class by specific 3D model, initial position and pin positions relative to part origin
 class LED5MM(Component):
@@ -52,6 +54,7 @@ class LED5MM(Component):
         super().__init__(model='LED5MM', collider='mesh', position=next(initPosition), on_click=clickFunction)
         self.Pin = [Entity(position=Vec3(12.1,  0, -6.8), parent=self),
                     Entity(position=Vec3(-12.1, 0, -6.8), parent=self)]
+        self.name = "LED5MM"
 
 # extends Component class by specific 3D model, initial position and pin positions relative to part origin
 class RES0603(Component):
@@ -59,11 +62,13 @@ class RES0603(Component):
         super().__init__(model='RES0603', collider='mesh', position=next(initPosition), on_click=clickFunction)
         self.Pin = [Entity(position=Vec3(0.8,  0, 0.2), parent=self),
                     Entity(position=Vec3(-0.8, 0, 0.2), parent=self)]
+        self.name = "RES0603"
 
 class PORT(Component):
     def __init__(self, clickFunction):
         super().__init__(model='RES0603', collider='mesh', position=next(initPosition), on_click=clickFunction)
         raise("implement pin position first!!!")
+        self.name = "PORT"
 
 class AIRWIRE(Entity):
     def __init__(self, start, end):
@@ -75,7 +80,7 @@ if __name__ == '__main__':
     window.borderless = False
     window.exit_button.enabled = False
 
-    current_entity = {}
+    currentEntity = {}
 
     originArrows()
 
