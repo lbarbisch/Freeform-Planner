@@ -35,13 +35,13 @@ class AIRWIRE(Entity):
         super().__init__(model=Mesh(vertices=[start, end], mode='line', thickness=airwire_thickness), color=color.yellow)
 
 
-class BC547(Component):
+class BC847(Component):
     def __init__(self, clickFunction):
         super().__init__(model='SOT23-3', collider='mesh', position=next(initPosition), on_click=clickFunction)
         self.Pin = [Entity(position=Vec3(-1.2,  1, 0), parent=self),
                     Entity(position=Vec3(-1.2, -1, 0), parent=self),
                     Entity(position=Vec3( 1.2,  0, 0), parent=self)]
-        self.name = "BC547"
+        self.name = "BC847"
 
 class LED5MM(Component):
     def __init__(self, clickFunction):
@@ -70,6 +70,56 @@ class DIODETHT(Component):
                     Entity(position=Vec3(-22.5, 0, 0), parent=self)]
         self.name = "PORT"
 
+class BC547(Component):
+    def __init__(self, clickFunction):
+        super().__init__(model='TO92', collider='mesh', position=next(initPosition), on_click=clickFunction)
+        self.Pin = [Entity(position=Vec3( 2.4, -12, 0), parent=self),
+                    Entity(position=Vec3(   0, -12, 0), parent=self),
+                    Entity(position=Vec3(-2.4, -12, 0), parent=self)]
+        self.name = "BC547"
+
+class BC557(Component):
+    def __init__(self, clickFunction):
+        super().__init__(model='TO92', collider='mesh', position=next(initPosition), on_click=clickFunction)
+        self.Pin = [Entity(position=Vec3( 2.4, -12, 0), parent=self),
+                    Entity(position=Vec3(   0, -12, 0), parent=self),
+                    Entity(position=Vec3(-2.4, -12, 0), parent=self)]
+        self.name = "BC557"
+
+class CAPTHT(Component):
+    def __init__(self, clickFunction):
+        super().__init__(model='CAPTHT', collider='mesh', position=next(initPosition), on_click=clickFunction)
+        self.Pin = [Entity(position=Vec3(12.5,  0, 0), parent=self),
+                    Entity(position=Vec3(-12.5, 0, 0), parent=self)]
+        self.name = "CAPTHT"
+
+class DIP8(Component):
+    def __init__(self, clickFunction):
+        super().__init__(model='DIP8', collider='mesh', position=next(initPosition), on_click=clickFunction)
+        self.Pin = [Entity(position=Vec3(-3.81, -3.81, -3.81), parent=self),
+                    Entity(position=Vec3(-1.27, -3.81, -3.81), parent=self),
+                    Entity(position=Vec3( 1.27, -3.81, -3.81), parent=self),
+                    Entity(position=Vec3( 3.81, -3.81, -3.81), parent=self),
+                    Entity(position=Vec3( 3.81, -3.81, 3.81), parent=self),
+                    Entity(position=Vec3( 1.27, -3.81, 3.81), parent=self),
+                    Entity(position=Vec3(-1.27, -3.81, 3.81), parent=self),
+                    Entity(position=Vec3(-3.81, -3.81, 3.81), parent=self)]
+        self.name = "DIP8"
+
+class SOIC8(Component):
+    def __init__(self, clickFunction):
+        super().__init__(model='SOIC8', collider='mesh', position=next(initPosition), on_click=clickFunction)
+        self.Pin = [Entity(position=Vec3(-1.905, 0, -3), parent=self),
+                    Entity(position=Vec3(-0.635, 0, -3), parent=self),
+                    Entity(position=Vec3( 0.635, 0, -3), parent=self),
+                    Entity(position=Vec3( 1.905, 0, -3), parent=self),
+                    Entity(position=Vec3( 1.905, 0,  3), parent=self),
+                    Entity(position=Vec3( 0.635, 0,  3), parent=self),
+                    Entity(position=Vec3(-0.635, 0,  3), parent=self),
+                    Entity(position=Vec3(-1.905, 0,  3), parent=self)]
+        self.name = "SOIC8"
+
+
 
 
 if __name__ == '__main__':
@@ -81,11 +131,17 @@ if __name__ == '__main__':
 
     originArrows()
 
-    D = DIODETHT(click)
-    L = LED5MM(click)
+    # C = CAPTHT(click)
+    # L = LED5MM(click)
+    # T = BC547(click)
+    # D = DIP8(click)
+    D = SOIC8(click)
     # PORT(click)
-    # AIRWIRE(start=L.Pin[0], end=D.Pin[0])
-    AIRWIRE(start=L.getPinPos(1), end=D.getPinPos(1))
+    AIRWIRE(start=D.getPinPos(1), end=D.getPinPos(7))
+    AIRWIRE(start=D.getPinPos(2), end=D.getPinPos(6))
+    AIRWIRE(start=D.getPinPos(3), end=D.getPinPos(5))
+    AIRWIRE(start=D.getPinPos(4), end=D.getPinPos(8))
+    # AIRWIRE(start=C.getPinPos(2), end=T.getPinPos(2))
 
 
     for i in range(-10, 10):
