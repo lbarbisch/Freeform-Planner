@@ -30,7 +30,11 @@ class Component(Entity):
         # pinNumber-1 so pin number 1 is index 0
         return self.Pin[pinNumber-1].world_position
 
-# extends Component class by specific 3D model, initial position and pin positions relative to part origin
+class AIRWIRE(Entity):
+    def __init__(self, start, end):
+        super().__init__(model=Mesh(vertices=[start, end], mode='line', thickness=airwire_thickness), color=color.yellow)
+
+
 class BC547(Component):
     def __init__(self, clickFunction):
         super().__init__(model='SOT23-3', collider='mesh', position=next(initPosition), on_click=clickFunction)
@@ -39,16 +43,6 @@ class BC547(Component):
                     Entity(position=Vec3( 1.2,  0, 0), parent=self)]
         self.name = "BC547"
 
-# DELETE ME AFTERWARDS solely for testing
-class BC807(Component):
-    def __init__(self, clickFunction):
-        super().__init__(model='SOT23-3', collider='mesh', position=next(initPosition), on_click=clickFunction)
-        self.Pin = [Entity(position=Vec3(-1.2,  1, 0), parent=self),
-                    Entity(position=Vec3(-1.2, -1, 0), parent=self),
-                    Entity(position=Vec3( 1.2,  0, 0), parent=self)]
-        self.name = "BC807"
-
-# extends Component class by specific 3D model, initial position and pin positions relative to part origin
 class LED5MM(Component):
     def __init__(self, clickFunction):
         super().__init__(model='LED5MM', collider='mesh', position=next(initPosition), on_click=clickFunction)
@@ -56,7 +50,6 @@ class LED5MM(Component):
                     Entity(position=Vec3(-12.1, 0, -6.8), parent=self)]
         self.name = "LED5MM"
 
-# extends Component class by specific 3D model, initial position and pin positions relative to part origin
 class RES0603(Component):
     def __init__(self, clickFunction):
         super().__init__(model='RES0603', collider='mesh', position=next(initPosition), on_click=clickFunction)
@@ -66,13 +59,17 @@ class RES0603(Component):
 
 class PORT(Component):
     def __init__(self, clickFunction):
-        super().__init__(model='RES0603', collider='mesh', position=next(initPosition), on_click=clickFunction)
-        raise("implement pin position first!!!")
+        super().__init__(model='PIN', collider='mesh', position=next(initPosition), on_click=clickFunction)
+        self.Pin = [Entity(position=Vec3(0, 0, 0), parent=self)]
         self.name = "PORT"
 
-class AIRWIRE(Entity):
-    def __init__(self, start, end):
-        super().__init__(model=Mesh(vertices=[start, end], mode='line', thickness=airwire_thickness), color=color.yellow)
+class DIODETHT(Component):
+    def __init__(self, clickFunction):
+        super().__init__(model='1N4007', collider='mesh', position=next(initPosition), on_click=clickFunction)
+        self.Pin = [Entity(position=Vec3(22.5,  0, 0), parent=self),
+                    Entity(position=Vec3(-22.5, 0, 0), parent=self)]
+        self.name = "PORT"
+
 
 
 if __name__ == '__main__':
@@ -84,14 +81,17 @@ if __name__ == '__main__':
 
     originArrows()
 
-    LED5MM(click)
-    RES0603(click)
+    D = DIODETHT(click)
+    L = LED5MM(click)
+    # PORT(click)
+    # AIRWIRE(start=L.Pin[0], end=D.Pin[0])
+    AIRWIRE(start=L.getPinPos(1), end=D.getPinPos(1))
 
 
-    for i in range(-20, 20):
-        for j in range(-20, 20):
-            Entity(model="Cube", position=[i, j, 0], scale=0.05)
-            Entity(model="Cube", position=[i, 0, j], scale=0.05)
+    for i in range(-10, 10):
+        for j in range(-10, 10):
+            Entity(model="Cube", position=[i*2, j*2, 0], scale=0.05)
+            Entity(model="Cube", position=[i*2, 0, j*2], scale=0.05)
 
     def input(key):
         if key == key_exit:

@@ -8,9 +8,13 @@ from settings import *
 import os
 
 app = Ursina()
-Sky()
+skybox_image = load_texture("sky_sunset.jpg")
+Sky(texture=skybox_image, shader='None')
+window.title = "Freeform-Planner"
 window.borderless = False
+window.windowed_size = (window.fullscreen_size/1.2)
 window.exit_button.enabled = False
+platform = Entity(model="Cube", scale=(100, 0, 100), position=(0, -5, 0), texture='orb', color=color.dark_gray)
 
 light = AmbientLight(shadows=True)
 light.look_at(Vec3(50, -50, 50))
