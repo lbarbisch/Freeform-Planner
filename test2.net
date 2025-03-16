@@ -1,7 +1,7 @@
 (export (version "E")
   (design
     (source "C:\\Users\\Lukas\\Desktop\\test\\test.kicad_sch")
-    (date "2025-03-12T22:35:51+0100")
+    (date "2025-03-16T01:14:12+0100")
     (tool "Eeschema 8.0.2")
     (sheet (number "1") (name "/") (tstamps "/")
       (title_block
@@ -21,7 +21,7 @@
         (comment (number "9") (value "")))))
   (components
     (comp (ref "Q1")
-      (value "BC807")
+      (value "BC847")
       (footprint "Package_TO_SOT_SMD:SOT-23")
       (datasheet "https://www.onsemi.com/pub/Collateral/BC808-D.pdf")
       (description "0.8A Ic, 45V Vce, PNP Transistor, SOT-23")
@@ -37,7 +37,7 @@
       (sheetpath (names "/") (tstamps "/"))
       (tstamps "0e03c2e2-1e31-470e-b170-d6f50d005426"))
     (comp (ref "Q2")
-      (value "BC807")
+      (value "BC847")
       (footprint "Package_TO_SOT_SMD:SOT-23")
       (datasheet "https://www.onsemi.com/pub/Collateral/BC808-D.pdf")
       (description "0.8A Ic, 45V Vce, PNP Transistor, SOT-23")
@@ -53,7 +53,7 @@
       (sheetpath (names "/") (tstamps "/"))
       (tstamps "cb064e07-3d60-42cb-a80f-aac4269b5de6"))
     (comp (ref "Q3")
-      (value "BC807")
+      (value "BC847")
       (footprint "Package_TO_SOT_SMD:SOT-23")
       (datasheet "https://www.onsemi.com/pub/Collateral/BC808-D.pdf")
       (description "0.8A Ic, 45V Vce, PNP Transistor, SOT-23")

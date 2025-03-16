@@ -46,8 +46,8 @@ class BC847(Component):
 class LED5MM(Component):
     def __init__(self, clickFunction):
         super().__init__(model='LED5MM', collider='mesh', position=next(initPosition), on_click=clickFunction)
-        self.Pin = [Entity(position=Vec3(12.1,  0, -6.8), parent=self),
-                    Entity(position=Vec3(-12.1, 0, -6.8), parent=self)]
+        self.Pin = [Entity(position=Vec3(12.1,  0, 0), parent=self),
+                    Entity(position=Vec3(-12.1, 0, 0), parent=self)]
         self.name = "LED5MM"
 
 class RES0603(Component):
@@ -68,7 +68,14 @@ class DIODETHT(Component):
         super().__init__(model='1N4007', collider='mesh', position=next(initPosition), on_click=clickFunction)
         self.Pin = [Entity(position=Vec3(22.5,  0, 0), parent=self),
                     Entity(position=Vec3(-22.5, 0, 0), parent=self)]
-        self.name = "PORT"
+        self.name = "DIODETHT"
+
+class RESTHT(Component):
+    def __init__(self, clickFunction):
+        super().__init__(model='RESTHT', collider='mesh', position=next(initPosition), on_click=clickFunction)
+        self.Pin = [Entity(position=Vec3( 31, 0, 0), parent=self),
+                    Entity(position=Vec3(-31, 0, 0), parent=self)]
+        self.name = "RESTHT"
 
 class BC547(Component):
     def __init__(self, clickFunction):
@@ -132,13 +139,14 @@ if __name__ == '__main__':
     originArrows()
 
     # C = CAPTHT(click)
-    # L = LED5MM(click)
+    L = LED5MM(click)
     # T = BC547(click)
     # D = DIP8(click)
     D = SOIC8(click)
+    # R = RESTHT(click)
     # PORT(click)
-    AIRWIRE(start=D.getPinPos(1), end=D.getPinPos(7))
-    AIRWIRE(start=D.getPinPos(2), end=D.getPinPos(6))
+    AIRWIRE(start=L.getPinPos(1), end=D.getPinPos(7))
+    AIRWIRE(start=L.getPinPos(2), end=D.getPinPos(6))
     AIRWIRE(start=D.getPinPos(3), end=D.getPinPos(5))
     AIRWIRE(start=D.getPinPos(4), end=D.getPinPos(8))
     # AIRWIRE(start=C.getPinPos(2), end=T.getPinPos(2))

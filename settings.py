@@ -2,9 +2,11 @@
 
 rotation_increment = 15
 translation_increment = 1
-airwire_thickness = 5
+airwire_thickness = 10
 
 ### Keybindings ###
+
+reset_rotation = "r"
 
 # Rotation
 key_rotate_x_pos = "w"

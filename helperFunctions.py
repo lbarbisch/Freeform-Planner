@@ -26,18 +26,23 @@ def updateAirwires(dataStore):
         nets = dataStore['nets']
         for netname in list(nets.keys()):
             for i in range(1, len(nets[netname])):
-                startPart = list(nets[netname].keys())[i-1]
-                startPin  = int(list(nets[netname].values())[i-1])
-                endPart   = list(nets[netname].keys())[i]
-                endPin    = int(list(nets[netname].values())[i])
+                try:
+                    startPart = list(nets[netname].keys())[i-1]
+                    startPin  = int(list(nets[netname].values())[i-1])
+                    endPart   = list(nets[netname].keys())[i]
+                    endPin    = int(list(nets[netname].values())[i])
 
-                startPosition = dataStore['components'][startPart].getPinPos(startPin)
-                endPosition = dataStore['components'][endPart].getPinPos(endPin)
+                    startPosition = dataStore['components'][startPart].getPinPos(startPin)
+                    endPosition = dataStore['components'][endPart].getPinPos(endPin)
 
-                # print("net", netname, "wire", i, startPart, startPin, endPart, endPin, startPosition, endPosition)
+                    # print("net", netname, "wire", i, startPart, startPin, endPart, endPin, startPosition, endPosition)
 
-                dataStore['airwires'][netname][str(i)].model.vertices = [startPosition, endPosition]
-                dataStore['airwires'][netname][str(i)].model.generate()
+                    dataStore['airwires'][netname][str(i)].model.vertices = [startPosition, endPosition]
+                    dataStore['airwires'][netname][str(i)].model.generate()
+                except:
+                    pass
+                    # print("airwire not possible")
+                    # print(dataStore)
     return dataStore
 
 def deleteAllEntities(dataStore):

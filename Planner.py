@@ -20,7 +20,7 @@ light = AmbientLight(shadows=True)
 light.look_at(Vec3(50, -50, 50))
 
 fb = FileBrowserBetterSave(enabled=False)
-currentEntityDescriptor = Text(text="nothing selected", position=(0.8, 0.45), origin = (.5, -.5))
+currentEntityDescriptor = Text(text="nothing selected", position=(0.8, 0.4), origin = (.5, -.5))
 
 currentEntity = {}
 dataStore = {}
@@ -78,9 +78,7 @@ def menuButtonSave():
 def menuButtonNew():
     global dataStore, currentEntity, loadedFile
     # destroy all Entites individually
-    deleteAllEntities(dataStore)
-    # blank the dataStore and currentEntity
-    dataStore = {}
+    dataStore = deleteAllEntities(dataStore)
     currentEntity = {}
     loadedFile = "no file loaded"
     # reset the initPosition for the part placing
@@ -155,9 +153,12 @@ def input(key):
             currentEntity.y -= translation_increment/2
         elif held_keys[key_translate_y_neg]:
             currentEntity.y -= translation_increment
+        
 
-        currentEntityDescriptor.text = currentEntity
-        print(dir(currentEntity))
+        if key == reset_rotation:
+            currentEntity.rotation = (0, 0, 0)
+
+        currentEntityDescriptor.text = currentEntity.name + '\nPosition ' + str(list(currentEntity.position)) + '\nRotation ' + str(list(currentEntity.rotation))
 
     if key == key_exit:     #### ONLY USEFULL FOR DEBUGGING ####
         app.userExit()

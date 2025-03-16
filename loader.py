@@ -1,6 +1,7 @@
 import parts
 import re
 import pickle
+import traceback
 
 def parseKicadNetlist(file_path):
     components = {}
@@ -42,7 +43,7 @@ def _loadProjectFile(filename, clickFunction):
     with open(filename, "br") as file:
         loadStore = pickle.load(file)
     
-    # print("loadStore", loadStore)
+    print("loadStore", loadStore)
 
     components = loadStore['components']
     dataStore = {}
@@ -53,7 +54,9 @@ def _loadProjectFile(filename, clickFunction):
             componentClass = getattr(parts, components[designator]['name'])
             dataStore["components"][designator] = componentClass(clickFunction)     # add the actual component
             dataStore["components"][designator].rotation = components[designator]['rotation']
+            dataStore["components"][designator].position = components[designator]['position']
         except:
+            print(traceback.format_exc())
             print("No component candidate found for", components[designator]['name'], "skipping")
     
     # print('dataStore', dataStore)
@@ -75,21 +78,24 @@ def _loadProjectFile(filename, clickFunction):
             dataStore['airwires'][netname] = {}
             # print(netname)
             for i in range(1, len(connections[netname])):
-                startPart = list(connections[netname].keys())[i-1]
-                startPin  = int(list(connections[netname].values())[i-1])
-                endPart   = list(connections[netname].keys())[i]
-                endPin    = int(list(connections[netname].values())[i])
+                try:
+                    startPart = list(connections[netname].keys())[i-1]
+                    startPin  = int(list(connections[netname].values())[i-1])
+                    endPart   = list(connections[netname].keys())[i]
+                    endPin    = int(list(connections[netname].values())[i])
 
-                startPosition = dataStore['components'][startPart].getPinPos(startPin)
-                endPosition   = dataStore['components'][endPart].getPinPos(endPin)
+                    startPosition = dataStore['components'][startPart].getPinPos(startPin)
+                    endPosition   = dataStore['components'][endPart].getPinPos(endPin)
 
-                # print("net", netname, "wire", i, startPart, startPin, endPart, endPin, startPosition, endPosition)
+                    # print("net", netname, "wire", i, startPart, startPin, endPart, endPin, startPosition, endPosition)
 
-                if clickFunction != {}:
-                    dataStore['airwires'][netname][str(i)] = parts.AIRWIRE(startPosition, endPosition)
-                else:
-                    dataStore['airwires'][netname][str(i)] = "wire" + str(i)
-            # print(connections[netname])
+                    if clickFunction != {}:
+                        dataStore['airwires'][netname][str(i)] = parts.AIRWIRE(startPosition, endPosition)
+                    else:
+                        dataStore['airwires'][netname][str(i)] = "wire" + str(i)
+                except:
+                    print("skipping Airwire, because part does not exist.")
+
     return dataStore
 
 # parses and loads netlists
@@ -108,6 +114,7 @@ def _loadNetlist(filename, clickFunction={}, dataStore={}):
             else:
                 dataStore["components"][str(designator)] = components[designator]       # only add name for testing purposes
         except:
+            print(traceback.format_exc())
             print("No component candidate found for", components[designator], "skipping")
     
     # add all nets to the nets subdict
@@ -120,6 +127,7 @@ def _loadNetlist(filename, clickFunction={}, dataStore={}):
     # add airwires
     # print(connections)
     dataStore['airwires'] = {}
+    validDesignators = dataStore['components'].keys()
     # iterate over every netname
     for netname in list(connections.keys()):
         if "unconnected" not in netname:
@@ -127,21 +135,25 @@ def _loadNetlist(filename, clickFunction={}, dataStore={}):
             dataStore['airwires'][netname] = {}
             # print(netname)
             for i in range(1, len(connections[netname])):
-                startPart = list(connections[netname].keys())[i-1]
-                startPin  = int(list(connections[netname].values())[i-1])
-                endPart   = list(connections[netname].keys())[i]
-                endPin    = int(list(connections[netname].values())[i])
+                try:
+                    startPart = list(connections[netname].keys())[i-1]
+                    startPin  = int(list(connections[netname].values())[i-1])
+                    endPart   = list(connections[netname].keys())[i]
+                    endPin    = int(list(connections[netname].values())[i])
 
-                startPosition = dataStore['components'][startPart].getPinPos(startPin)
-                endPosition = dataStore['components'][endPart].getPinPos(endPin)
-
+                    startPosition = dataStore['components'][startPart].getPinPos(startPin)
+                    endPosition = dataStore['components'][endPart].getPinPos(endPin)
                 # print("net", netname, "wire", i, startPart, startPin, endPart, endPin, startPosition, endPosition)
 
-                if clickFunction != {}:
-                    dataStore['airwires'][netname][str(i)] = parts.AIRWIRE(startPosition, endPosition)
-                else:
-                    dataStore['airwires'][netname][str(i)] = "wire" + str(i)
-            # print(connections[netname])
+                    if clickFunction != {}:
+                        dataStore['airwires'][netname][str(i)] = parts.AIRWIRE(startPosition, endPosition)
+                    else:
+                        dataStore['airwires'][netname][str(i)] = "wire" + str(i)
+                except:
+                    print(traceback.format_exc())
+                    print("skipping Airwire, because part does not exist.")
+            if dataStore['airwires'][netname] == {}:
+                del(dataStore['airwires'][netname])
     return dataStore
 
 def makeSaveStore(dataStore):
@@ -151,7 +163,7 @@ def makeSaveStore(dataStore):
 
     for designatorName in dataStore['components'].keys():
         designatorObject = dataStore['components'][designatorName]
-        saveStore['components'][designatorName] = {'name': designatorObject.name, 'rotation': designatorObject.rotation}
+        saveStore['components'][designatorName] = {'name': designatorObject.name, 'rotation': designatorObject.rotation, 'position': designatorObject.position}
     
     print("saveStore", saveStore)
 
@@ -159,7 +171,7 @@ def makeSaveStore(dataStore):
 
 
 if __name__ == "__main__":
-    print(parseKicadNetlist("test.net"))
+    print(parseKicadNetlist("Altium_EDIFp_Knobber_Topsheet.NET"))
     # dataStore = loadComponents("test.net")
     # print(dataStore['components'])
     # print(dataStore['nets'])
