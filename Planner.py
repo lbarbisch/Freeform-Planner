@@ -173,5 +173,5 @@ def update():
     # net2.model.generate()
 
 
-EditorCamera()
+EditorCamera(target_z=-100)
 app.run()
