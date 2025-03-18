@@ -7,20 +7,19 @@ from loader import *
 from settings import *
 import os
 
-app = Ursina()
+app = Ursina(title="Freeform-Planner", borderless=False, development_mode=True, fullscreen=False, show_ursina_splash=False)
+window.exit_button.enabled = False
+window.fps_counter.enabled = False
 skybox_image = load_texture("sky_sunset.jpg")
 Sky(texture=skybox_image, shader='None')
-window.title = "Freeform-Planner"
-window.borderless = False
-window.windowed_size = (window.fullscreen_size/1.2)
-window.exit_button.enabled = False
+
 platform = Entity(model="Cube", scale=(100, 0, 100), position=(0, -5, 0), texture='orb', color=color.dark_gray)
 
 light = AmbientLight(shadows=True)
 light.look_at(Vec3(50, -50, 50))
 
 fb = FileBrowserBetterSave(enabled=False)
-currentEntityDescriptor = Text(text="nothing selected", position=(0.8, 0.4), origin = (.5, -.5))
+currentEntityDescriptor = Text(eternal=True, origin=(.8,.5), text='60', ignore=True, position=(.5*window.aspect_ratio, .47+(.02*(not window.exit_button.enabled)), -999))
 
 currentEntity = {}
 dataStore = {}
