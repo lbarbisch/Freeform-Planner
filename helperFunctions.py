@@ -55,6 +55,7 @@ def deleteAllEntities(dataStore):
         for nets in airwires.keys():
             for number in list(airwires[nets].keys()):
                 destroy(airwires[nets][number])
+    return {}
 
 
 ## Stuff I had to implement, because the Ursina Library didn't work quite right

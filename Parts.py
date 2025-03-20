@@ -77,6 +77,13 @@ class RESTHT(Component):
                     Entity(position=Vec3(-31, 0, 0), parent=self)]
         self.name = "RESTHT"
 
+class RESTHT_SHORT(Component):
+    def __init__(self, clickFunction):
+        super().__init__(model='RESTHT_SHORT', collider='mesh', position=next(initPosition), on_click=clickFunction)
+        self.Pin = [Entity(position=Vec3( 7.5, 0, 0), parent=self),
+                    Entity(position=Vec3(-7.5, 0, 0), parent=self)]
+        self.name = "RESTHT_SHORT"
+
 class BC547(Component):
     def __init__(self, clickFunction):
         super().__init__(model='TO92', collider='mesh', position=next(initPosition), on_click=clickFunction)
@@ -100,6 +107,13 @@ class CAPTHT(Component):
                     Entity(position=Vec3(-12.5, 0, 0), parent=self)]
         self.name = "CAPTHT"
 
+class CAP0603(Component):
+    def __init__(self, clickFunction):
+        super().__init__(model='CAP0603', collider='mesh', position=next(initPosition), on_click=clickFunction)
+        self.Pin = [Entity(position=Vec3(0.8,  0, 0.2), parent=self),
+                    Entity(position=Vec3(-0.8, 0, 0.2), parent=self)]
+        self.name = "CAP0603"
+
 class DIP8(Component):
     def __init__(self, clickFunction):
         super().__init__(model='DIP8', collider='mesh', position=next(initPosition), on_click=clickFunction)
@@ -113,6 +127,19 @@ class DIP8(Component):
                     Entity(position=Vec3(-3.81, -3.81, 3.81), parent=self)]
         self.name = "DIP8"
 
+class DIP8_NE555P(Component):
+    def __init__(self, clickFunction):
+        super().__init__(model='DIP8', collider='mesh', position=next(initPosition), on_click=clickFunction)
+        self.Pin = [Entity(position=Vec3(-3.81, -3.81, -3.81), parent=self),
+                    Entity(position=Vec3(-1.27, -3.81, -3.81), parent=self),
+                    Entity(position=Vec3( 1.27, -3.81, -3.81), parent=self),
+                    Entity(position=Vec3( 3.81, -3.81, -3.81), parent=self),
+                    Entity(position=Vec3( 3.81, -3.81, 3.81), parent=self),
+                    Entity(position=Vec3( 1.27, -3.81, 3.81), parent=self),
+                    Entity(position=Vec3(-1.27, -3.81, 3.81), parent=self),
+                    Entity(position=Vec3(-3.81, -3.81, 3.81), parent=self)]
+        self.name = "DIP8_NE555P"
+
 class SOIC8(Component):
     def __init__(self, clickFunction):
         super().__init__(model='SOIC8', collider='mesh', position=next(initPosition), on_click=clickFunction)
@@ -125,6 +152,32 @@ class SOIC8(Component):
                     Entity(position=Vec3(-0.635, 0,  3), parent=self),
                     Entity(position=Vec3(-1.905, 0,  3), parent=self)]
         self.name = "SOIC8"
+
+class SOIC8_NE555D(Component):
+    def __init__(self, clickFunction):
+        super().__init__(model='SOIC8', collider='mesh', position=next(initPosition), on_click=clickFunction)
+        self.Pin = [Entity(position=Vec3(-1.905, 0, -3), parent=self),
+                    Entity(position=Vec3(-0.635, 0, -3), parent=self),
+                    Entity(position=Vec3( 0.635, 0, -3), parent=self),
+                    Entity(position=Vec3( 1.905, 0, -3), parent=self),
+                    Entity(position=Vec3( 1.905, 0,  3), parent=self),
+                    Entity(position=Vec3( 0.635, 0,  3), parent=self),
+                    Entity(position=Vec3(-0.635, 0,  3), parent=self),
+                    Entity(position=Vec3(-1.905, 0,  3), parent=self)]
+        self.name = "SOIC8_NE555D"
+
+class SOIC8_TL072(Component):
+    def __init__(self, clickFunction):
+        super().__init__(model='SOIC8', collider='mesh', position=next(initPosition), on_click=clickFunction)
+        self.Pin = [Entity(position=Vec3(-1.905, 0, -3), parent=self),
+                    Entity(position=Vec3(-0.635, 0, -3), parent=self),
+                    Entity(position=Vec3( 0.635, 0, -3), parent=self),
+                    Entity(position=Vec3( 1.905, 0, -3), parent=self),
+                    Entity(position=Vec3( 1.905, 0,  3), parent=self),
+                    Entity(position=Vec3( 0.635, 0,  3), parent=self),
+                    Entity(position=Vec3(-0.635, 0,  3), parent=self),
+                    Entity(position=Vec3(-1.905, 0,  3), parent=self)]
+        self.name = "SOIC8_TL072"
 
 
 
