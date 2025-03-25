@@ -42,7 +42,7 @@ def on_submit_load(paths):
     loadedFile = os.fspath(paths[0])
     # parse netlist and create all components
     dataStore = loadComponents(filename=loadedFile, clickFunction=click)
-    print(dataStore)
+    # print(dataStore)
 
 def on_submit_save(paths):
     global savedFile, dataStore
@@ -90,7 +90,7 @@ DropdownMenu("Menu", [DropdownMenuButton('New', on_click=menuButtonNew),
                       DropdownMenuButton('Save', on_click=menuButtonSave)])
 
 
-print("dataStore", dataStore)
+# print("dataStore", dataStore)
 
 # define air wire  placeholders
 # net1 = Entity(model=Mesh(vertices=[(0,0,0), (0,0,0)], mode='line', thickness=5), color=color.yellow)
@@ -98,6 +98,7 @@ print("dataStore", dataStore)
 
 # Rotation and Translation of selected object
 def input(key):
+    global currentEntity
     if currentEntity != {} and fb.enabled == False:
         if key == key_rotate_y_pos:
             currentEntity.rotation_y += rotation_increment
@@ -153,11 +154,29 @@ def input(key):
         elif held_keys[key_translate_y_neg]:
             currentEntity.y -= translation_increment
         
+        if key == key_swap_footprint:
+            temp_component = dataStore['components'][currentEntity.designator]
+            temp_position = currentEntity.position
+            temp_rotation = currentEntity.rotation
+            # check if current footprint is not the last possible in the array
+            if temp_component.current_footprint + 1 < len(temp_component.available_footprints):
+                new_footprint = temp_component.current_footprint + 1
+            else:
+                new_footprint = 0
+            
+            destroy(currentEntity)
 
+            temp_component.footprint = temp_component.available_footprints[new_footprint](click, temp_component.designator)
+
+            currentEntity = temp_component.footprint
+            currentEntity.position = temp_position
+            currentEntity.rotation = temp_rotation
+            temp_component.current_footprint = new_footprint
+        
         if key == reset_rotation:
             currentEntity.rotation = (0, 0, 0)
 
-        currentEntityDescriptor.text = currentEntity.name + '\nPosition ' + str(list(currentEntity.position)) + '\nRotation ' + str(list(currentEntity.rotation))
+        currentEntityDescriptor.text = currentEntity.designator + '\nPosition ' + str(list(currentEntity.position)) + '\nRotation ' + str(list(currentEntity.rotation)) + '\nFootprint: ' + str(dataStore['components'][currentEntity.designator].current_footprint+1) + '/' + str(len(dataStore['components'][currentEntity.designator].available_footprints))
 
     if key == key_exit:     #### ONLY USEFULL FOR DEBUGGING ####
         app.userExit()

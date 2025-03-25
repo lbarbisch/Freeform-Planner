@@ -43,7 +43,7 @@ def _loadProjectFile(filename, clickFunction):
     with open(filename, "br") as file:
         loadStore = pickle.load(file)
     
-    print("loadStore", loadStore)
+    # print("loadStore", loadStore)
 
     components = loadStore['components']
     dataStore = {}
@@ -51,13 +51,14 @@ def _loadProjectFile(filename, clickFunction):
     dataStore["components"] = {}
     for designator in list(components.keys()):
         try:
-            componentClass = getattr(parts, components[designator]['name'])
-            dataStore["components"][designator] = componentClass(clickFunction)     # add the actual component
-            dataStore["components"][designator].rotation = components[designator]['rotation']
-            dataStore["components"][designator].position = components[designator]['position']
+            componentClass = getattr(parts, components[designator]['value'])
+            footprint = components[designator]['footprint']
+            dataStore["components"][designator] = componentClass(clickFunction, footprint, designator)     # add the actual component
+            dataStore["components"][designator].footprint.rotation = components[designator]['rotation']
+            dataStore["components"][designator].footprint.position = components[designator]['position']
         except:
             print(traceback.format_exc())
-            print("No component candidate found for", components[designator]['name'], "skipping")
+            print("No component candidate found for", components[designator]['value'], "skipping")
     
     # print('dataStore', dataStore)
     # add all nets to the nets subdict
@@ -110,7 +111,7 @@ def _loadNetlist(filename, clickFunction={}, dataStore={}):
             componentClass = getattr(parts, components[designator])
             
             if clickFunction != {}:
-                dataStore["components"][designator] = componentClass(clickFunction)     # add the actual component
+                dataStore["components"][designator] = componentClass(clickFunction, 0, designator)     # add the actual component
             else:
                 dataStore["components"][str(designator)] = components[designator]       # only add name for testing purposes
         except:
@@ -156,23 +157,25 @@ def _loadNetlist(filename, clickFunction={}, dataStore={}):
                 del(dataStore['airwires'][netname])
     return dataStore
 
-def makeSaveStore(dataStore):
+def makeSaveStore(dataStore, debug=1):
     saveStore = {}
     saveStore["components"]= {}
     saveStore['nets'] = dataStore['nets']
 
     for designatorName in dataStore['components'].keys():
         designatorObject = dataStore['components'][designatorName]
-        saveStore['components'][designatorName] = {'name': designatorObject.name, 'rotation': designatorObject.rotation, 'position': designatorObject.position}
-    
-    print("saveStore", saveStore)
+        saveStore['components'][designatorName] = {'value': designatorObject.value, 'rotation': designatorObject.footprint.rotation, 'position': designatorObject.footprint.position, 'footprint': designatorObject.current_footprint}
 
+    if debug:
+        print("saveStore", saveStore)
+    
     return pickle.dumps(saveStore, protocol=pickle.HIGHEST_PROTOCOL)
 
 
 if __name__ == "__main__":
-    print(parseKicadNetlist("Altium_EDIFp_Knobber_Topsheet.NET"))
-    # dataStore = loadComponents("test.net")
-    # print(dataStore['components'])
-    # print(dataStore['nets'])
-    # print(dataStore['airwires'])
+    dataStore = _loadNetlist("transistor_oscillator.net")
+    
+    print(dataStore)
+
+    with open("testoutput.ffps", 'wb') as file:
+        file.write(makeSaveStore(dataStore, debug=1))
