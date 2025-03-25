@@ -42,7 +42,7 @@ def on_submit_load(paths):
     loadedFile = os.fspath(paths[0])
     # parse netlist and create all components
     dataStore = loadComponents(filename=loadedFile, clickFunction=click)
-    print(dataStore)
+    # print(dataStore)
 
 def on_submit_save(paths):
     global savedFile, dataStore
@@ -90,7 +90,7 @@ DropdownMenu("Menu", [DropdownMenuButton('New', on_click=menuButtonNew),
                       DropdownMenuButton('Save', on_click=menuButtonSave)])
 
 
-print("dataStore", dataStore)
+# print("dataStore", dataStore)
 
 # define air wire  placeholders
 # net1 = Entity(model=Mesh(vertices=[(0,0,0), (0,0,0)], mode='line', thickness=5), color=color.yellow)

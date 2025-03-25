@@ -1,15 +1,7 @@
 from ursina import *
 from helperFunctions import *
 from settings import *
-
-initPosition = posGenerator()
-counter = counterGenerator()
-
-# draws red, green and blue arrows at origin to show X, Y and Z axis
-def originArrows():
-    Entity(model="arrow", scale=(2, 1, 1), origin=(-0.5, 0, 0), color = color.rgb(255, 0, 0), rotation = (0,   0,   0), unlit=True)
-    Entity(model="arrow", scale=(2, 1, 1), origin=(-0.5, 0, 0), color = color.rgb(0, 255, 0), rotation = (0,   0, -90), unlit=True)
-    Entity(model="arrow", scale=(2, 1, 1), origin=(-0.5, 0, 0), color = color.rgb(0, 0, 255), rotation = (0, -90,   0), unlit=True)
+from footprints import *
 
 # only needed for test in this file
 def click():
@@ -19,165 +11,78 @@ def click():
     currentEntity = mouse.hovered_entity
     currentEntity.color = color.rgb(150, 255, 150)
 
-# adds Pin array and pinPos get function to Entity class
-class Component(Entity):
-    Pin = []
-    
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-    
-    def getPinPos(self, pinNumber):
-        # pinNumber-1 so pin number 1 is index 0
-        return self.Pin[pinNumber-1].world_position
-
 class AIRWIRE(Entity):
     def __init__(self, start, end):
         super().__init__(model=Mesh(vertices=[start, end], mode='line', thickness=airwire_thickness), color=color.yellow)
 
 
+# base class for components
+class Component():
+    def __init__(self, current_footprint, available_footprints, designator, clickFunction):
+        self.available_footprints = available_footprints
+        if len(available_footprints) > current_footprint:
+            self.current_footprint = current_footprint
+        else:
+            print("selected footprint out of bounds")
+            self.current_footprint = 0
+        self.footprint = self.available_footprints[self.current_footprint](clickFunction)
+        self.designator = designator
+    def getPinPos(self, pinNumber):
+        return self.footprint.getPinPos(pinNumber)
+
+    value = "None"
+
+
 class BC847(Component):
-    def __init__(self, clickFunction):
-        super().__init__(model='SOT23-3', collider='mesh', position=next(initPosition), on_click=clickFunction)
-        self.Pin = [Entity(position=Vec3(-1.2,  1, 0), parent=self),
-                    Entity(position=Vec3(-1.2, -1, 0), parent=self),
-                    Entity(position=Vec3( 1.2,  0, 0), parent=self)]
-        self.name = "BC847"
+    def __init__(self, clickFunction, footprint=0, designator = '?'):
+        super().__init__(footprint, [TO92, SOT23_3], designator, clickFunction)
+        self.value = "BC847"
 
 class LED5MM(Component):
-    def __init__(self, clickFunction):
-        super().__init__(model='LED5MM', collider='mesh', position=next(initPosition), on_click=clickFunction)
-        self.Pin = [Entity(position=Vec3(12.1,  0, 0), parent=self),
-                    Entity(position=Vec3(-12.1, 0, 0), parent=self)]
-        self.name = "LED5MM"
+    def __init__(self, clickFunction, footprint=0, designator = '?'):
+        super().__init__(footprint, [LED5MM_A, LED5MM_B], designator, clickFunction)
+        self.value = "LED5MM"
 
-class RES0603(Component):
-    def __init__(self, clickFunction):
-        super().__init__(model='RES0603', collider='mesh', position=next(initPosition), on_click=clickFunction)
-        self.Pin = [Entity(position=Vec3(0.8,  0, 0.2), parent=self),
-                    Entity(position=Vec3(-0.8, 0, 0.2), parent=self)]
-        self.name = "RES0603"
+class RES(Component):
+    def __init__(self, clickFunction, footprint=0, designator = '?'):
+        super().__init__(footprint, [RESTHT, RESTHT_SHORT, RES0603], designator, clickFunction)
+        self.value = "RES"
+
+class CAP(Component):
+    def __init__(self, clickFunction, footprint=0, designator = '?'):
+        super().__init__(footprint, [CAPTHT, CAP0603], designator, clickFunction)
+        self.value = "CAP"
 
 class PORT(Component):
-    def __init__(self, clickFunction):
-        super().__init__(model='PIN', collider='mesh', position=next(initPosition), on_click=clickFunction)
-        self.Pin = [Entity(position=Vec3(0, 0, 0), parent=self)]
-        self.name = "PORT"
+    def __init__(self, clickFunction, footprint=0, designator = '?'):
+        super().__init__(footprint, [PIN], designator, clickFunction)
+        self.value = "PORT"
 
 class DIODETHT(Component):
-    def __init__(self, clickFunction):
-        super().__init__(model='1N4007', collider='mesh', position=next(initPosition), on_click=clickFunction)
-        self.Pin = [Entity(position=Vec3(22.5,  0, 0), parent=self),
-                    Entity(position=Vec3(-22.5, 0, 0), parent=self)]
+    def __init__(self, clickFunction, footprint=0, designator = '?'):
+        super().__init__(footprint, [DIODETHT], designator, clickFunction)
         self.name = "DIODETHT"
 
-class RESTHT(Component):
-    def __init__(self, clickFunction):
-        super().__init__(model='RESTHT', collider='mesh', position=next(initPosition), on_click=clickFunction)
-        self.Pin = [Entity(position=Vec3( 31, 0, 0), parent=self),
-                    Entity(position=Vec3(-31, 0, 0), parent=self)]
-        self.name = "RESTHT"
-
-class RESTHT_SHORT(Component):
-    def __init__(self, clickFunction):
-        super().__init__(model='RESTHT_SHORT', collider='mesh', position=next(initPosition), on_click=clickFunction)
-        self.Pin = [Entity(position=Vec3( 7.5, 0, 0), parent=self),
-                    Entity(position=Vec3(-7.5, 0, 0), parent=self)]
-        self.name = "RESTHT_SHORT"
-
 class BC547(Component):
-    def __init__(self, clickFunction):
-        super().__init__(model='TO92', collider='mesh', position=next(initPosition), on_click=clickFunction)
-        self.Pin = [Entity(position=Vec3( 2.4, -12, 0), parent=self),
-                    Entity(position=Vec3(   0, -12, 0), parent=self),
-                    Entity(position=Vec3(-2.4, -12, 0), parent=self)]
+    def __init__(self, clickFunction, footprint=0, designator = '?'):
+        super().__init__(footprint, [TO92, SOT23_3], designator, clickFunction)
         self.name = "BC547"
 
 class BC557(Component):
-    def __init__(self, clickFunction):
-        super().__init__(model='TO92', collider='mesh', position=next(initPosition), on_click=clickFunction)
-        self.Pin = [Entity(position=Vec3( 2.4, -12, 0), parent=self),
-                    Entity(position=Vec3(   0, -12, 0), parent=self),
-                    Entity(position=Vec3(-2.4, -12, 0), parent=self)]
+    def __init__(self, clickFunction, footprint=0, designator = '?'):
+        super().__init__(footprint, [TO92, SOT23_3], designator, clickFunction)
         self.name = "BC557"
 
-class CAPTHT(Component):
-    def __init__(self, clickFunction):
-        super().__init__(model='CAPTHT', collider='mesh', position=next(initPosition), on_click=clickFunction)
-        self.Pin = [Entity(position=Vec3(12.5,  0, 0), parent=self),
-                    Entity(position=Vec3(-12.5, 0, 0), parent=self)]
-        self.name = "CAPTHT"
+class NE555(Component):
+    def __init__(self, clickFunction, footprint=0, designator = '?'):
+        super().__init__(footprint, [SOIC8, DIP8], designator, clickFunction)
+        self.name = "NE555"
 
-class CAP0603(Component):
-    def __init__(self, clickFunction):
-        super().__init__(model='CAP0603', collider='mesh', position=next(initPosition), on_click=clickFunction)
-        self.Pin = [Entity(position=Vec3(0.8,  0, 0.2), parent=self),
-                    Entity(position=Vec3(-0.8, 0, 0.2), parent=self)]
-        self.name = "CAP0603"
+class TL072(Component):
+    def __init__(self, clickFunction, footprint=0, designator = '?'):
+        super().__init__(footprint, [SOIC8, DIP8], designator, clickFunction)
+        self.name = "TL072"
 
-class DIP8(Component):
-    def __init__(self, clickFunction):
-        super().__init__(model='DIP8', collider='mesh', position=next(initPosition), on_click=clickFunction)
-        self.Pin = [Entity(position=Vec3(-3.81, -3.81, -3.81), parent=self),
-                    Entity(position=Vec3(-1.27, -3.81, -3.81), parent=self),
-                    Entity(position=Vec3( 1.27, -3.81, -3.81), parent=self),
-                    Entity(position=Vec3( 3.81, -3.81, -3.81), parent=self),
-                    Entity(position=Vec3( 3.81, -3.81, 3.81), parent=self),
-                    Entity(position=Vec3( 1.27, -3.81, 3.81), parent=self),
-                    Entity(position=Vec3(-1.27, -3.81, 3.81), parent=self),
-                    Entity(position=Vec3(-3.81, -3.81, 3.81), parent=self)]
-        self.name = "DIP8"
-
-class DIP8_NE555P(Component):
-    def __init__(self, clickFunction):
-        super().__init__(model='DIP8', collider='mesh', position=next(initPosition), on_click=clickFunction)
-        self.Pin = [Entity(position=Vec3(-3.81, -3.81, -3.81), parent=self),
-                    Entity(position=Vec3(-1.27, -3.81, -3.81), parent=self),
-                    Entity(position=Vec3( 1.27, -3.81, -3.81), parent=self),
-                    Entity(position=Vec3( 3.81, -3.81, -3.81), parent=self),
-                    Entity(position=Vec3( 3.81, -3.81, 3.81), parent=self),
-                    Entity(position=Vec3( 1.27, -3.81, 3.81), parent=self),
-                    Entity(position=Vec3(-1.27, -3.81, 3.81), parent=self),
-                    Entity(position=Vec3(-3.81, -3.81, 3.81), parent=self)]
-        self.name = "DIP8_NE555P"
-
-class SOIC8(Component):
-    def __init__(self, clickFunction):
-        super().__init__(model='SOIC8', collider='mesh', position=next(initPosition), on_click=clickFunction)
-        self.Pin = [Entity(position=Vec3(-1.905, 0, -3), parent=self),
-                    Entity(position=Vec3(-0.635, 0, -3), parent=self),
-                    Entity(position=Vec3( 0.635, 0, -3), parent=self),
-                    Entity(position=Vec3( 1.905, 0, -3), parent=self),
-                    Entity(position=Vec3( 1.905, 0,  3), parent=self),
-                    Entity(position=Vec3( 0.635, 0,  3), parent=self),
-                    Entity(position=Vec3(-0.635, 0,  3), parent=self),
-                    Entity(position=Vec3(-1.905, 0,  3), parent=self)]
-        self.name = "SOIC8"
-
-class SOIC8_NE555D(Component):
-    def __init__(self, clickFunction):
-        super().__init__(model='SOIC8', collider='mesh', position=next(initPosition), on_click=clickFunction)
-        self.Pin = [Entity(position=Vec3(-1.905, 0, -3), parent=self),
-                    Entity(position=Vec3(-0.635, 0, -3), parent=self),
-                    Entity(position=Vec3( 0.635, 0, -3), parent=self),
-                    Entity(position=Vec3( 1.905, 0, -3), parent=self),
-                    Entity(position=Vec3( 1.905, 0,  3), parent=self),
-                    Entity(position=Vec3( 0.635, 0,  3), parent=self),
-                    Entity(position=Vec3(-0.635, 0,  3), parent=self),
-                    Entity(position=Vec3(-1.905, 0,  3), parent=self)]
-        self.name = "SOIC8_NE555D"
-
-class SOIC8_TL072(Component):
-    def __init__(self, clickFunction):
-        super().__init__(model='SOIC8', collider='mesh', position=next(initPosition), on_click=clickFunction)
-        self.Pin = [Entity(position=Vec3(-1.905, 0, -3), parent=self),
-                    Entity(position=Vec3(-0.635, 0, -3), parent=self),
-                    Entity(position=Vec3( 0.635, 0, -3), parent=self),
-                    Entity(position=Vec3( 1.905, 0, -3), parent=self),
-                    Entity(position=Vec3( 1.905, 0,  3), parent=self),
-                    Entity(position=Vec3( 0.635, 0,  3), parent=self),
-                    Entity(position=Vec3(-0.635, 0,  3), parent=self),
-                    Entity(position=Vec3(-1.905, 0,  3), parent=self)]
-        self.name = "SOIC8_TL072"
 
 
 
@@ -201,7 +106,7 @@ if __name__ == '__main__':
     AIRWIRE(start=L.getPinPos(1), end=D.getPinPos(7))
     AIRWIRE(start=L.getPinPos(2), end=D.getPinPos(6))
     AIRWIRE(start=D.getPinPos(3), end=D.getPinPos(5))
-    AIRWIRE(start=D.getPinPos(4), end=D.getPinPos(8))
+    # AIRWIRE(start=D.getPinPos(4), end=D.getPinPos(8))
     # AIRWIRE(start=C.getPinPos(2), end=T.getPinPos(2))
 
 

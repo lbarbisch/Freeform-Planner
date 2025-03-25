@@ -1,6 +1,12 @@
 from ursina import *
 from ursina.prefabs.file_browser import FileBrowser, FileButton
 
+# draws red, green and blue arrows at origin to show X, Y and Z axis
+def originArrows():
+    Entity(model="arrow", scale=(2, 1, 1), origin=(-0.5, 0, 0), color = color.rgb(255, 0, 0), rotation = (0,   0,   0), unlit=True)
+    Entity(model="arrow", scale=(2, 1, 1), origin=(-0.5, 0, 0), color = color.rgb(0, 255, 0), rotation = (0,   0, -90), unlit=True)
+    Entity(model="arrow", scale=(2, 1, 1), origin=(-0.5, 0, 0), color = color.rgb(0, 0, 255), rotation = (0, -90,   0), unlit=True)
+
 # generator that creates a grid to initially position all components
 def posGenerator():
     x = 0

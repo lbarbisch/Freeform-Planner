@@ -43,7 +43,7 @@ def _loadProjectFile(filename, clickFunction):
     with open(filename, "br") as file:
         loadStore = pickle.load(file)
     
-    print("loadStore", loadStore)
+    # print("loadStore", loadStore)
 
     components = loadStore['components']
     dataStore = {}
@@ -53,8 +53,8 @@ def _loadProjectFile(filename, clickFunction):
         try:
             componentClass = getattr(parts, components[designator]['name'])
             dataStore["components"][designator] = componentClass(clickFunction)     # add the actual component
-            dataStore["components"][designator].rotation = components[designator]['rotation']
-            dataStore["components"][designator].position = components[designator]['position']
+            dataStore["components"][designator].footprint.rotation = components[designator]['rotation']
+            dataStore["components"][designator].footprint.position = components[designator]['position']
         except:
             print(traceback.format_exc())
             print("No component candidate found for", components[designator]['name'], "skipping")
@@ -163,9 +163,9 @@ def makeSaveStore(dataStore):
 
     for designatorName in dataStore['components'].keys():
         designatorObject = dataStore['components'][designatorName]
-        saveStore['components'][designatorName] = {'name': designatorObject.name, 'rotation': designatorObject.rotation, 'position': designatorObject.position}
+        saveStore['components'][designatorName] = {'name': designatorObject.name, 'rotation': designatorObject.footprint.rotation, 'position': designatorObject.footprint.position}
     
-    print("saveStore", saveStore)
+    # print("saveStore", saveStore)
 
     return pickle.dumps(saveStore, protocol=pickle.HIGHEST_PROTOCOL)
 
