@@ -20,13 +20,14 @@ class AIRWIRE(Entity):
 class Component():
     def __init__(self, current_footprint, available_footprints, designator, clickFunction):
         self.available_footprints = available_footprints
-        if len(available_footprints) > current_footprint:
+        if len(available_footprints) > int(current_footprint):
             self.current_footprint = current_footprint
         else:
             print("selected footprint out of bounds")
             self.current_footprint = 0
-        self.footprint = self.available_footprints[self.current_footprint](clickFunction)
+        self.footprint = self.available_footprints[self.current_footprint](clickFunction, designator)
         self.designator = designator
+
     def getPinPos(self, pinNumber):
         return self.footprint.getPinPos(pinNumber)
 

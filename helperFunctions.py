@@ -55,7 +55,7 @@ def deleteAllEntities(dataStore):
     if dataStore != {}:
         components = dataStore['components']
         for part in components.keys():
-            destroy(components[part])
+            destroy(components[part].footprint)
 
         airwires = dataStore['airwires']
         for nets in airwires.keys():

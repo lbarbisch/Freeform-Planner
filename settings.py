@@ -24,4 +24,6 @@ key_translate_y_neg = "1"
 key_translate_z_pos = "8"
 key_translate_z_neg = "2"
 
+key_swap_footprint = "f"
+
 key_exit = "escape"
