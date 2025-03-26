@@ -91,7 +91,7 @@ def _loadProjectFile(filename, clickFunction):
                     # print("net", netname, "wire", i, startPart, startPin, endPart, endPin, startPosition, endPosition)
 
                     if clickFunction != {}:
-                        dataStore['airwires'][netname][str(i)] = parts.AIRWIRE(startPosition, endPosition, clickFunction)
+                        dataStore['airwires'][netname][str(i)] = parts.AIRWIRE(startPosition, endPosition, clickFunction, netname, startPart, endPart)
                     else:
                         dataStore['airwires'][netname][str(i)] = "wire" + str(i)
                 except:
@@ -148,7 +148,7 @@ def _loadNetlist(filename, clickFunction={}, dataStore={}):
                 # print("net", netname, "wire", i, startPart, startPin, endPart, endPin, startPosition, endPosition)
 
                     if clickFunction != {}:
-                        dataStore['airwires'][netname][str(i)] = parts.AIRWIRE(startPosition, endPosition)
+                        dataStore['airwires'][netname][str(i)] = parts.AIRWIRE(startPosition, endPosition, clickFunction, netname, startPart, endPart)
                     else:
                         dataStore['airwires'][netname][str(i)] = "wire" + str(i)
                 except:

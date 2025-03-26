@@ -5,6 +5,7 @@ from ursina.prefabs.file_browser_save import *
 from parts import *
 from loader import *
 from settings import *
+import numpy as np
 import os
 
 app = Ursina(title="Freeform-Planner", borderless=False, development_mode=True, fullscreen=False, show_ursina_splash=False, splash=False)
@@ -19,7 +20,7 @@ light = AmbientLight(shadows=True)
 light.look_at(Vec3(50, -50, 50))
 
 fb = FileBrowserBetterSave(enabled=False)
-currentEntityDescriptor = Text(origin=(.5,.5), text='nothing selected', position=(.49*window.aspect_ratio, .47+(.02*(not window.exit_button.enabled))))
+currentEntityDescriptor = Text(origin=(-.5,.5), text='nothing selected', position=(.3*window.aspect_ratio, .47+(.02*(not window.exit_button.enabled))))
 
 currentEntity = {}
 dataStore = {}
@@ -94,24 +95,12 @@ DropdownMenu("Menu", [DropdownMenuButton('New', on_click=menuButtonNew),
 
 # print("dataStore", dataStore)
 
-# define air wire  placeholders
-# net1 = Entity(model=Mesh(vertices=[(0,0,0), (0,0,0)], mode='line', thickness=5), color=color.yellow)
-# net2 = Entity(model=Mesh(vertices=[(0,0,0), (0,0,0)], mode='line', thickness=5), color=color.yellow)
-
 # Rotation and Translation of selected object
 def input(key):
     global currentEntity
     if currentEntity != {} and fb.enabled == False:
         if not isinstance(currentEntity, AIRWIRE):
-            if key == key_rotate_y_pos:
-                currentEntity.rotation_y += rotation_increment
-            elif held_keys[key_rotate_y_pos]:
-                currentEntity.rotation_y += rotation_increment
-            if key == key_rotate_y_neg:
-                currentEntity.rotation_y -= rotation_increment
-            elif held_keys[key_rotate_y_neg]:
-                currentEntity.rotation_y -= rotation_increment
-
+            # Rotate around X axis
             if key == key_rotate_x_pos:
                 currentEntity.rotation_x += rotation_increment
             elif held_keys[key_rotate_x_pos]:
@@ -121,6 +110,17 @@ def input(key):
             elif held_keys[key_rotate_x_neg]:
                 currentEntity.rotation_x -= rotation_increment
 
+            # Rotate around Y axis
+            if key == key_rotate_y_pos:
+                currentEntity.rotation_y += rotation_increment
+            elif held_keys[key_rotate_y_pos]:
+                currentEntity.rotation_y += rotation_increment
+            if key == key_rotate_y_neg:
+                currentEntity.rotation_y -= rotation_increment
+            elif held_keys[key_rotate_y_neg]:
+                currentEntity.rotation_y -= rotation_increment
+
+            # Rotate around Z axis
             if key == key_rotate_z_pos:
                 currentEntity.rotation_z += rotation_increment
             elif held_keys[key_rotate_z_pos]:
@@ -130,6 +130,7 @@ def input(key):
             elif held_keys[key_rotate_z_neg]:
                 currentEntity.rotation_z -= rotation_increment
 
+            # Translate on X axis
             if key == key_translate_x_pos:
                 currentEntity.x += translation_increment/2
             elif held_keys[key_translate_x_pos]:
@@ -139,15 +140,7 @@ def input(key):
             elif held_keys[key_translate_x_neg]:
                 currentEntity.x -= translation_increment
 
-            if key == key_translate_z_pos:
-                currentEntity.z += translation_increment/2
-            elif held_keys[key_translate_z_pos]:
-                currentEntity.z += translation_increment
-            if key == key_translate_z_neg:
-                currentEntity.z -= translation_increment/2
-            elif held_keys[key_translate_z_neg]:
-                currentEntity.z -= translation_increment
-
+            # Translate on Y axis
             if key == key_translate_y_pos:
                 currentEntity.y += translation_increment/2
             elif held_keys[key_translate_y_pos]:
@@ -156,7 +149,18 @@ def input(key):
                 currentEntity.y -= translation_increment/2
             elif held_keys[key_translate_y_neg]:
                 currentEntity.y -= translation_increment
+
+            # Translate on Z axis
+            if key == key_translate_z_pos:
+                currentEntity.z += translation_increment/2
+            elif held_keys[key_translate_z_pos]:
+                currentEntity.z += translation_increment
+            if key == key_translate_z_neg:
+                currentEntity.z -= translation_increment/2
+            elif held_keys[key_translate_z_neg]:
+                currentEntity.z -= translation_increment
             
+            # Switch between 
             if key == key_swap_footprint:
                 temp_component = dataStore['components'][currentEntity.designator]
                 temp_position = currentEntity.position
@@ -179,10 +183,12 @@ def input(key):
             if key == reset_rotation:
                 currentEntity.rotation = (0, 0, 0)
 
-            currentEntityDescriptor.text = currentEntity.designator + '\nPosition ' + str(list(currentEntity.position)) + '\nRotation ' + str(list(currentEntity.rotation)) + '\nFootprint: ' + str(dataStore['components'][currentEntity.designator].current_footprint+1) + '/' + str(len(dataStore['components'][currentEntity.designator].available_footprints))
+            currentEntityDescriptor.text = "Designator: " + currentEntity.designator + '\nPosition: ' + str(list(currentEntity.position)) + '\nRotation: ' + str(list(currentEntity.rotation)) + '\nFootprint: ' + str(dataStore['components'][currentEntity.designator].current_footprint+1) + '/' + str(len(dataStore['components'][currentEntity.designator].available_footprints))
         else:
-            print(currentEntity.position)
-    if key == key_exit:     #### ONLY USEFULL FOR DEBUGGING ####
+            currentEntityDescriptor.text = "Designator: " + currentEntity.designator + '\nNetname: ' + currentEntity.net + '\nPosition: ' + str(np.round(currentEntity.position, 1)) + '\nRotation: ' + str(np.round(currentEntity.rotation, 1)) + '\nFrom: ' + str(currentEntity.startPart) + '\nTo: ' + str(currentEntity.endPart)
+    if key == 'x':                              #### ONLY USED FOR DEBUGGING ####
+        print(dataStore)
+    if key == key_exit:                         #### ONLY NEEDED FOR DEBUGGING ####
         app.userExit()
 
 # update positions of existing air wires

@@ -44,12 +44,12 @@ def updateAirwires(dataStore):
 
                     midpoint = (Vec3(startPosition) + Vec3(endPosition)) / 2
                     length = distance(startPosition, endPosition)
-                    scale = (airwire_thickness * 0.02, airwire_thickness * 0.02, length)
+                    scale = (airwire_thickness, airwire_thickness, length)
                     
                     direction = (Vec3(endPosition) - Vec3(startPosition)).normalized()
-                    fixed_direction = Vec3(0, 0, 1)
+                    fixed_direction = Vec3(0, 0, 1)                         #FIXME: set_from_axis_angle_rad will fail when airwire parallel to Z-axis
                     rotation_quaternion = Quat()
-                    rotation_quaternion.set_from_axis_angle_rad(fixed_direction.angle_rad(direction), fixed_direction.cross(direction).normalized())
+                    rotation_quaternion.set_from_axis_angle_rad(fixed_direction.angle_rad(direction), fixed_direction.cross(direction).normalized())    #FIXME: rotation does not need to be calculated if target rotation is (0, 0, 0)
                     
                     dataStore['airwires'][netname][str(i)].position = midpoint
                     dataStore['airwires'][netname][str(i)].quaternion = rotation_quaternion

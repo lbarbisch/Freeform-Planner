@@ -12,17 +12,6 @@ def click():
     currentEntity = mouse.hovered_entity
     currentEntity.color = color.rgb(150, 255, 150)
 
-class AIRWIRE(Entity):
-    def __init__(self, start, end, clickFunction):
-        # super().__init__(model=Mesh(vertices=[start, end], mode='line', thickness=airwire_thickness), color=color.yellow)
-        midpoint = (Vec3(start) + Vec3(end)) / 2
-        length = distance(start, end)
-        scale = (airwire_thickness * 0.02, airwire_thickness * 0.02, length)
-
-        super().__init__(model='Cube', position=midpoint, scale=scale, collider='mesh', color=color.yellow, on_click=clickFunction)
-        # hitbox = Entity(position=Vec3(end)-Vec3(start), )
-
-
 # base class for components
 class Component():
     def __init__(self, current_footprint, available_footprints, designator, clickFunction):
@@ -37,8 +26,23 @@ class Component():
 
     def getPinPos(self, pinNumber):
         return self.footprint.getPinPos(pinNumber)
-
+    
     value = "None"
+
+
+class AIRWIRE(Entity):
+    def __init__(self, start, end, clickFunction, netname, startPart, endPart):
+        self.net = netname
+        self.startPart = startPart
+        self.endPart = endPart
+        self.designator = "AIRWIRE_" + str(next(counter))
+        self.value = "AIRWIRE"
+
+        midpoint = (Vec3(start) + Vec3(end)) / 2
+        length = distance(start, end)
+        scale = (airwire_thickness, airwire_thickness, length)
+
+        super().__init__(model='Cube', position=midpoint, scale=scale, collider='mesh', color=color.yellow, on_click=clickFunction)
 
 
 class BC847(Component):
