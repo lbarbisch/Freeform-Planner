@@ -1,5 +1,6 @@
 from ursina import *
 from ursina.prefabs.file_browser import FileBrowser, FileButton
+from settings import *
 
 # draws red, green and blue arrows at origin to show X, Y and Z axis
 def originArrows():
@@ -41,10 +42,18 @@ def updateAirwires(dataStore):
                     startPosition = dataStore['components'][startPart].getPinPos(startPin)
                     endPosition = dataStore['components'][endPart].getPinPos(endPin)
 
-                    # print("net", netname, "wire", i, startPart, startPin, endPart, endPin, startPosition, endPosition)
-
-                    dataStore['airwires'][netname][str(i)].model.vertices = [startPosition, endPosition]
-                    dataStore['airwires'][netname][str(i)].model.generate()
+                    midpoint = (Vec3(startPosition) + Vec3(endPosition)) / 2
+                    length = distance(startPosition, endPosition)
+                    scale = (airwire_thickness * 0.02, airwire_thickness * 0.02, length)
+                    
+                    direction = (Vec3(endPosition) - Vec3(startPosition)).normalized()
+                    fixed_direction = Vec3(0, 0, 1)
+                    rotation_quaternion = Quat()
+                    rotation_quaternion.set_from_axis_angle_rad(fixed_direction.angle_rad(direction), fixed_direction.cross(direction).normalized())
+                    
+                    dataStore['airwires'][netname][str(i)].position = midpoint
+                    dataStore['airwires'][netname][str(i)].quaternion = rotation_quaternion
+                    dataStore['airwires'][netname][str(i)].scale = scale
                 except:
                     pass
                     # print("airwire not possible")

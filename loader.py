@@ -91,10 +91,11 @@ def _loadProjectFile(filename, clickFunction):
                     # print("net", netname, "wire", i, startPart, startPin, endPart, endPin, startPosition, endPosition)
 
                     if clickFunction != {}:
-                        dataStore['airwires'][netname][str(i)] = parts.AIRWIRE(startPosition, endPosition)
+                        dataStore['airwires'][netname][str(i)] = parts.AIRWIRE(startPosition, endPosition, clickFunction)
                     else:
                         dataStore['airwires'][netname][str(i)] = "wire" + str(i)
                 except:
+                    print(traceback.format_exc())
                     print("skipping Airwire, because part does not exist.")
 
     return dataStore
