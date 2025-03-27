@@ -1,9 +1,9 @@
 from ursina import *
 from ursina.prefabs.dropdown_menu import DropdownMenu, DropdownMenuButton
-from ursina.prefabs.file_browser import *
-from ursina.prefabs.file_browser_save import *
-from parts import *
+from fileBrowserBetter import *
+from componentLibrary import *
 from loader import *
+from helperFunctions import *
 from settings import *
 import numpy as np
 import os
@@ -84,7 +84,7 @@ def menuButtonNew():
     currentEntity = {}
     loadedFile = "no file loaded"
     # reset the initPosition for the part placing
-    parts.initPosition = parts.posGenerator()
+    components.initPosition = components.posGenerator()
 
 
 # basic menu structure with buttons
@@ -97,9 +97,30 @@ DropdownMenu("Menu", [DropdownMenuButton('New', on_click=menuButtonNew),
 
 # Rotation and Translation of selected object
 def input(key):
-    global currentEntity
+    global currentEntity, dataStore
     if currentEntity != {} and fb.enabled == False:
-        if not isinstance(currentEntity, AIRWIRE):
+        if isinstance(currentEntity, AIRWIRE):
+
+            if held_keys['left control'] and key == key_insert_wire:
+                dataStore = insertWire(dataStore, click, currentEntity.net, currentEntity.startPart, currentEntity.endPart)
+                return
+
+            currentEntityDescriptor.text = "Designator: " + currentEntity.designator + '\nNetname: ' + currentEntity.net + '\nPosition: ' + str(np.round(currentEntity.position, 1)) + '\nRotation: ' + str(np.round(currentEntity.rotation, 1)) + '\nFrom: ' + str(currentEntity.startPart) + '\nTo: ' + str(currentEntity.endPart)
+
+        else:
+            
+            currentEntityDescriptor.text = "Designator: " + currentEntity.designator + '\nPosition: ' + str(list(currentEntity.position)) + '\nRotation: ' + str(list(currentEntity.rotation)) + '\nFootprint: ' + str(dataStore['components'][currentEntity.designator].current_footprint+1) + '/' + str(len(dataStore['components'][currentEntity.designator].available_footprints))
+
+
+            # reset rotation of currentEntity to 0, 0, 0 very helpfull for cylindrical parts that rotate in weird ways all of a sudden
+            if key == reset_rotation:
+                currentEntity.rotation = (0, 0, 0)
+
+            # Switch between available footprints
+            if key == key_swap_footprint:
+                dataStore, currentEntity = swapFootprint(dataStore, currentEntity, click)
+            
+
             # Rotate around X axis
             if key == key_rotate_x_pos:
                 currentEntity.rotation_x += rotation_increment
@@ -160,32 +181,6 @@ def input(key):
             elif held_keys[key_translate_z_neg]:
                 currentEntity.z -= translation_increment
             
-            # Switch between 
-            if key == key_swap_footprint:
-                temp_component = dataStore['components'][currentEntity.designator]
-                temp_position = currentEntity.position
-                temp_rotation = currentEntity.rotation
-                # check if current footprint is not the last possible in the array
-                if temp_component.current_footprint + 1 < len(temp_component.available_footprints):
-                    new_footprint = temp_component.current_footprint + 1
-                else:
-                    new_footprint = 0
-                
-                destroy(currentEntity)
-
-                temp_component.footprint = temp_component.available_footprints[new_footprint](click, temp_component.designator)
-
-                currentEntity = temp_component.footprint
-                currentEntity.position = temp_position
-                currentEntity.rotation = temp_rotation
-                temp_component.current_footprint = new_footprint
-            
-            if key == reset_rotation:
-                currentEntity.rotation = (0, 0, 0)
-
-            currentEntityDescriptor.text = "Designator: " + currentEntity.designator + '\nPosition: ' + str(list(currentEntity.position)) + '\nRotation: ' + str(list(currentEntity.rotation)) + '\nFootprint: ' + str(dataStore['components'][currentEntity.designator].current_footprint+1) + '/' + str(len(dataStore['components'][currentEntity.designator].available_footprints))
-        else:
-            currentEntityDescriptor.text = "Designator: " + currentEntity.designator + '\nNetname: ' + currentEntity.net + '\nPosition: ' + str(np.round(currentEntity.position, 1)) + '\nRotation: ' + str(np.round(currentEntity.rotation, 1)) + '\nFrom: ' + str(currentEntity.startPart) + '\nTo: ' + str(currentEntity.endPart)
     if key == 'x':                              #### ONLY USED FOR DEBUGGING ####
         print(dataStore)
     if key == key_exit:                         #### ONLY NEEDED FOR DEBUGGING ####

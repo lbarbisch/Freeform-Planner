@@ -1,4 +1,4 @@
-import parts
+import componentLibrary
 import re
 import pickle
 import traceback
@@ -51,7 +51,7 @@ def _loadProjectFile(filename, clickFunction):
     dataStore["components"] = {}
     for designator in list(components.keys()):
         try:
-            componentClass = getattr(parts, components[designator]['value'])
+            componentClass = getattr(componentLibrary, components[designator]['value'])
             footprint = components[designator]['footprint']
             dataStore["components"][designator] = componentClass(clickFunction, footprint, designator)     # add the actual component
             dataStore["components"][designator].footprint.rotation = components[designator]['rotation']
@@ -91,7 +91,7 @@ def _loadProjectFile(filename, clickFunction):
                     # print("net", netname, "wire", i, startPart, startPin, endPart, endPin, startPosition, endPosition)
 
                     if clickFunction != {}:
-                        dataStore['airwires'][netname][str(i)] = parts.AIRWIRE(startPosition, endPosition, clickFunction, netname, startPart, endPart)
+                        dataStore['airwires'][netname][str(i)] = componentLibrary.AIRWIRE(startPosition, endPosition, clickFunction, netname, startPart, endPart)
                     else:
                         dataStore['airwires'][netname][str(i)] = "wire" + str(i)
                 except:
@@ -109,7 +109,7 @@ def _loadNetlist(filename, clickFunction={}, dataStore={}):
     dataStore["components"] = {}
     for designator in list(components.keys()):
         try:
-            componentClass = getattr(parts, components[designator])
+            componentClass = getattr(components, components[designator])
             
             if clickFunction != {}:
                 dataStore["components"][designator] = componentClass(clickFunction, 0, designator)     # add the actual component
@@ -148,7 +148,7 @@ def _loadNetlist(filename, clickFunction={}, dataStore={}):
                 # print("net", netname, "wire", i, startPart, startPin, endPart, endPin, startPosition, endPosition)
 
                     if clickFunction != {}:
-                        dataStore['airwires'][netname][str(i)] = parts.AIRWIRE(startPosition, endPosition, clickFunction, netname, startPart, endPart)
+                        dataStore['airwires'][netname][str(i)] = componentLibrary.AIRWIRE(startPosition, endPosition, clickFunction, netname, startPart, endPart)
                     else:
                         dataStore['airwires'][netname][str(i)] = "wire" + str(i)
                 except:

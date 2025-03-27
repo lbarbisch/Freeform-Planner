@@ -1,6 +1,25 @@
-from parts import *
-from helperFunctions import *
+from ursina import *
 from settings import *
+
+# generator that creates a grid to initially position all components
+def posGenerator():
+    x = 0
+    y = 0
+    while True:
+        if x == 10:
+            x = 0
+            y += 1
+            yield x*5, y*5, 0
+        else:
+            yield x*5, y*5, 0
+            x += 1
+
+# generator that returns increasing values
+def counterGenerator():
+    x = 0
+    while True:
+        yield x
+        x += 1
 
 
 initPosition = posGenerator()
@@ -168,6 +187,43 @@ class PIN(Footprint):
         self.Pin = [Entity(position=Vec3(0, 0, 0), parent=self)]
 
 
+class WIRE10X10(Footprint):
+    # -
+    def __init__(self, clickFunction, designator):
+        super().__init__(designator, model='WIRE10X10', collider='mesh', position=next(initPosition), on_click=clickFunction)
+        self.Pin = [Entity(position=Vec3(0, 0, 0), parent=self),
+                    Entity(position=Vec3(-10, 0, -10), parent=self)]
+
+class WIRE10X20(Footprint):
+    # -
+    def __init__(self, clickFunction, designator):
+        super().__init__(designator, model='WIRE10X20', collider='mesh', position=next(initPosition), on_click=clickFunction)
+        self.Pin = [Entity(position=Vec3(0, 0, 0), parent=self),
+                    Entity(position=Vec3(-20, 0, -10), parent=self)]
+
+class WIRE20X10(Footprint):
+    # -
+    def __init__(self, clickFunction, designator):
+        super().__init__(designator, model='WIRE20X10', collider='mesh', position=next(initPosition), on_click=clickFunction)
+        self.Pin = [Entity(position=Vec3(0, 0, 0), parent=self),
+                    Entity(position=Vec3(-10, 0, -20), parent=self)]
+
+class WIRE20X50(Footprint):
+    # -
+    def __init__(self, clickFunction, designator):
+        super().__init__(designator, model='WIRE20X50', collider='mesh', position=next(initPosition), on_click=clickFunction)
+        self.Pin = [Entity(position=Vec3(0, 0, 0), parent=self),
+                    Entity(position=Vec3(-50, 0, -20), parent=self)]
+
+class WIRE50X20(Footprint):
+    # -
+    def __init__(self, clickFunction, designator):
+        super().__init__(designator, model='WIRE50X20', collider='mesh', position=next(initPosition), on_click=clickFunction)
+        self.Pin = [Entity(position=Vec3(0, 0, 0), parent=self),
+                    Entity(position=Vec3(-20, 0, -50), parent=self)]
+
+
+
 
 if __name__ == '__main__':
     app = Ursina()
@@ -178,7 +234,7 @@ if __name__ == '__main__':
 
     originArrows()
 
-    SOIC8(click, "test")
+    WIRE10X20(click, "test")
 
 
     for i in range(-10, 10):

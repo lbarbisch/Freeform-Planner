@@ -1,5 +1,5 @@
 from ursina import *
-from helperFunctions import *
+# from helperFunctions import *
 from settings import *
 from footprints import *
 from math import asin, acos
@@ -44,6 +44,11 @@ class AIRWIRE(Entity):
 
         super().__init__(model='Cube', position=midpoint, scale=scale, collider='mesh', color=color.yellow, on_click=clickFunction)
 
+
+class WIRE(Component):
+    def __init__(self, clickFunction, footprint=0, designator = '?'):
+        super().__init__(footprint, [WIRE10X10, WIRE10X20, WIRE20X10, WIRE20X50, WIRE50X20], designator, clickFunction)
+        self.value = "WIRE"
 
 class BC847(Component):
     def __init__(self, clickFunction, footprint=0, designator = '?'):
