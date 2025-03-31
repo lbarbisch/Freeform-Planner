@@ -42,7 +42,7 @@ class AIRWIRE(Entity):
         length = distance(start, end)
         scale = (airwire_thickness, airwire_thickness, length)
 
-        super().__init__(model='Cube', position=midpoint, scale=scale, collider='mesh', color=color.yellow, on_click=clickFunction)
+        super().__init__(model='cube', position=midpoint, scale=scale, collider='mesh', color=color.yellow, on_click=clickFunction)
 
 
 class WIRE(Component):
@@ -129,8 +129,8 @@ if __name__ == '__main__':
 
     for i in range(-10, 10):
         for j in range(-10, 10):
-            Entity(model="Cube", position=[i*2, j*2, 0], scale=0.05)
-            Entity(model="Cube", position=[i*2, 0, j*2], scale=0.05)
+            Entity(model="cube", position=[i*2, j*2, 0], scale=0.05)
+            Entity(model="cube", position=[i*2, 0, j*2], scale=0.05)
 
     def input(key):
         if key == key_exit:

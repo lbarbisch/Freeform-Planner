@@ -239,8 +239,8 @@ if __name__ == '__main__':
 
     for i in range(-10, 10):
         for j in range(-10, 10):
-            Entity(model="Cube", position=[i, j, 0], scale=0.05)
-            Entity(model="Cube", position=[i, 0, j], scale=0.05)
+            Entity(model="cube", position=[i, j, 0], scale=0.05)
+            Entity(model="cube", position=[i, 0, j], scale=0.05)
 
     def input(key):
         if key == key_exit:

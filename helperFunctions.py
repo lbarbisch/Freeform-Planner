@@ -42,6 +42,12 @@ def updateAirwires(dataStore):
     return dataStore
 
 def insertWire(dataStore, clickFunction, netName, startPart, endPart):
+    
+    ### DEBUG
+    print("netName", netName, "startPart", startPart, "endPart", endPart)
+    for x in dataStore['airwires'][netName].keys():
+        print("wire", x, "start", dataStore['airwires'][netName][x].startPart, "end", dataStore['airwires'][netName][x].endPart)
+    
     # create new wire Entity which is basically a normal component
     counter = 0
     while 'WIRE' + str(counter) in dataStore['components'].keys():
@@ -50,19 +56,28 @@ def insertWire(dataStore, clickFunction, netName, startPart, endPart):
     dataStore['components'][wireDesignator] = WIRE(clickFunction, 0, wireDesignator)
 
     endPin = dataStore['nets'][netName][endPart]
+    
     # change net recipient to new wire
     dataStore['nets'][netName][wireDesignator] = dataStore['nets'][netName][endPart]
     del dataStore['nets'][netName][endPart]
-    dataStore['nets'][netName][wireDesignator] = 0
+    dataStore['nets'][netName][wireDesignator] = 1
 
     # add new net from second pin of WIRE to endPart
     counter = 0
     while 'wirenet' + str(counter) in dataStore['nets'].keys():
         counter += 1
-    dataStore['nets']['wirenet' + str(counter)] = {wireDesignator: 1, endPart: endPin}
+    newNet = 'wirenet' + str(counter)
+    dataStore['nets'][newNet] = {endPart: endPin, wireDesignator: 2}
+
+    # update parameters of updated airwire object
+    for x in dataStore['airwires'][netName].keys():
+        if dataStore['airwires'][netName][x].endPart == endPart:
+            dataStore['airwires'][netName][x].endPart = wireDesignator
+            # dataStore['airwires'][netName][x].net = newNet
+            print("updated existing airwire to:", "endPart", wireDesignator, "net", newNet)
 
     # create missing air wire for newly created net
-    dataStore['airwires']['wirenet' + str(counter)] = {'1': AIRWIRE((0,0,0), (0,0,0), clickFunction, netName, wireDesignator, endPart)}
+    dataStore['airwires']['wirenet' + str(counter)] = {'1': AIRWIRE((0,0,0), (0,0,0), clickFunction, newNet, wireDesignator, endPart)}
 
     return dataStore
 

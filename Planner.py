@@ -6,6 +6,7 @@ from loader import *
 from helperFunctions import *
 from settings import *
 import numpy as np
+import pprint
 import os
 
 app = Ursina(title="Freeform-Planner", borderless=False, development_mode=True, fullscreen=False, show_ursina_splash=False, splash=False)
@@ -14,7 +15,7 @@ window.fps_counter.enabled = False
 skybox_image = load_texture("sky_sunset.jpg")
 Sky(texture=skybox_image)
 
-platform = Entity(model="Cube", scale=(100, 0, 100), position=(0, -5, 0), texture='orb', color=color.dark_gray)
+platform = Entity(model="cube", scale=(100, 0, 100), position=(0, -5, 0), texture='orb', color=color.dark_gray)
 
 light = AmbientLight(shadows=True)
 light.look_at(Vec3(50, -50, 50))
@@ -84,7 +85,7 @@ def menuButtonNew():
     currentEntity = {}
     loadedFile = "no file loaded"
     # reset the initPosition for the part placing
-    components.initPosition = components.posGenerator()
+    componentLibrary.initPosition = componentLibrary.posGenerator()
 
 
 # basic menu structure with buttons
@@ -182,7 +183,8 @@ def input(key):
                 currentEntity.z -= translation_increment
             
     if key == 'x':                              #### ONLY USED FOR DEBUGGING ####
-        print(dataStore)
+        pp = pprint.PrettyPrinter(indent=2)
+        pp.pprint(dataStore)
     if key == key_exit:                         #### ONLY NEEDED FOR DEBUGGING ####
         app.userExit()
 
