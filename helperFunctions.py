@@ -27,13 +27,20 @@ def updateAirwires(dataStore):
                     length = distance(startPosition, endPosition)
                     scale = (airwire_thickness, airwire_thickness, length)
                     
-                    direction = (Vec3(endPosition) - Vec3(startPosition)).normalized()
-                    fixed_direction = Vec3(0, 0, 1)                         #FIXME: set_from_axis_angle_rad will fail when airwire parallel to Z-axis
-                    rotation_quaternion = Quat()
-                    rotation_quaternion.set_from_axis_angle_rad(fixed_direction.angle_rad(direction), fixed_direction.cross(direction).normalized())    #FIXME: rotation does not need to be calculated if target rotation is (0, 0, 0)
+                    if not startPosition == endPosition:
+                        direction = (Vec3(endPosition) - Vec3(startPosition)).normalized()
+                        print(direction)
+                        if (not Vec3(0, 0, 1) == direction) and (not Vec3(0, 0, -1) == direction):
+                            fixed_direction = Vec3(0, 0, 1)
+                            rotation_quaternion = Quat()
+                            rotation_quaternion.set_from_axis_angle_rad(fixed_direction.angle_rad(direction), fixed_direction.cross(direction).normalized())    #FIXME: rotation does not need to be calculated if target rotation is (0, 0, 0)
+                            
+                            dataStore['airwires'][netname][str(i)].quaternion = rotation_quaternion
+                        else:
+                            print("znöch binenand")
+                            dataStore['airwires'][netname][str(i)].rotation = Vec3(0, 0, 1)
                     
                     dataStore['airwires'][netname][str(i)].position = midpoint
-                    dataStore['airwires'][netname][str(i)].quaternion = rotation_quaternion
                     dataStore['airwires'][netname][str(i)].scale = scale
                 except:
                     pass
