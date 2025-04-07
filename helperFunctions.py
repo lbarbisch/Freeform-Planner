@@ -1,6 +1,7 @@
 from ursina import *
 from settings import *
 from componentLibrary import *
+import traceback
 
 # draws red, green and blue arrows at origin to show X, Y and Z axis
 def originArrows():
@@ -29,32 +30,25 @@ def updateAirwires(dataStore):
                     
                     if not startPosition == endPosition:
                         direction = (Vec3(endPosition) - Vec3(startPosition)).normalized()
-                        print(direction)
-                        if (not Vec3(0, 0, 1) == direction) and (not Vec3(0, 0, -1) == direction):
+                        if not (Vec3(0, 0, 1).almostEqual(direction, 0.00101) or Vec3(0, 0, -1).almostEqual(direction, 0.00101)):   # don't do this section if the direction is close to 0, 0, 1
                             fixed_direction = Vec3(0, 0, 1)
                             rotation_quaternion = Quat()
                             rotation_quaternion.set_from_axis_angle_rad(fixed_direction.angle_rad(direction), fixed_direction.cross(direction).normalized())    #FIXME: rotation does not need to be calculated if target rotation is (0, 0, 0)
                             
                             dataStore['airwires'][netname][str(i)].quaternion = rotation_quaternion
                         else:
-                            print("znöch binenand")
                             dataStore['airwires'][netname][str(i)].rotation = Vec3(0, 0, 1)
                     
                     dataStore['airwires'][netname][str(i)].position = midpoint
                     dataStore['airwires'][netname][str(i)].scale = scale
                 except:
                     pass
-                    # print("airwire not possible")
-                    # print(dataStore)
+                    print(traceback.format_exc())
+                    print("airwire not possible")
+                    print(dataStore)
     return dataStore
 
 def insertWire(dataStore, clickFunction, netName, startPart, endPart):
-    
-    ### DEBUG
-    print("netName", netName, "startPart", startPart, "endPart", endPart)
-    for x in dataStore['airwires'][netName].keys():
-        print("wire", x, "start", dataStore['airwires'][netName][x].startPart, "end", dataStore['airwires'][netName][x].endPart)
-    
     # create new wire Entity which is basically a normal component
     counter = 0
     while 'WIRE' + str(counter) in dataStore['components'].keys():
@@ -80,13 +74,17 @@ def insertWire(dataStore, clickFunction, netName, startPart, endPart):
     for x in dataStore['airwires'][netName].keys():
         if dataStore['airwires'][netName][x].endPart == endPart:
             dataStore['airwires'][netName][x].endPart = wireDesignator
-            # dataStore['airwires'][netName][x].net = newNet
-            print("updated existing airwire to:", "endPart", wireDesignator, "net", newNet)
 
     # create missing air wire for newly created net
     dataStore['airwires']['wirenet' + str(counter)] = {'1': AIRWIRE((0,0,0), (0,0,0), clickFunction, newNet, wireDesignator, endPart)}
 
     return dataStore
+
+def removeWire(dataStore, designator):
+    # first check if designator is even deletable
+    if "WIRE" in designator:
+        # getting necessary information
+        wire_A_netname = dataStore['']
 
 def swapFootprint(dataStore, currentEntity, clickFunction):
     temp_component = dataStore['components'][currentEntity.designator]

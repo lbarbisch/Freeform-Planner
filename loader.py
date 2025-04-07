@@ -109,7 +109,7 @@ def _loadNetlist(filename, clickFunction={}, dataStore={}):
     dataStore["components"] = {}
     for designator in list(components.keys()):
         try:
-            componentClass = getattr(components, components[designator])
+            componentClass = getattr(componentLibrary, components[designator])
             
             if clickFunction != {}:
                 dataStore["components"][designator] = componentClass(clickFunction, 0, designator)     # add the actual component
