@@ -1,4 +1,6 @@
-from ursina import *
+"""Rewritten fileBrowser class, very similar to the Ursina provided one"""
+
+from ursina import InputField, WindowPanel, color, Text, Button
 from ursina.prefabs.file_browser import FileBrowser, FileButton
 
 ## Stuff I had to implement, because the Ursina Library didn't work quite right

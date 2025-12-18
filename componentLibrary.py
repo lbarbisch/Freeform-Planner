@@ -1,3 +1,5 @@
+"""component library defining all the usable components"""
+
 from ursina import *
 # from helperFunctions import *
 from settings import *
@@ -6,6 +8,7 @@ from math import asin, acos
 
 # only needed for test in this file
 def click():
+    @staticmethod
     global currentEntity
     if currentEntity != {}:
         currentEntity.color = color.rgb(255, 255, 255)

@@ -30,8 +30,8 @@ savedFile = "no file saved yet"
 
 originArrows()
 
-# handler to select components on screen
-def click():
+def on_click():
+    """handler to select components on screen"""
     global currentEntity
     if currentEntity != {}:
         currentEntity.color = color.rgb(255, 255, 255)
@@ -41,6 +41,7 @@ def click():
     currentEntity.color = color.rgb(150, 255, 150)
 
 def on_submit_load(paths):
+    """handler which is triggered when loading a file"""
     global loadedFile, dataStore
     # save input filename for display
     loadedFile = os.fspath(paths[0])
@@ -49,6 +50,7 @@ def on_submit_load(paths):
     # print(dataStore)
 
 def on_submit_save(paths):
+    """handler which is triggered when saving a file"""
     global savedFile, dataStore
     if type(paths) == list:
         path = paths[0]
@@ -60,6 +62,7 @@ def on_submit_save(paths):
 
 
 def menuButtonLoad():
+    """handler which is triggered when clicking Load button in the UI"""
     global fb
     if dataStore == {}:
         # load file, either savestate or netlist
@@ -69,7 +72,9 @@ def menuButtonLoad():
         fb.title_bar.text = "Load Netlist or Project File"
         fb.enabled = True
 
+
 def menuButtonSave():
+    """handler which is triggered when clicking Save button in the UI"""
     global fb
     if dataStore != {}:
         fb.file_type = '.ffps'
@@ -78,7 +83,9 @@ def menuButtonSave():
         fb.enabled = True
         print("done")
 
+
 def menuButtonNew():
+    """handler which is triggered when clicking New button in the UI"""
     global dataStore, currentEntity, loadedFile
     # destroy all Entites individually
     dataStore = deleteAllEntities(dataStore)
@@ -96,31 +103,34 @@ DropdownMenu("Menu", [DropdownMenuButton('New', on_click=menuButtonNew),
 
 # print("dataStore", dataStore)
 
-# Rotation and Translation of selected object
-def input(key):
+def button_input(key):
+    """Rotation and Translation of selected object"""
     global currentEntity, dataStore
-    if currentEntity != {} and fb.enabled == False:
+    if currentEntity != {} and not fb.enabled:
         if isinstance(currentEntity, AIRWIRE):
 
             if held_keys['left control'] and key == key_insert_wire:
-                dataStore = insertWire(dataStore, click, currentEntity.net, currentEntity.startPart, currentEntity.endPart)
+                dataStore = insertWire(dataStore,
+                                       click,
+                                       currentEntity.net,
+                                       currentEntity.startPart,
+                                       currentEntity.endPart)
                 return
 
             currentEntityDescriptor.text = "Designator: " + currentEntity.designator + '\nNetname: ' + currentEntity.net + '\nPosition: ' + str(np.round(currentEntity.position, 1)) + '\nRotation: ' + str(np.round(currentEntity.rotation, 1)) + '\nFrom: ' + str(currentEntity.startPart) + '\nTo: ' + str(currentEntity.endPart)
 
         else:
-            
             currentEntityDescriptor.text = "Designator: " + currentEntity.designator + '\nPosition: ' + str(list(currentEntity.position)) + '\nRotation: ' + str(list(currentEntity.rotation)) + '\nFootprint: ' + str(dataStore['components'][currentEntity.designator].current_footprint+1) + '/' + str(len(dataStore['components'][currentEntity.designator].available_footprints))
 
 
-            # reset rotation of currentEntity to 0, 0, 0 very helpfull for cylindrical parts that rotate in weird ways all of a sudden
+            # reset rotation of currentEntity to 0, 0, 0 very helpful for cylindrical parts that rotate in weird ways all of a sudden
             if key == reset_rotation:
                 currentEntity.rotation = (0, 0, 0)
 
             # Switch between available footprints
             if key == key_swap_footprint:
                 dataStore, currentEntity = swapFootprint(dataStore, currentEntity, click)
-            
+
 
             # Rotate around X axis
             if key == key_rotate_x_pos:
@@ -181,15 +191,16 @@ def input(key):
                 currentEntity.z -= translation_increment/2
             elif held_keys[key_translate_z_neg]:
                 currentEntity.z -= translation_increment
-            
+
     if key == 'x':                              #### ONLY USED FOR DEBUGGING ####
         pp = pprint.PrettyPrinter(indent=2)
         pp.pprint(dataStore)
     if key == key_exit:                         #### ONLY NEEDED FOR DEBUGGING ####
         app.userExit()
 
-# update positions of existing air wires
+
 def update():
+    """update positions of existing air wires"""
     global dataStore
     dataStore = updateAirwires(dataStore)
     # net1.model.vertices=[Q2.getPinPos(0), Q3.getPinPos(1)]

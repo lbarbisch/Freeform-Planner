@@ -2,3 +2,4 @@ __pycache__
 *.bam
 *.bak
 .vscode/
+models_sources/
