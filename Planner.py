@@ -31,6 +31,17 @@ savedFile = "no file saved yet"
 
 originArrows()
 
+def update_current_entity_descriptor():
+    """Update the current entity descriptor text based on selected component"""
+    global currentEntity, dataStore, currentEntityDescriptor
+    
+    if currentEntity == {}:
+        currentEntityDescriptor.text = 'nothing selected'
+    elif isinstance(currentEntity, AIRWIRE):
+        currentEntityDescriptor.text = "Designator: " + currentEntity.designator + '\nNetname: ' + currentEntity.net + '\nPosition: ' + str(np.round(currentEntity.position, 1)) + '\nRotation: ' + str(np.round(currentEntity.rotation, 1)) + '\nFrom: ' + str(currentEntity.startPart) + '\nTo: ' + str(currentEntity.endPart)
+    else:
+        currentEntityDescriptor.text = "Designator: " + currentEntity.designator + '\nPosition: ' + str(list(currentEntity.position)) + '\nRotation: ' + str(list(currentEntity.rotation)) + '\nFootprint: ' + str(dataStore['components'][currentEntity.designator].current_footprint+1) + '/' + str(len(dataStore['components'][currentEntity.designator].available_footprints))
+
 def click_handler():
     """handler to select components on screen"""
     global currentEntity
@@ -39,10 +50,12 @@ def click_handler():
             currentEntity.color = currentEntity.original_color
         currentEntity = mouse.hovered_entity
         currentEntity.color = color.rgb(150, 255, 150)
+        update_current_entity_descriptor()
     else:
         if currentEntity != {}:
             currentEntity.color = currentEntity.original_color
         currentEntity = {}
+        update_current_entity_descriptor()
 
 def on_submit_load(paths):
     """handler which is triggered when loading a file"""
@@ -99,15 +112,92 @@ def menuButtonNew():
     componentLibrary.initPosition = componentLibrary.posGenerator()
 
 
+help_panel = None
+help_background = None
+help_text_obj = None
+
+def close_help():
+    """Close the help panel and background overlay"""
+    global help_panel, help_background, help_text_obj
+    
+    if help_panel:
+        destroy(help_panel)
+        help_panel = None
+    if help_text_obj:
+        destroy(help_text_obj)
+        help_text_obj = None
+    if help_background:
+        destroy(help_background)
+        help_background = None
+
+
+def menuButtonHelp():
+    """handler which displays keyboard shortcuts help"""
+    global help_panel, help_background, help_text_obj
+    
+    help_text = """KEYBOARD SHORTCUTS
+
+Selection:
+  Click on component - Select component
+  
+Rotation (selected component):
+  W / S - Rotate around X axis
+  D / A - Rotate around Y axis
+  E / Q - Rotate around Z axis
+  R - Reset rotation to (0,0,0)
+  
+Translation (selected component):
+  6 / 4 - Move along X axis
+  9 / 1 - Move along Y axis
+  8 / 2 - Move along Z axis
+  
+Component Management:
+  F - Swap footprint variant
+  Ctrl+W - Insert wire (when wire selected)
+  
+Other:
+  X - Print dataStore (debug)
+  ESC - Exit application
+  
+Click anywhere to close"""
+    
+    # Close if already open
+    if help_panel:
+        close_help()
+        return
+    
+    # Create transparent background overlay (clickable to close)
+    help_background = Button(
+        scale_x=window.aspect_ratio * 2,
+        scale_y=2,
+        color=color.rgba(0, 0, 0, 0.5),
+        on_click=close_help
+    )
+    help_background.z = 0.1
+    
+    # Create help text object
+    help_text_obj = Text(help_text, size=11, origin=(0, 0))
+    
+    # Create help panel with text
+    help_panel = Panel(
+        title="Keyboard Shortcuts",
+        content=help_text_obj,
+        popup=True
+    )
+    help_panel.scale = 0.65
+    help_panel.z = 0.2
+
+
 # basic menu structure with buttons
 DropdownMenu("Menu", [DropdownMenuButton('New', on_click=menuButtonNew),
                       DropdownMenuButton('Load', on_click=menuButtonLoad),
-                      DropdownMenuButton('Save', on_click=menuButtonSave)])
+                      DropdownMenuButton('Save', on_click=menuButtonSave),
+                      DropdownMenuButton('Help', on_click=menuButtonHelp)])
 
 
 # print("dataStore", dataStore)
 
-def button_input(key):
+def input(key):
     """Rotation and Translation of selected object"""
     global currentEntity, dataStore
     if currentEntity != {} and not fb.enabled:
@@ -115,16 +205,16 @@ def button_input(key):
 
             if held_keys['left control'] and key == key_insert_wire:
                 dataStore = insertWire(dataStore,
-                                       click,
+                                       click_handler,
                                        currentEntity.net,
                                        currentEntity.startPart,
                                        currentEntity.endPart)
                 return
 
-            currentEntityDescriptor.text = "Designator: " + currentEntity.designator + '\nNetname: ' + currentEntity.net + '\nPosition: ' + str(np.round(currentEntity.position, 1)) + '\nRotation: ' + str(np.round(currentEntity.rotation, 1)) + '\nFrom: ' + str(currentEntity.startPart) + '\nTo: ' + str(currentEntity.endPart)
+            update_current_entity_descriptor()
 
         else:
-            currentEntityDescriptor.text = "Designator: " + currentEntity.designator + '\nPosition: ' + str(list(currentEntity.position)) + '\nRotation: ' + str(list(currentEntity.rotation)) + '\nFootprint: ' + str(dataStore['components'][currentEntity.designator].current_footprint+1) + '/' + str(len(dataStore['components'][currentEntity.designator].available_footprints))
+            update_current_entity_descriptor()
 
 
             # reset rotation of currentEntity to 0, 0, 0 very helpful for cylindrical parts that rotate in weird ways all of a sudden
@@ -133,7 +223,7 @@ def button_input(key):
 
             # Switch between available footprints
             if key == key_swap_footprint:
-                dataStore, currentEntity = swapFootprint(dataStore, currentEntity, click)
+                dataStore, currentEntity = swapFootprint(dataStore, currentEntity, click_handler)
 
 
             # Rotate around X axis
