@@ -27,13 +27,15 @@ counter = counterGenerator()
 
 # only needed for test in this file
 def click():
-    @staticmethod
     global currentEntity
-    if currentEntity != {}:
-        currentEntity.color = color.rgb(255, 255, 255)
-    currentEntity = mouse.hovered_entity
-    currentEntity.color = color.rgb(150, 255, 150)
-    print(currentEntity.designator)
+    try:
+        if currentEntity != {}:
+            currentEntity.color = color.rgb(255, 255, 255)
+        currentEntity = mouse.hovered_entity
+        currentEntity.color = color.rgb(150, 255, 150)
+        print(currentEntity.designator)
+    except Exception:
+        pass
 
 
 
@@ -43,6 +45,7 @@ class Footprint(Entity):
     def __init__(self, designator, **kwargs):
         super().__init__(**kwargs)
         self.designator = designator
+        self.original_color = self.color
     
     def getPinPos(self, pinNumber):
         # pinNumber-1 so pin number 1 is index 0

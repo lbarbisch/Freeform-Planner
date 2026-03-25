@@ -1,6 +1,7 @@
 from ursina import *
 from ursina.prefabs.dropdown_menu import DropdownMenu, DropdownMenuButton
-from fileBrowserBetter import *
+#from fileBrowserBetter import *
+from ursina.prefabs.file_browser import *
 from componentLibrary import *
 from loader import *
 from helperFunctions import *
@@ -20,7 +21,7 @@ platform = Entity(model="cube", scale=(100, 0, 100), position=(0, -5, 0), textur
 light = AmbientLight(shadows=True)
 light.look_at(Vec3(50, -50, 50))
 
-fb = FileBrowserBetterSave(enabled=False)
+fb = FileBrowser(enabled=False)
 currentEntityDescriptor = Text(origin=(-.5,.5), text='nothing selected', position=(.3*window.aspect_ratio, .47+(.02*(not window.exit_button.enabled))))
 
 currentEntity = {}
@@ -30,15 +31,18 @@ savedFile = "no file saved yet"
 
 originArrows()
 
-def on_click():
+def click_handler():
     """handler to select components on screen"""
     global currentEntity
-    if currentEntity != {}:
-        currentEntity.color = color.rgb(255, 255, 255)
-    if isinstance(currentEntity, AIRWIRE):
-        currentEntity.color = color.yellow
-    currentEntity = mouse.hovered_entity
-    currentEntity.color = color.rgb(150, 255, 150)
+    if mouse.hovered_entity:
+        if currentEntity != {}:
+            currentEntity.color = currentEntity.original_color
+        currentEntity = mouse.hovered_entity
+        currentEntity.color = color.rgb(150, 255, 150)
+    else:
+        if currentEntity != {}:
+            currentEntity.color = currentEntity.original_color
+        currentEntity = {}
 
 def on_submit_load(paths):
     """handler which is triggered when loading a file"""
@@ -46,7 +50,7 @@ def on_submit_load(paths):
     # save input filename for display
     loadedFile = os.fspath(paths[0])
     # parse netlist and create all components
-    dataStore = loadComponents(filename=loadedFile, clickFunction=click)
+    dataStore = loadComponents(filename=loadedFile, clickFunction=click_handler)
     # print(dataStore)
 
 def on_submit_save(paths):

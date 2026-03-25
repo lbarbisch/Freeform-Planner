@@ -23,13 +23,3 @@ def parse_kicad_netlist_improved(file_path):
 
     return components, connections
 
-file_path = "test.net"
-
-# Parse the file again with an improved regex for node extraction
-components, connections = parse_kicad_netlist_improved(file_path)
-
-# Show a sample of extracted components and connections
-components_sample = dict(list(components.items())[:10])
-connections_sample = connections[:10]
-
-print(components_sample, connections_sample)

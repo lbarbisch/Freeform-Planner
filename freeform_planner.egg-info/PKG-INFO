@@ -1,3 +1,16 @@
+Metadata-Version: 2.4
+Name: freeform-planner
+Version: 0.1.0
+Summary: Freeform 3D electronics layout planner
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: numpy>=2.2.6
+Requires-Dist: ursina>=6.0.0
+Provides-Extra: test
+Requires-Dist: pytest>=7.0.0; extra == "test"
+Dynamic: license-file
+
 # Freeform-Planner
 Rudimentary 3D layout software to plan freeform electronic installations
 
