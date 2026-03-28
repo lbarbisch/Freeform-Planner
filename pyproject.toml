@@ -3,7 +3,14 @@ name = "freeform-planner"
 version = "0.1.0"
 description = "Freeform 3D electronics layout planner"
 readme = "README.md"
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
 requires-python = ">=3.10"
+authors = [
+    { name = "lbarbisch" }
+]
+urls = { Homepage = "https://github.com/lbarbisch/Freeform-Planner" }
+keywords = ["electronics", "layout", "3D", "freeform", "KiCAD"]
 dependencies = [
     "numpy>=2.2.6",
     "pytest>=9.0.2",
