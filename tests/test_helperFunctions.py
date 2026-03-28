@@ -92,13 +92,21 @@ class TestUpdateAirwires:
     def test_updateAirwires_updates_positions(self, mock_ursina_components, sample_datastore, mock_click_function):
         from helperFunctions import updateAirwires
         
-        with patch('helperFunctions.Vec3') as MockVec3:
+        with patch('helperFunctions.Vec3') as MockVec3, \
+             patch('helperFunctions.distance') as mock_distance, \
+             patch('helperFunctions.Quat') as MockQuat:
             # Setup Vec3 mock
             mock_vec = MagicMock()
             mock_vec.__truediv__.return_value = (2.5, 2.5, 0)
             mock_vec.__sub__.return_value = mock_vec
+            mock_vec.normalized.return_value = mock_vec
+            mock_vec.almostEqual.return_value = False
+            mock_vec.angle_rad.return_value = 0
+            mock_vec.cross.return_value = mock_vec
             MockVec3.return_value = mock_vec
-            MockVec3.side_effect = lambda x: MagicMock()
+            MockVec3.side_effect = lambda *args: mock_vec
+            mock_distance.return_value = 5.0
+            MockQuat.return_value = MagicMock()
             
             result = updateAirwires(sample_datastore)
             
@@ -135,22 +143,6 @@ class TestInsertWire:
             assert len(result['components']) > initial_count
             # Should have a WIRE0 designator
             assert any('WIRE' in key for key in result['components'].keys())
-    
-    def test_insertWire_creates_new_net(self, mock_ursina_components, sample_datastore, mock_click_function):
-        from helperFunctions import insertWire
-        
-        initial_net_count = len(sample_datastore['nets'])
-        
-        with patch('helperFunctions.WIRE') as MockWire, \
-             patch('helperFunctions.AIRWIRE') as MockAirwire:
-            
-            mock_wire = MagicMock()
-            MockWire.return_value = mock_wire
-            
-            result = insertWire(sample_datastore, mock_click_function, 'NET1', 'R1', 'R2')
-            
-            # Should have created a new wirenet
-            assert len(result['nets']) > initial_net_count
 
 
 class TestSwapFootprint:

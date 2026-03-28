@@ -40,7 +40,11 @@ def update_current_entity_descriptor():
     elif isinstance(currentEntity, AIRWIRE):
         currentEntityDescriptor.text = "Designator: " + currentEntity.designator + '\nNetname: ' + currentEntity.net + '\nPosition: ' + str(np.round(currentEntity.position, 1)) + '\nRotation: ' + str(np.round(currentEntity.rotation, 1)) + '\nFrom: ' + str(currentEntity.startPart) + '\nTo: ' + str(currentEntity.endPart)
     else:
-        currentEntityDescriptor.text = "Designator: " + currentEntity.designator + '\nPosition: ' + str(list(currentEntity.position)) + '\nRotation: ' + str(list(currentEntity.rotation)) + '\nFootprint: ' + str(dataStore['components'][currentEntity.designator].current_footprint+1) + '/' + str(len(dataStore['components'][currentEntity.designator].available_footprints))
+        # For WIRE components look up the net from the dataStore; other components have no net
+        net_keys = [netname for netname, parts in dataStore['nets'].items()
+                    if currentEntity.designator + '__1' in parts]
+        net_display = ('\nNetname: ' + net_keys[0]) if net_keys else ''
+        currentEntityDescriptor.text = "Designator: " + currentEntity.designator + net_display + '\nPosition: ' + str(list(currentEntity.position)) + '\nRotation: ' + str(list(currentEntity.rotation)) + '\nFootprint: ' + str(dataStore['components'][currentEntity.designator].current_footprint+1) + '/' + str(len(dataStore['components'][currentEntity.designator].available_footprints))
 
 def click_handler():
     """handler to select components on screen"""
@@ -153,7 +157,8 @@ Translation (selected component):
   
 Component Management:
   F - Swap footprint variant
-  Ctrl+W - Insert wire (when wire selected)
+  Ctrl+W - Insert wire (when airwire selected)
+  Ctrl+W - Remove wire (when WIRE component selected)
   
 Other:
   X - Print dataStore (debug)
@@ -214,6 +219,13 @@ def input(key):
             update_current_entity_descriptor()
 
         else:
+            # Remove WIRE component (same shortcut as insert wire, but on a WIRE component)
+            if held_keys['left control'] and key == key_insert_wire and 'WIRE' in currentEntity.designator:
+                dataStore = removeWire(dataStore, currentEntity.designator)
+                currentEntity = {}
+                update_current_entity_descriptor()
+                return
+
             update_current_entity_descriptor()
 
 
@@ -296,7 +308,7 @@ def input(key):
 def update():
     """update positions of existing air wires"""
     global dataStore
-    dataStore = updateAirwires(dataStore)
+    dataStore = updateAirwires(dataStore, click_handler)
     # net1.model.vertices=[Q2.getPinPos(0), Q3.getPinPos(1)]
     # net1.model.generate()
     # net2.model.vertices=[Q1.getPinPos(2), Q2.getPinPos(1)]

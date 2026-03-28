@@ -1,5 +1,0 @@
-numpy>=2.2.6
-ursina>=6.0.0
-
-[test]
-pytest>=7.0.0

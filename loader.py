@@ -2,6 +2,7 @@ import componentLibrary
 import re
 import pickle
 import traceback
+from ursina import *
 
 def parseKicadNetlist(file_path):
     components = {}
@@ -77,26 +78,25 @@ def _loadProjectFile(filename, clickFunction):
         if "unconnected" not in netname:
             # prepare 
             dataStore['airwires'][netname] = {}
-            # print(netname)
-            for i in range(1, len(connections[netname])):
+            # Get pins sorted by part name
+            pin_list = sorted(connections[netname].items(), key=lambda x: x[0])
+            pins = []
+            for part, pin in pin_list:
                 try:
-                    startPart = list(connections[netname].keys())[i-1]
-                    startPin  = int(list(connections[netname].values())[i-1])
-                    endPart   = list(connections[netname].keys())[i]
-                    endPin    = int(list(connections[netname].values())[i])
-
-                    startPosition = dataStore['components'][startPart].getPinPos(startPin)
-                    endPosition   = dataStore['components'][endPart].getPinPos(endPin)
-
-                    # print("net", netname, "wire", i, startPart, startPin, endPart, endPin, startPosition, endPosition)
-
-                    if clickFunction != {}:
-                        dataStore['airwires'][netname][str(i)] = componentLibrary.AIRWIRE(startPosition, endPosition, clickFunction, netname, startPart, endPart)
-                    else:
-                        dataStore['airwires'][netname][str(i)] = "wire" + str(i)
+                    pos = dataStore['components'][part].getPinPos(int(pin))
+                    pins.append((part, int(pin), pos))
                 except:
-                    print(traceback.format_exc())
-                    print("skipping Airwire, because part does not exist.")
+                    print(f"Skipping pin {part} {pin} in net {netname}")
+            # For each pin, create airwire to closest other pin
+            for idx in range(len(pins)):
+                if len(pins) > 1:
+                    closest_j = min((j for j in range(len(pins)) if j != idx), key=lambda j: distance(pins[idx][2], pins[j][2]))
+                    start_part, start_pin, start_pos = pins[idx]
+                    end_part, end_pin, end_pos = pins[closest_j]
+                    if clickFunction != {}:
+                        dataStore['airwires'][netname][str(idx+1)] = componentLibrary.AIRWIRE(start_pos, end_pos, clickFunction, netname, start_part, end_part)
+                    else:
+                        dataStore['airwires'][netname][str(idx+1)] = "wire" + str(idx+1)
 
     return dataStore
 
