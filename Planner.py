@@ -203,7 +203,6 @@ DropdownMenu("Menu", [DropdownMenuButton('New', on_click=menuButtonNew),
                       DropdownMenuButton('Help', on_click=menuButtonHelp)])
 
 
-# print("dataStore", dataStore)
 
 def input(key):
     """Rotation and Translation of selected object"""

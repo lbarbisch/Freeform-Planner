@@ -183,8 +183,16 @@ class TestPassiveComponents:
         assert led.value == "LED5MM"
     
     def test_diode_component(self, mock_click_function, mock_ursina_components):
-        """Test DIODETHT component initialization - skipped due to recursion issue"""
-        pytest.skip("DIODETHT has recursive constructor, needs special handling")
+        from componentLibrary import DIODE
+
+        diode = DIODE(
+            clickFunction=mock_click_function,
+            footprint=0,
+            designator="D1"
+        )
+
+        assert diode.designator == "D1"
+        assert diode.name == "DIODE"
 
 
 class TestPortComponent:
