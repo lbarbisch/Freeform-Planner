@@ -2,6 +2,7 @@ from ursina import *
 from ursina.prefabs.dropdown_menu import DropdownMenu, DropdownMenuButton
 #from fileBrowserBetter import *
 from ursina.prefabs.file_browser import *
+from ursina.prefabs.file_browser_save import FileBrowserSave
 from componentLibrary import *
 from loader import *
 from helperFunctions import *
@@ -13,6 +14,8 @@ import os
 app = Ursina(title="Freeform-Planner", borderless=False, development_mode=True, fullscreen=False, show_ursina_splash=False, splash=False)
 window.exit_button.enabled = False
 window.fps_counter.enabled = False
+window.entity_counter.enabled = False
+window.collider_counter.enabled = False
 skybox_image = load_texture("sky_sunset.jpg")
 Sky(texture=skybox_image)
 
@@ -22,6 +25,7 @@ light = AmbientLight(shadows=True)
 light.look_at(Vec3(50, -50, 50))
 
 fb = FileBrowser(enabled=False)
+fb_save = FileBrowserSave(enabled=False)
 currentEntityDescriptor = Text(origin=(-.5,.5), text='nothing selected', position=(.3*window.aspect_ratio, .47+(.02*(not window.exit_button.enabled))))
 
 currentEntity = {}
@@ -96,13 +100,12 @@ def menuButtonLoad():
 
 def menuButtonSave():
     """handler which is triggered when clicking Save button in the UI"""
-    global fb
+    global fb_save
     if dataStore != {}:
-        fb.file_type = '.ffps'
-        fb.on_submit = on_submit_save
-        fb.title_bar.text = "Save Project"
-        fb.enabled = True
-        print("done")
+        fb_save.file_type = '.ffps'
+        fb_save.on_submit = on_submit_save
+        fb_save.title_bar.text = "Save Project"
+        fb_save.enabled = True
 
 
 def menuButtonNew():
@@ -205,6 +208,8 @@ DropdownMenu("Menu", [DropdownMenuButton('New', on_click=menuButtonNew),
 def input(key):
     """Rotation and Translation of selected object"""
     global currentEntity, dataStore
+    if key == 'left mouse down' and not mouse.hovered_entity and not fb.enabled and not fb_save.enabled:
+        click_handler()
     if currentEntity != {} and not fb.enabled:
         if isinstance(currentEntity, AIRWIRE):
 
