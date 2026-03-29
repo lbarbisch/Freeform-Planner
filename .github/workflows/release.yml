@@ -1,0 +1,72 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write   # needed to create GitHub Releases and upload assets
+
+jobs:
+  test:
+    name: Run tests before release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Run tests
+        run: uv run pytest -ra -q
+
+  build-exe:
+    name: Build Windows exe
+    needs: test
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Install dependencies + PyInstaller
+        run: |
+          uv sync --all-extras
+          uv pip install pyinstaller
+
+      - name: Build exe with PyInstaller
+        run: uv run python -m PyInstaller Planner.spec --noconfirm
+
+      - name: Zip the output folder
+        run: |
+          $version = "${{ github.ref_name }}"
+          $zipName = "Freeform-Planner-$version-windows.zip"
+          Compress-Archive -Path "dist\Freeform-Planner\*" -DestinationPath $zipName
+          echo "ZIP_NAME=$zipName" >> $env:GITHUB_ENV
+        shell: pwsh
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "Release ${{ github.ref_name }}"
+          files: ${{ env.ZIP_NAME }}
+          generate_release_notes: true

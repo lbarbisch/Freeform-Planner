@@ -1,0 +1,35 @@
+[project]
+name = "freeform-planner"
+version = "0.1.0"
+description = "Freeform 3D electronics layout planner"
+readme = "README.md"
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
+requires-python = ">=3.10"
+authors = [
+    { name = "lbarbisch" }
+]
+urls = { Homepage = "https://github.com/lbarbisch/Freeform-Planner" }
+keywords = ["electronics", "layout", "3D", "freeform", "KiCAD"]
+dependencies = [
+    "numpy>=2.2.6",
+    "pytest>=9.0.2",
+    "ursina>=6.0.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.0.0",
+]
+
+[build-system]
+requires = ["setuptools>=65.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q"
+python_files = "test_*.py"
+
+[tool.setuptools.packages.find]
+exclude = ["models*", "KiCAD_Library*", "models_compressed*"]

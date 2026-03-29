@@ -45,11 +45,12 @@ class AIRWIRE(Entity):
         scale = (airwire_thickness, airwire_thickness, length)
 
         super().__init__(model='cube', position=midpoint, scale=scale, collider='mesh', color=color.yellow, on_click=clickFunction)
+        self.original_color = self.color
 
 
 class WIRE(Component):
     def __init__(self, clickFunction, footprint=0, designator = '?'):
-        super().__init__(footprint, [WIRE10X10, WIRE10X20, WIRE20X10, WIRE20X50, WIRE50X20], designator, clickFunction)
+        super().__init__(footprint, [WIRE10X10, WIRE20X10, WIRE20X50, WIRE50X20], designator, clickFunction)
         self.value = "WIRE"
 
 class BC847(Component):
@@ -64,7 +65,7 @@ class LED5MM(Component):
 
 class RES(Component):
     def __init__(self, clickFunction, footprint=0, designator = '?'):
-        super().__init__(footprint, [RESTHT, RESTHT_SHORT, RES0603], designator, clickFunction)
+        super().__init__(footprint, [RESTHT, RES0603], designator, clickFunction)
         self.value = "RES"
 
 class CAP(Component):
@@ -77,10 +78,10 @@ class PORT(Component):
         super().__init__(footprint, [PIN], designator, clickFunction)
         self.value = "PORT"
 
-class DIODETHT(Component):
+class DIODE(Component):
     def __init__(self, clickFunction, footprint=0, designator = '?'):
         super().__init__(footprint, [DIODETHT], designator, clickFunction)
-        self.name = "DIODETHT"
+        self.name = "DIODE"
 
 class BC547(Component):
     def __init__(self, clickFunction, footprint=0, designator = '?'):

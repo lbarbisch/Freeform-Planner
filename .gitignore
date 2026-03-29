@@ -3,3 +3,8 @@ __pycache__
 *.bak
 .vscode/
 models_sources/
+# Build artifacts
+build/
+dist/
+freeform_planner.egg-info/
+*.zip
