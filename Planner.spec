@@ -23,6 +23,7 @@ panda3d_libs = collect_dynamic_libs('panda3d')   # libpandagl.dll, libpandadx9.d
 local_datas = [
     ('models',        'models'),
     ('KiCAD_Library', 'KiCAD_Library'),
+    ('KiCAD_Example_Project', 'KiCAD_Example_Project'),
 ]
 
 a = Analysis(
