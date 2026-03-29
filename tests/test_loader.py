@@ -5,8 +5,8 @@ from unittest.mock import Mock, patch, MagicMock
 from loader import parseKicadNetlist, _loadNetlist, makeSaveStore, loadComponents
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-TRANSISTOR_NET = os.path.join(PROJECT_ROOT, 'transistor_oscillator.net')
-TRANSISTOR_FFPS = os.path.join(PROJECT_ROOT, 'transistor_oscillator.ffps')
+TRANSISTOR_NET = os.path.join(PROJECT_ROOT, 'tests/transistor_oscillator.net')
+TRANSISTOR_FFPS = os.path.join(PROJECT_ROOT, 'tests/transistor_oscillator.ffps')
 
 
 class TestParseKicadNetlist:

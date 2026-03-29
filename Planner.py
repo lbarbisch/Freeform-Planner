@@ -40,8 +40,6 @@ help_text_obj = None
 ec = EditorCamera()
 ec.target_z = -200
 
-app.run()
-
 originArrows()
 
 def update_current_entity_descriptor():
@@ -124,7 +122,6 @@ def menuButtonNew():
     # reset the initPosition for the part placing
     componentLibrary.initPosition = componentLibrary.posGenerator()
 
-
 def close_help():
     """Close the help panel and background overlay"""
     global help_panel, help_background, help_text_obj
@@ -193,8 +190,8 @@ Click anywhere to close"""
         content=help_text_obj,
         popup=True
     )
-    help_panel.scale = 0.65
-    help_panel.z = 0.2
+    help_panel.scale = 0.7
+    help_panel.z = 0.25
 
 # basic menu structure with buttons
 DropdownMenu("Menu", [DropdownMenuButton('New', on_click=menuButtonNew),
@@ -310,4 +307,9 @@ def update():
     """update positions of existing air wires"""
     global dataStore
     dataStore = updateAirwires(dataStore, click_handler)
+
+# remenant from dependency issues
+#import importlib.metadata as m; print(m.version('ursina'))
+
+app.run()
 
