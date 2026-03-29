@@ -21,9 +21,8 @@ panda3d_libs = collect_dynamic_libs('panda3d')   # libpandagl.dll, libpandadx9.d
 
 # Our own runtime assets
 local_datas = [
-    ('models',            'models'),
-    ('models_compressed', 'models_compressed'),
-    ('KiCAD_Library',     'KiCAD_Library'),
+    ('models',        'models'),
+    ('KiCAD_Library', 'KiCAD_Library'),
 ]
 
 a = Analysis(
