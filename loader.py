@@ -51,15 +51,19 @@ def _loadProjectFile(filename, clickFunction):
     # instantiate all components from their respective class and add them to the components subdict
     dataStore["components"] = {}
     for designator in list(components.keys()):
+        saved_value = components[designator]['value']
+        if saved_value is None or saved_value == 'None':
+            print(f"Skipping {designator}: saved value is '{saved_value}' (no valid component class)")
+            continue
         try:
-            componentClass = getattr(componentLibrary, components[designator]['value'])
+            componentClass = getattr(componentLibrary, saved_value)
             footprint = components[designator]['footprint']
             dataStore["components"][designator] = componentClass(clickFunction, footprint, designator)     # add the actual component
             dataStore["components"][designator].footprint.rotation = components[designator]['rotation']
             dataStore["components"][designator].footprint.position = components[designator]['position']
         except:
             print(traceback.format_exc())
-            print("No component candidate found for", components[designator]['value'], "skipping")
+            print("No component candidate found for", saved_value, "skipping")
     
     # print('dataStore', dataStore)
     # add all nets to the nets subdict
@@ -165,7 +169,8 @@ def makeSaveStore(dataStore, debug=1):
 
     for designatorName in dataStore['components'].keys():
         designatorObject = dataStore['components'][designatorName]
-        saveStore['components'][designatorName] = {'value': designatorObject.value, 'rotation': designatorObject.footprint.rotation, 'position': designatorObject.footprint.position, 'footprint': designatorObject.current_footprint}
+        class_name = type(designatorObject).__name__
+        saveStore['components'][designatorName] = {'value': class_name, 'rotation': designatorObject.footprint.rotation, 'position': designatorObject.footprint.position, 'footprint': designatorObject.current_footprint}
 
     if debug:
         print("saveStore", saveStore)

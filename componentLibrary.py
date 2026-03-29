@@ -65,7 +65,7 @@ class LED5MM(Component):
 
 class RES(Component):
     def __init__(self, clickFunction, footprint=0, designator = '?'):
-        super().__init__(footprint, [RESTHT, RES0603], designator, clickFunction)
+        super().__init__(footprint, [RESTHT, RESTHT_SHORT, RES0603], designator, clickFunction)
         self.value = "RES"
 
 class CAP(Component):
@@ -81,27 +81,27 @@ class PORT(Component):
 class DIODE(Component):
     def __init__(self, clickFunction, footprint=0, designator = '?'):
         super().__init__(footprint, [DIODETHT], designator, clickFunction)
-        self.name = "DIODE"
+        self.value = "DIODE"
 
 class BC547(Component):
     def __init__(self, clickFunction, footprint=0, designator = '?'):
         super().__init__(footprint, [TO92, SOT23_3], designator, clickFunction)
-        self.name = "BC547"
+        self.value = "BC547"
 
 class BC557(Component):
     def __init__(self, clickFunction, footprint=0, designator = '?'):
         super().__init__(footprint, [TO92, SOT23_3], designator, clickFunction)
-        self.name = "BC557"
+        self.value = "BC557"
 
 class NE555(Component):
     def __init__(self, clickFunction, footprint=0, designator = '?'):
         super().__init__(footprint, [SOIC8, DIP8], designator, clickFunction)
-        self.name = "NE555"
+        self.value = "NE555"
 
 class TL072(Component):
     def __init__(self, clickFunction, footprint=0, designator = '?'):
         super().__init__(footprint, [SOIC8, DIP8], designator, clickFunction)
-        self.name = "TL072"
+        self.value = "TL072"
 
 
 

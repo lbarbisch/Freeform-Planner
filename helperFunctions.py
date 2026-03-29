@@ -109,36 +109,39 @@ def updateAirwires(dataStore, clickFunction=None):
     nets = dataStore['nets']
     for netname in list(nets.keys()):
         # Collect current pin positions, sorted by part name for stable ordering
-        # Keys may be plain component designators, or use the WIRE0__2 convention
-        # (designator + '__' + pin_number) to allow a single component to appear
+        # Keys may be plain component designators, or use the WIRE0_2 convention
+        # (designator + '_' + pin_number) to allow a single component to appear
         # twice in one net dict without a key collision.
         pin_list = sorted(nets[netname].items(), key=lambda x: x[0])
         pins = []
         key_to_index = {}  # net-key -> index in pins
         for key, pin in pin_list:
-            if '__' in key:
-                part, encoded_pin = key.rsplit('__', 1)
+            if '_' in key:
+                part, encoded_pin = key.rsplit('_', 1)
                 pin_number = int(encoded_pin)
             else:
                 part = key
                 pin_number = int(pin)
+            if part not in dataStore['components']:
+                print(f"updateAirwires: skipping pin {part} {pin_number} in net {netname} – component not loaded")
+                continue
             pos = dataStore['components'][part].getPinPos(pin_number)
             key_to_index[key] = len(pins)
             pins.append((part, pin_number, pos))
 
-        # Identify WIRE pin pairs: entries sharing the same DESIGNATOR via __1 / __2
+        # Identify WIRE pin pairs: entries sharing the same DESIGNATOR via _1 / _2
         # keys.  Each such pair is already physically connected – treat them as
         # pre-connected edges so Kruskal doesn't draw an airwire for them.
         wire_designators = set()
         for key in key_to_index:
-            if '__' in key:
-                designator, _ = key.rsplit('__', 1)
+            if '_' in key:
+                designator, _ = key.rsplit('_', 1)
                 wire_designators.add(designator)
 
         preconnected = []
         for designator in wire_designators:
-            k1 = designator + '__1'
-            k2 = designator + '__2'
+            k1 = designator + '_1'
+            k2 = designator + '_2'
             if k1 in key_to_index and k2 in key_to_index:
                 preconnected.append((key_to_index[k1], key_to_index[k2]))
 

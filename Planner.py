@@ -33,6 +33,15 @@ dataStore = {}
 loadedFile = "no file loaded"
 savedFile = "no file saved yet"
 
+help_panel = None
+help_background = None
+help_text_obj = None
+
+ec = EditorCamera()
+ec.target_z = -200
+
+app.run()
+
 originArrows()
 
 def update_current_entity_descriptor():
@@ -85,7 +94,6 @@ def on_submit_save(paths):
     with open(os.fspath(path), '+bw') as file:
         file.write(makeSaveStore(dataStore))
 
-
 def menuButtonLoad():
     """handler which is triggered when clicking Load button in the UI"""
     global fb
@@ -97,7 +105,6 @@ def menuButtonLoad():
         fb.title_bar.text = "Load Netlist or Project File"
         fb.enabled = True
 
-
 def menuButtonSave():
     """handler which is triggered when clicking Save button in the UI"""
     global fb_save
@@ -106,7 +113,6 @@ def menuButtonSave():
         fb_save.on_submit = on_submit_save
         fb_save.title_bar.text = "Save Project"
         fb_save.enabled = True
-
 
 def menuButtonNew():
     """handler which is triggered when clicking New button in the UI"""
@@ -118,10 +124,6 @@ def menuButtonNew():
     # reset the initPosition for the part placing
     componentLibrary.initPosition = componentLibrary.posGenerator()
 
-
-help_panel = None
-help_background = None
-help_text_obj = None
 
 def close_help():
     """Close the help panel and background overlay"""
@@ -136,7 +138,6 @@ def close_help():
     if help_background:
         destroy(help_background)
         help_background = None
-
 
 def menuButtonHelp():
     """handler which displays keyboard shortcuts help"""
@@ -195,14 +196,11 @@ Click anywhere to close"""
     help_panel.scale = 0.65
     help_panel.z = 0.2
 
-
 # basic menu structure with buttons
 DropdownMenu("Menu", [DropdownMenuButton('New', on_click=menuButtonNew),
                       DropdownMenuButton('Load', on_click=menuButtonLoad),
                       DropdownMenuButton('Save', on_click=menuButtonSave),
                       DropdownMenuButton('Help', on_click=menuButtonHelp)])
-
-
 
 def input(key):
     """Rotation and Translation of selected object"""
@@ -308,17 +306,8 @@ def input(key):
     if key == key_exit:                         #### ONLY NEEDED FOR DEBUGGING ####
         app.userExit()
 
-
 def update():
     """update positions of existing air wires"""
     global dataStore
     dataStore = updateAirwires(dataStore, click_handler)
-    # net1.model.vertices=[Q2.getPinPos(0), Q3.getPinPos(1)]
-    # net1.model.generate()
-    # net2.model.vertices=[Q1.getPinPos(2), Q2.getPinPos(1)]
-    # net2.model.generate()
 
-
-EditorCamera(target_z=-100)
-
-app.run()
