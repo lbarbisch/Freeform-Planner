@@ -96,7 +96,7 @@ class TestTransistorComponents:
         )
         
         assert transistor.designator == "Q2"
-        assert transistor.name == "BC547"
+        assert transistor.value == "BC547"
     
     def test_bc557_component(self, mock_click_function, mock_ursina_components):
         from componentLibrary import BC557
@@ -108,7 +108,7 @@ class TestTransistorComponents:
         )
         
         assert transistor.designator == "Q3"
-        assert transistor.name == "BC557"
+        assert transistor.value == "BC557"
 
 
 class TestOpAmpComponent:
@@ -124,7 +124,7 @@ class TestOpAmpComponent:
         )
         
         assert opamp.designator == "U1"
-        assert opamp.name == "TL072"
+        assert opamp.value == "TL072"
 
 
 class TestTimerComponent:
@@ -140,7 +140,7 @@ class TestTimerComponent:
         )
         
         assert timer.designator == "U2"
-        assert timer.name == "NE555"
+        assert timer.value == "NE555"
 
 
 class TestPassiveComponents:
@@ -192,7 +192,7 @@ class TestPassiveComponents:
         )
 
         assert diode.designator == "D1"
-        assert diode.name == "DIODE"
+        assert diode.value == "DIODE"
 
 
 class TestPortComponent:
