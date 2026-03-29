@@ -7,6 +7,12 @@ from footprints import *
 from math import asin, acos
 
 # only needed for test in this file
+def click():
+    global currentEntity
+    if currentEntity != {}:
+        currentEntity.color = color.rgb(255, 255, 255)
+    currentEntity = mouse.hovered_entity
+    currentEntity.color = color.rgb(150, 255, 150)
 
 # base class for components
 class Component():
