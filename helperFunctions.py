@@ -2,6 +2,7 @@ from ursina import *
 from settings import *
 from componentLibrary import *
 import traceback
+import re
 
 # draws red, green and blue arrows at origin to show X, Y and Z axis
 def originArrows():
@@ -260,3 +261,187 @@ def deleteAllEntities(dataStore):
             for number in list(airwires[nets].keys()):
                 destroy(airwires[nets][number])
     return {}
+
+
+def export_scene_obj(dataStore, filepath):
+    """Export all components and airwires to Wavefront OBJ + MTL files."""
+    from panda3d.core import GeomVertexReader, LPoint3f, ColorAttrib
+    import os as _os
+
+    if not dataStore:
+        print("[export] Nothing to export – load a project first.")
+        return
+
+    mtl_filepath = _os.path.splitext(filepath)[0] + '.mtl'
+    models_dir   = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), 'models')
+
+    obj_lines    = ["# Freeform Planner – 3D Scene Export",
+                    f"mtllib {_os.path.basename(mtl_filepath)}"]
+    mtl_lines    = ["# Freeform Planner – Material Library"]
+    v_offset     = [0]
+    mat_registry = {}
+    mat_counter  = [0]
+
+    def _find_model_file(model_name, ext):
+        if not model_name:
+            return None
+        for root, _dirs, _files in _os.walk(models_dir):
+            path = _os.path.join(root, model_name + ext)
+            if _os.path.isfile(path):
+                return path
+        return None
+
+    def _parse_mtl(mtl_path):
+        """Parse a .mtl file → {mat_name: (r, g, b, a, ka, ks, ns)}."""
+        materials = {}
+        cur = None
+        kd = [.8, .8, .8];  ka = [.2, .2, .2];  ks = [.5, .5, .5];  d = 1.0;  ns = 32.0
+
+        def _save():
+            if cur is not None:
+                materials[cur] = (kd[0], kd[1], kd[2], d, sum(ka) / 3, sum(ks) / 3, ns)
+
+        try:
+            with open(mtl_path, 'r', encoding='utf-8', errors='replace') as fh:
+                for line in fh:
+                    p = line.split()
+                    if not p or p[0].startswith('#'):
+                        continue
+                    if   p[0] == 'newmtl' and len(p) >= 2:
+                        _save();  cur = ' '.join(p[1:])
+                        kd=[.8,.8,.8];  ka=[.2,.2,.2];  ks=[.5,.5,.5];  d=1.0;  ns=32.0
+                    elif p[0] == 'Kd' and len(p) >= 4:  kd = [float(p[1]), float(p[2]), float(p[3])]
+                    elif p[0] == 'Ka' and len(p) >= 4:  ka = [float(p[1]), float(p[2]), float(p[3])]
+                    elif p[0] == 'Ks' and len(p) >= 4:  ks = [float(p[1]), float(p[2]), float(p[3])]
+                    elif p[0] == 'Ns' and len(p) >= 2:  ns = float(p[1])
+                    elif p[0] == 'd'  and len(p) >= 2:  d  = float(p[1])
+            _save()
+        except Exception as exc:
+            print(f"[export] Warning: could not parse {mtl_path}: {exc}")
+        return materials
+
+    def _parse_obj(obj_path):
+        """Parse a .obj file → (verts, sections).
+        verts    – list of (x, y, z)
+        sections – list of (mat_name, [[vi, …], …]) per usemtl block
+        """
+        verts = [];  sections = [];  cur_mat = None;  cur_faces = []
+        try:
+            with open(obj_path, 'r', encoding='utf-8', errors='replace') as fh:
+                for raw in fh:
+                    if raw.startswith('v ') or raw.startswith('v\t'):
+                        p = raw.split()
+                        verts.append((float(p[1]), float(p[2]), float(p[3])))
+                    elif raw.startswith('usemtl'):
+                        if cur_faces:
+                            sections.append((cur_mat, cur_faces))
+                        cur_mat = raw[7:].strip();  cur_faces = []
+                    elif raw.startswith('f ') or raw.startswith('f\t'):
+                        n = len(verts);  vis = []
+                        for tok in raw.split()[1:]:
+                            i = int(tok.split('/')[0])
+                            vis.append(i if i > 0 else n + i + 1)
+                        cur_faces.append(vis)
+            if cur_faces:
+                sections.append((cur_mat, cur_faces))
+        except Exception as exc:
+            print(f"[export] Warning: could not parse {obj_path}: {exc}")
+        return verts, sections
+
+    def _register_mat(r, g, b, a, ka, ks, ns):
+        """Deduplicate and register a material; return its export name."""
+        key = (round(r,4), round(g,4), round(b,4), round(a,4),
+               round(ka,4), round(ks,4), round(ns,2))
+        if key in mat_registry:
+            return mat_registry[key]
+        mat_counter[0] += 1
+        name = f"mat_{mat_counter[0]:04d}"
+        mat_registry[key] = name
+        mtl_lines.extend([f"\nnewmtl {name}",
+                          f"Ka {ka:.4f} {ka:.4f} {ka:.4f}",
+                          f"Kd {r:.4f} {g:.4f} {b:.4f}",
+                          f"Ks {ks:.4f} {ks:.4f} {ks:.4f}",
+                          f"Ns {ns:.4f}", f"d {a:.4f}"])
+        return name
+
+    def _append_entity(entity, group_name):
+        model_name  = getattr(entity, 'model_name', None)
+        mtl_lookup  = _parse_mtl(f) if (f := _find_model_file(model_name, '.mtl')) else {}
+        obj_verts, obj_sections = _parse_obj(f) if (f := _find_model_file(model_name, '.obj')) else ([], [])
+
+        vlines = [];  flines = []
+
+        if len(obj_sections) > 1:
+            # Multi-material: read geometry from source OBJ.
+            # BAM files collapse all materials into one Geom with no name,
+            # making per-part colours unrecoverable from the Panda3D scene graph.
+            wm = entity.getMat(base.render)
+            for x, y, z in obj_verts:
+                wp = wm.xformPoint(LPoint3f(x, y, z))
+                vlines.append(f"v {wp.x:.6f} {wp.y:.6f} {-wp.z:.6f}")
+            base_v = v_offset[0]
+            for mat_name, faces in obj_sections:
+                r, g, b, a, ka, ks, ns = mtl_lookup.get(mat_name, (0.8, 0.8, 0.8, 1.0, 0.2, 0.5, 32.0))
+                flines.append(f"usemtl {_register_mat(r, g, b, a, ka, ks, ns)}")
+                for face in faces:
+                    flines.append("f " + " ".join(str(base_v + vi) for vi in face))
+            v_offset[0] += len(obj_verts)
+        else:
+            # Single-material or dynamic geometry (airwires): use Panda3D scene
+            # graph so internal model transforms are correctly applied.
+            # Color: from OBJ MTL when available, otherwise ColorAttrib/entity.color.
+            color_tuple = mtl_lookup.get(obj_sections[0][0]) if obj_sections else None
+            ev = 0
+            for gnp in entity.findAllMatches('**/+GeomNode'):
+                gn = gnp.node();  wm = gnp.getMat(base.render)
+                for gi in range(gn.getNumGeoms()):
+                    geom = gn.getGeom(gi)
+                    if color_tuple:
+                        r, g, b, a, ka, ks, ns = color_tuple
+                    else:
+                        state = gnp.getNetState().compose(gn.getGeomState(gi))
+                        ca = state.getAttrib(ColorAttrib.getClassType())
+                        if ca and ca.getColorType() == ColorAttrib.T_flat:
+                            c = ca.getColor();  r, g, b, a = c.x, c.y, c.z, c.w
+                        else:
+                            ec = entity.color;  r, g, b, a = ec[0], ec[1], ec[2], ec[3]
+                        ka, ks, ns = 0.2, 0.1, 10.0
+                    flines.append(f"usemtl {_register_mat(r, g, b, a, ka, ks, ns)}")
+                    try:
+                        reader = GeomVertexReader(geom.getVertexData(), 'vertex')
+                    except Exception:
+                        continue
+                    lverts = []
+                    while not reader.isAtEnd():
+                        pt = reader.getData3f()
+                        lverts.append(wm.xformPoint(LPoint3f(pt[0], pt[1], pt[2])))
+                    gvs = ev
+                    for wp in lverts:
+                        vlines.append(f"v {wp.x:.6f} {wp.y:.6f} {-wp.z:.6f}")
+                    for pi in range(geom.getNumPrimitives()):
+                        prim = geom.getPrimitive(pi).decompose()
+                        for ti in range(prim.getNumPrimitives()):
+                            s = prim.getPrimitiveStart(ti);  e = prim.getPrimitiveEnd(ti)
+                            flines.append("f " + " ".join(
+                                str(v_offset[0] + gvs + prim.getVertex(vi) + 1)
+                                for vi in range(s, e)))
+                    ev += len(lverts)
+            v_offset[0] += ev
+
+        if vlines:
+            obj_lines.extend([f"\ng {group_name}"] + vlines + flines)
+
+    for designator, component in dataStore.get('components', {}).items():
+        _append_entity(component.footprint, designator)
+
+    for netname, aw_dict in dataStore.get('airwires', {}).items():
+        safe_net = re.sub(r'[^A-Za-z0-9_]', '_', netname)
+        for key, aw in aw_dict.items():
+            _append_entity(aw, f"AIRWIRE_{safe_net}_{key}")
+
+    with open(filepath, 'w') as fh:
+        fh.write('\n'.join(obj_lines) + '\n')
+    with open(mtl_filepath, 'w') as fh:
+        fh.write('\n'.join(mtl_lines) + '\n')
+    print(f"[export] Scene written to:     {filepath}")
+    print(f"[export] Materials written to: {mtl_filepath}")

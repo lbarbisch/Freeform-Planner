@@ -92,6 +92,16 @@ def on_submit_save(paths):
     with open(os.fspath(path), '+bw') as file:
         file.write(makeSaveStore(dataStore))
 
+
+def on_submit_export(paths):
+    """handler which is triggered when exporting a 3D OBJ model"""
+    global dataStore
+    if type(paths) == list:
+        path = paths[0]
+    else:
+        path = paths
+    export_scene_obj(dataStore, os.fspath(path))
+
 def menuButtonLoad():
     """handler which is triggered when clicking Load button in the UI"""
     global fb
@@ -110,6 +120,16 @@ def menuButtonSave():
         fb_save.file_type = '.ffps'
         fb_save.on_submit = on_submit_save
         fb_save.title_bar.text = "Save Project"
+        fb_save.enabled = True
+
+
+def menuButtonExport():
+    """handler which is triggered when clicking Export OBJ in the UI"""
+    global fb_save
+    if dataStore != {}:
+        fb_save.file_type = '.obj'
+        fb_save.on_submit = on_submit_export
+        fb_save.title_bar.text = "Export 3D Model (OBJ)"
         fb_save.enabled = True
 
 def menuButtonNew():
@@ -197,6 +217,7 @@ Click anywhere to close"""
 DropdownMenu("Menu", [DropdownMenuButton('New', on_click=menuButtonNew),
                       DropdownMenuButton('Load', on_click=menuButtonLoad),
                       DropdownMenuButton('Save', on_click=menuButtonSave),
+                      DropdownMenuButton('Export OBJ', on_click=menuButtonExport),
                       DropdownMenuButton('Help', on_click=menuButtonHelp)])
 
 def input(key):

@@ -46,6 +46,7 @@ class Footprint(Entity):
         super().__init__(**kwargs)
         self.designator = designator
         self.original_color = self.color
+        self.model_name = kwargs.get('model', None)   # used by OBJ exporter
     
     def getPinPos(self, pinNumber):
         # pinNumber-1 so pin number 1 is index 0
