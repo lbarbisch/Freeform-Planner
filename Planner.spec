@@ -14,10 +14,15 @@ _py_dll_name = f'python{sys.version_info.major}{sys.version_info.minor}.dll'
 _py_dll_path = os.path.join(os.path.dirname(sys._base_executable), _py_dll_name)
 _extra_binaries = [(_py_dll_path, '.')] if os.path.exists(_py_dll_path) else []
 
+# SpaceMouse support needs the native hidapi library, bundle it when it is placed in the project root
+if os.path.exists('hidapi.dll'):
+    _extra_binaries.append(('hidapi.dll', '.'))
+
 # Collect all data files that Ursina and Panda3D need at runtime
 ursina_datas = collect_data_files('ursina')
 panda3d_datas = collect_data_files('panda3d')   # includes etc/Config.prc
 panda3d_libs = collect_dynamic_libs('panda3d')   # libpandagl.dll, libpandadx9.dll, etc.
+pyspacemouse_datas = collect_data_files('pyspacemouse')   # devices.toml
 
 # Our own runtime assets
 local_datas = [
@@ -30,7 +35,7 @@ a = Analysis(
     ['Planner.py'],
     pathex=['.'],
     binaries=_extra_binaries + panda3d_libs,
-    datas=ursina_datas + panda3d_datas + local_datas,
+    datas=ursina_datas + panda3d_datas + pyspacemouse_datas + local_datas,
     hiddenimports=[
         # Ursina sub-packages that PyInstaller may miss
         'ursina.prefabs.dropdown_menu',
@@ -44,10 +49,13 @@ a = Analysis(
         'settings',
         'footprints',
         'netlistParser',
+        'spaceMouse',
         # runtime deps
         'numpy',
         'panda3d',
         'panda3d.core',
+        'pyspacemouse',
+        'easyhid',
     ],
     hookspath=[],
     hooksconfig={},

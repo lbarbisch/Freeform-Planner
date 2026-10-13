@@ -39,6 +39,18 @@ Click a component to select it (it highlights), then use the keyboard shortcuts 
 | Orbit camera | Hold **right mouse** + drag |
 | Pan camera | Hold **middle mouse** + drag |
 | Zoom | Scroll wheel |
+| Pan / zoom / orbit camera | 3Dconnexion SpaceMouse (optional, see below) |
+| Reset camera view | SpaceMouse right button |
+
+#### SpaceMouse navigation (optional)
+A connected 3Dconnexion SpaceMouse is picked up automatically at startup through [pyspacemouse](https://github.com/JakubAndrysek/PySpaceMouse). It behaves like 3Dconnexion's *object mode*: the scene follows the cap.
+- Slide the cap left/right/up/down to pan, push/pull it to zoom.
+- Tilt it forward/back or twist it to orbit around the camera pivot.
+- Press the right button to reset the view.
+
+On Windows, pyspacemouse needs the native `hidapi.dll` ([hidapi releases](https://github.com/libusb/hidapi/releases), x64 build). Put it next to `python.exe` or anywhere on your `PATH`. For the exe build, place it in the project root and `Planner.spec` bundles it. Linux needs `libhidapi` (e.g. `sudo apt install libhidapi-dev`) plus udev access to the device. Without the library or a device, the app runs as before.
+
+If the 3Dconnexion driver (3DxWare) is running, it may also send its own mouse/keyboard events to the window. If the camera moves twice, disable those for this application in 3DxWare. Speeds, deadzone and the reset button live in `settings.py`.
 
 ### 4 — Save your work
 **File ▸ Save** writes a `.ffps` project file that preserves component positions, rotations, and footprint choices.

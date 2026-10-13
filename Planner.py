@@ -7,6 +7,7 @@ from componentLibrary import *
 from loader import *
 from helperFunctions import *
 from settings import *
+from spaceMouse import SpaceMouse
 import numpy as np
 import pprint
 import os
@@ -39,6 +40,10 @@ help_text_obj = None
 
 ec = EditorCamera()
 ec.target_z = -200
+
+# optional 3Dconnexion SpaceMouse navigation, the app works the same without one
+space_mouse = SpaceMouse(ec)
+space_mouse.start()
 
 originArrows()
 
@@ -181,6 +186,13 @@ Component Management:
   Ctrl+W - Insert wire (when airwire selected)
   Ctrl+W - Remove wire (when WIRE component selected)
   
+Camera:
+  Right mouse + drag - Orbit
+  Middle mouse + drag - Pan
+  Scroll wheel - Zoom
+  SpaceMouse - Pan / zoom / orbit
+  SpaceMouse right button - Reset view
+  
 Other:
   X - Print dataStore (debug)
   ESC - Exit application
@@ -322,12 +334,14 @@ def input(key):
         pp = pprint.PrettyPrinter(indent=2)
         pp.pprint(dataStore)
     if key == key_exit:                         #### ONLY NEEDED FOR DEBUGGING ####
+        space_mouse.stop()
         app.userExit()
 
 def update():
-    """update positions of existing air wires"""
+    """update positions of existing air wires and apply SpaceMouse navigation"""
     global dataStore
     dataStore = updateAirwires(dataStore, click_handler)
+    space_mouse.update()
 
 # remenant from dependency issues
 #import importlib.metadata as m; print(m.version('ursina'))

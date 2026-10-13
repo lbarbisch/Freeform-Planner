@@ -4,6 +4,20 @@ rotation_increment = 15
 translation_increment = 1
 airwire_thickness = 0.2
 
+### SpaceMouse (3Dconnexion) ###
+
+spacemouse_enabled = True
+spacemouse_deadzone = 0.05          # ignore axis values below this (range 0..1)
+spacemouse_pan_speed = 1.0          # camera distances per second at full deflection
+spacemouse_zoom_speed = 1.5         # camera distances per second at full deflection
+spacemouse_rotation_speed = 120     # degrees per second at full deflection
+spacemouse_min_distance = 1         # closest the camera may zoom towards its pivot
+spacemouse_button_reset_view = 1    # button index, 1 is the right button on most models
+spacemouse_motion_threshold = 0.01  # axis value above which the cap counts as moving
+spacemouse_scroll_block_time = 0.3  # seconds after SpaceMouse motion during which mouse wheel zoom is ignored
+                                    # (the 3Dconnexion driver emits wheel events for unsupported applications)
+# use a negative speed to invert an axis group
+
 ### Keybindings ###
 
 reset_rotation = "r"

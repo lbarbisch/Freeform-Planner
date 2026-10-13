@@ -13,6 +13,7 @@ urls = { Homepage = "https://github.com/lbarbisch/Freeform-Planner" }
 keywords = ["electronics", "layout", "3D", "freeform", "KiCAD"]
 dependencies = [
     "numpy>=2.2.6",
+    "pyspacemouse>=2.1.0",
     "pytest>=9.0.2",
     "ursina>=5.3.0",
 ]
