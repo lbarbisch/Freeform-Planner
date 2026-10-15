@@ -1,6 +1,5 @@
 import { emptyProject, FileFormatError, loadProjectText, saveProjectText } from '../core';
 import { getState, isDirty, loadDocument, markSaved, notify, setView } from './store';
-import { assetUrl } from '../layout3d/models';
 import { pickTextFile, saveTextFile } from './persistence';
 
 function announceLoaded(): void {
@@ -43,7 +42,7 @@ export async function openProject(): Promise<void> {
 export async function openExample(): Promise<void> {
   if (!confirmDiscard()) return;
   try {
-    const res = await fetch(assetUrl('examples/transistor-blinker.ffp.json'));
+    const res = await fetch(`${import.meta.env.BASE_URL}examples/transistor-blinker.ffp.json`);
     if (!res.ok) throw new Error(res.statusText);
     if (openProjectText('transistor-blinker.ffp.json', await res.text())) {
       // examples are templates: saving must not overwrite anything

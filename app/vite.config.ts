@@ -5,6 +5,8 @@ export default defineConfig({
   // relative base so the build works from any sub path (GitHub Pages, file shares, Tauri)
   base: './',
   plugins: [react()],
+  // the lazily loaded Three.js chunk is ~600 kB on its own
+  build: { chunkSizeWarningLimit: 700 },
   test: {
     include: ['src/**/*.test.ts', 'tools/**/*.test.ts'],
     environment: 'node',

@@ -1,8 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { deriveNetlist } from '../core';
-import { LayoutView } from '../layout3d/LayoutView';
-import { LibraryView } from '../library-ui/LibraryView';
 import { SchematicView } from '../schematic/SchematicView';
+
+// Three.js is only needed by these views; loading them on demand keeps the first load small
+const LayoutView = lazy(() => import('../layout3d/LayoutView').then((m) => ({ default: m.LayoutView })));
+const LibraryView = lazy(() => import('../library-ui/LibraryView').then((m) => ({ default: m.LibraryView })));
 import { Modal } from './Dialog';
 import { newProject, openExample, openProject, saveProject } from './fileActions';
 import { isTypingTarget } from './keyboard';
@@ -98,8 +100,10 @@ export function App() {
       </header>
       <main className="workspace">
         {view === 'schematic' && <SchematicView />}
-        {view === 'layout' && <LayoutView />}
-        {view === 'library' && <LibraryView />}
+        <Suspense fallback={<p className="empty-hint">Loading…</p>}>
+          {view === 'layout' && <LayoutView />}
+          {view === 'library' && <LibraryView />}
+        </Suspense>
       </main>
       <StatusBar />
       <Notices />
