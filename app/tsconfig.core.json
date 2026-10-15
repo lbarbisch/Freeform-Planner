@@ -1,0 +1,10 @@
+{
+  // The core must stay free of DOM, React and Three.js so it can be tested in plain Node.
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2023"],
+    "types": []
+  },
+  "include": ["src/core/**/*.ts"],
+  "exclude": ["src/core/**/*.test.ts"]
+}

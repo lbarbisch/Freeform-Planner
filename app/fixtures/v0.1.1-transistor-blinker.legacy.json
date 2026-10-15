@@ -1,0 +1,312 @@
+{
+ "formatVersion": 0,
+ "kind": "freeform-planner-legacy",
+ "components": {
+  "C1": {
+   "value": "CAP",
+   "footprint": 1,
+   "footprintId": "CAP0603",
+   "position": [
+    5.5,
+    25.0,
+    12.5
+   ],
+   "rotation": [
+    0.0,
+    0.707107,
+    0.0,
+    0.707107
+   ]
+  },
+  "C2": {
+   "value": "CAP",
+   "footprint": 1,
+   "footprintId": "CAP0603",
+   "position": [
+    1.0,
+    25.0,
+    -12.5
+   ],
+   "rotation": [
+    0.0,
+    0.707107,
+    0.0,
+    0.707107
+   ]
+  },
+  "D1": {
+   "value": "LED5MM",
+   "footprint": 0,
+   "footprintId": "LED5MM_A",
+   "position": [
+    -11.5,
+    15.0,
+    -16.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    0.0,
+    1.0
+   ]
+  },
+  "D2": {
+   "value": "LED5MM",
+   "footprint": 0,
+   "footprintId": "LED5MM_A",
+   "position": [
+    -11.5,
+    15.0,
+    16.0
+   ],
+   "rotation": [
+    -1.0,
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "H1": {
+   "value": "PORT",
+   "footprint": 0,
+   "footprintId": "PIN",
+   "position": [
+    9.5,
+    15.0,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    -1.0,
+    0.0
+   ]
+  },
+  "H2": {
+   "value": "PORT",
+   "footprint": 0,
+   "footprintId": "PIN",
+   "position": [
+    -24.0,
+    15.0,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    -1.0,
+    0.0
+   ]
+  },
+  "Q1": {
+   "value": "BC547",
+   "footprint": 0,
+   "footprintId": "TO92",
+   "position": [
+    13.0,
+    15.0,
+    13.5
+   ],
+   "rotation": [
+    -0.5,
+    -0.5,
+    -0.5,
+    0.5
+   ]
+  },
+  "Q2": {
+   "value": "BC547",
+   "footprint": 0,
+   "footprintId": "TO92",
+   "position": [
+    13.0,
+    15.0,
+    -13.5
+   ],
+   "rotation": [
+    0.5,
+    0.5,
+    -0.5,
+    0.5
+   ]
+  },
+  "R1": {
+   "value": "RES",
+   "footprint": 1,
+   "footprintId": "RESTHT_SHORT",
+   "position": [
+    -24.0,
+    15.0,
+    -8.5
+   ],
+   "rotation": [
+    0.0,
+    -0.707107,
+    0.0,
+    0.707107
+   ]
+  },
+  "R2": {
+   "value": "RES",
+   "footprint": 1,
+   "footprintId": "RESTHT_SHORT",
+   "position": [
+    -24.0,
+    15.0,
+    8.5
+   ],
+   "rotation": [
+    0.0,
+    0.707107,
+    0.0,
+    0.707107
+   ]
+  },
+  "R3": {
+   "value": "RES",
+   "footprint": 1,
+   "footprintId": "RESTHT_SHORT",
+   "position": [
+    -12.0,
+    15.0,
+    -4.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    0.0,
+    1.0
+   ]
+  },
+  "R4": {
+   "value": "RES",
+   "footprint": 1,
+   "footprintId": "RESTHT_SHORT",
+   "position": [
+    -12.0,
+    15.0,
+    4.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    0.0,
+    1.0
+   ]
+  },
+  "WIRE0": {
+   "value": "WIRE",
+   "footprint": 0,
+   "footprintId": "WIRE10X10",
+   "position": [
+    -5.0,
+    15.0,
+    -3.5
+   ],
+   "rotation": [
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ]
+  },
+  "WIRE1": {
+   "value": "WIRE",
+   "footprint": 0,
+   "footprintId": "WIRE10X10",
+   "position": [
+    5.0,
+    15.0,
+    13.5
+   ],
+   "rotation": [
+    0.0,
+    -0.707107,
+    0.0,
+    0.707107
+   ]
+  },
+  "WIRE2": {
+   "value": "WIRE",
+   "footprint": 0,
+   "footprintId": "WIRE10X10",
+   "position": [
+    0.5,
+    25.0,
+    6.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    0.707107,
+    0.707107
+   ]
+  },
+  "WIRE3": {
+   "value": "WIRE",
+   "footprint": 0,
+   "footprintId": "WIRE10X10",
+   "position": [
+    5.0,
+    15.0,
+    -16.0
+   ],
+   "rotation": [
+    -0.5,
+    0.5,
+    0.5,
+    0.5
+   ]
+  }
+ },
+ "nets": {
+  "/+5V": {
+   "H2": "1",
+   "R1": "1",
+   "R2": "1",
+   "R3": "2",
+   "R4": "2"
+  },
+  "/GND": {
+   "H1": "1",
+   "Q1": "3",
+   "Q2": "3"
+  },
+  "Net-(D1-A)": {
+   "D1": "2",
+   "R1": "2"
+  },
+  "Net-(D1-K)": {
+   "C1": "1",
+   "D1": "1",
+   "Q2": "1",
+   "WIRE3_1": 1,
+   "WIRE3_2": 2
+  },
+  "Net-(D2-A)": {
+   "D2": "2",
+   "R2": "2"
+  },
+  "Net-(D2-K)": {
+   "C2": "2",
+   "D2": "1",
+   "Q1": "1",
+   "WIRE2_1": 1,
+   "WIRE2_2": 2
+  },
+  "Net-(Q1-B)": {
+   "C1": "2",
+   "Q1": "2",
+   "R4": "1",
+   "WIRE1_1": 1,
+   "WIRE1_2": 2
+  },
+  "Net-(Q2-B)": {
+   "C2": "1",
+   "Q2": "2",
+   "R3": "1",
+   "WIRE0_1": 1,
+   "WIRE0_2": 2
+  }
+ }
+}

@@ -1,0 +1,2477 @@
+{
+ "formatVersion": 1,
+ "kind": "freeform-planner-library",
+ "name": "Built-in",
+ "symbols": {
+  "BC547": {
+   "id": "BC547",
+   "name": "BC547",
+   "refPrefix": "Q",
+   "graphics": [
+    {
+     "kind": "line",
+     "points": [
+      [
+       0.5,
+       -0.5
+      ],
+      [
+       2.0,
+       -2.0
+      ]
+     ],
+     "fill": false
+    },
+    {
+     "kind": "line",
+     "points": [
+      [
+       0.5,
+       0.5
+      ],
+      [
+       2.0,
+       2.0
+      ],
+      [
+       2.0,
+       2.0
+      ]
+     ],
+     "fill": false
+    },
+    {
+     "kind": "line",
+     "points": [
+      [
+       0.5,
+       -1.5
+      ],
+      [
+       0.5,
+       1.5
+      ],
+      [
+       0.5,
+       1.5
+      ]
+     ],
+     "fill": false
+    },
+    {
+     "kind": "line",
+     "points": [
+      [
+       1.0,
+       1.4
+      ],
+      [
+       1.4,
+       1.0
+      ],
+      [
+       1.8,
+       1.8
+      ],
+      [
+       1.0,
+       1.4
+      ],
+      [
+       1.0,
+       1.4
+      ]
+     ],
+     "fill": true
+    },
+    {
+     "kind": "circle",
+     "center": [
+      1.0,
+      0.0
+     ],
+     "radius": 2.22,
+     "fill": false
+    }
+   ],
+   "pins": [
+    {
+     "number": "1",
+     "name": "C",
+     "at": [
+      2.0,
+      -4.0
+     ],
+     "dir": "down",
+     "length": 2.0
+    },
+    {
+     "number": "2",
+     "name": "B",
+     "at": [
+      -4.0,
+      0.0
+     ],
+     "dir": "right",
+     "length": 4.5
+    },
+    {
+     "number": "3",
+     "name": "E",
+     "at": [
+      2.0,
+      4.0
+     ],
+     "dir": "up",
+     "length": 2.0
+    }
+   ],
+   "refAt": [
+    4.0,
+    -1.0
+   ],
+   "valueAt": [
+    4.0,
+    1.0
+   ],
+   "showPinNumbers": true,
+   "showPinNames": false,
+   "power": false
+  },
+  "BC557": {
+   "id": "BC557",
+   "name": "BC557",
+   "refPrefix": "Q",
+   "graphics": [
+    {
+     "kind": "line",
+     "points": [
+      [
+       0.5,
+       -0.5
+      ],
+      [
+       2.0,
+       -2.0
+      ]
+     ],
+     "fill": false
+    },
+    {
+     "kind": "line",
+     "points": [
+      [
+       0.5,
+       0.5
+      ],
+      [
+       2.0,
+       2.0
+      ],
+      [
+       2.0,
+       2.0
+      ]
+     ],
+     "fill": false
+    },
+    {
+     "kind": "line",
+     "points": [
+      [
+       0.5,
+       -1.5
+      ],
+      [
+       0.5,
+       1.5
+      ],
+      [
+       0.5,
+       1.5
+      ]
+     ],
+     "fill": false
+    },
+    {
+     "kind": "line",
+     "points": [
+      [
+       1.8,
+       1.4
+      ],
+      [
+       1.4,
+       1.8
+      ],
+      [
+       1.0,
+       1.0
+      ],
+      [
+       1.8,
+       1.4
+      ],
+      [
+       1.8,
+       1.4
+      ]
+     ],
+     "fill": true
+    },
+    {
+     "kind": "circle",
+     "center": [
+      1.0,
+      0.0
+     ],
+     "radius": 2.22,
+     "fill": false
+    }
+   ],
+   "pins": [
+    {
+     "number": "1",
+     "name": "C",
+     "at": [
+      2.0,
+      -4.0
+     ],
+     "dir": "down",
+     "length": 2.0
+    },
+    {
+     "number": "2",
+     "name": "B",
+     "at": [
+      -4.0,
+      0.0
+     ],
+     "dir": "right",
+     "length": 4.5
+    },
+    {
+     "number": "3",
+     "name": "E",
+     "at": [
+      2.0,
+      4.0
+     ],
+     "dir": "up",
+     "length": 2.0
+    }
+   ],
+   "refAt": [
+    4.0,
+    -1.0
+   ],
+   "valueAt": [
+    4.0,
+    1.0
+   ],
+   "showPinNumbers": true,
+   "showPinNames": false,
+   "power": false
+  },
+  "BC847": {
+   "id": "BC847",
+   "name": "BC847",
+   "refPrefix": "Q",
+   "graphics": [
+    {
+     "kind": "line",
+     "points": [
+      [
+       0.5,
+       -0.5
+      ],
+      [
+       2.0,
+       -2.0
+      ]
+     ],
+     "fill": false
+    },
+    {
+     "kind": "line",
+     "points": [
+      [
+       0.5,
+       0.5
+      ],
+      [
+       2.0,
+       2.0
+      ],
+      [
+       2.0,
+       2.0
+      ]
+     ],
+     "fill": false
+    },
+    {
+     "kind": "line",
+     "points": [
+      [
+       0.5,
+       -1.5
+      ],
+      [
+       0.5,
+       1.5
+      ],
+      [
+       0.5,
+       1.5
+      ]
+     ],
+     "fill": false
+    },
+    {
+     "kind": "line",
+     "points": [
+      [
+       1.0,
+       1.4
+      ],
+      [
+       1.4,
+       1.0
+      ],
+      [
+       1.8,
+       1.8
+      ],
+      [
+       1.0,
+       1.4
+      ],
+      [
+       1.0,
+       1.4
+      ]
+     ],
+     "fill": true
+    },
+    {
+     "kind": "circle",
+     "center": [
+      1.0,
+      0.0
+     ],
+     "radius": 2.22,
+     "fill": false
+    }
+   ],
+   "pins": [
+    {
+     "number": "1",
+     "name": "B",
+     "at": [
+      -4.0,
+      0.0
+     ],
+     "dir": "right",
+     "length": 4.5
+    },
+    {
+     "number": "2",
+     "name": "E",
+     "at": [
+      2.0,
+      4.0
+     ],
+     "dir": "up",
+     "length": 2.0
+    },
+    {
+     "number": "3",
+     "name": "C",
+     "at": [
+      2.0,
+      -4.0
+     ],
+     "dir": "down",
+     "length": 2.0
+    }
+   ],
+   "refAt": [
+    4.0,
+    -1.0
+   ],
+   "valueAt": [
+    4.0,
+    1.0
+   ],
+   "showPinNumbers": true,
+   "showPinNames": false,
+   "power": false
+  },
+  "CAP": {
+   "id": "CAP",
+   "name": "CAP",
+   "refPrefix": "C",
+   "graphics": [
+    {
+     "kind": "line",
+     "points": [
+      [
+       -1.6,
+       0.6
+      ],
+      [
+       1.6,
+       0.6
+      ]
+     ],
+     "fill": false
+    },
+    {
+     "kind": "line",
+     "points": [
+      [
+       -1.6,
+       -0.6
+      ],
+      [
+       1.6,
+       -0.6
+      ]
+     ],
+     "fill": false
+    }
+   ],
+   "pins": [
+    {
+     "number": "1",
+     "name": "",
+     "at": [
+      0.0,
+      -3.0
+     ],
+     "dir": "down",
+     "length": 2.2
+    },
+    {
+     "number": "2",
+     "name": "",
+     "at": [
+      0.0,
+      3.0
+     ],
+     "dir": "up",
+     "length": 2.2
+    }
+   ],
+   "refAt": [
+    2,
+    -0.5
+   ],
+   "valueAt": [
+    2,
+    1
+   ],
+   "showPinNumbers": false,
+   "showPinNames": false,
+   "power": false
+  },
+  "DIODETHT": {
+   "id": "DIODETHT",
+   "name": "DIODETHT",
+   "refPrefix": "D",
+   "graphics": [
+    {
+     "kind": "line",
+     "points": [
+      [
+       -1.0,
+       -1.0
+      ],
+      [
+       -1.0,
+       1.0
+      ]
+     ],
+     "fill": false
+    },
+    {
+     "kind": "line",
+     "points": [
+      [
+       1.0,
+       0.0
+      ],
+      [
+       -1.0,
+       0.0
+      ]
+     ],
+     "fill": false
+    },
+    {
+     "kind": "line",
+     "points": [
+      [
+       1.0,
+       -1.0
+      ],
+      [
+       1.0,
+       1.0
+      ],
+      [
+       -1.0,
+       0.0
+      ],
+      [
+       1.0,
+       -1.0
+      ]
+     ],
+     "fill": false
+    }
+   ],
+   "pins": [
+    {
+     "number": "1",
+     "name": "K",
+     "at": [
+      -3.0,
+      0.0
+     ],
+     "dir": "right",
+     "length": 2.0
+    },
+    {
+     "number": "2",
+     "name": "A",
+     "at": [
+      3.0,
+      0.0
+     ],
+     "dir": "left",
+     "length": 2.0
+    }
+   ],
+   "refAt": [
+    0.0,
+    -2.0
+   ],
+   "valueAt": [
+    0.0,
+    2.0
+   ],
+   "showPinNumbers": false,
+   "showPinNames": false,
+   "power": false
+  },
+  "LED5MM": {
+   "id": "LED5MM",
+   "name": "LED5MM",
+   "refPrefix": "D",
+   "graphics": [
+    {
+     "kind": "line",
+     "points": [
+      [
+       -2.0,
+       -1.0
+      ],
+      [
+       -2.0,
+       1.0
+      ]
+     ],
+     "fill": false
+    },
+    {
+     "kind": "line",
+     "points": [
+      [
+       0.0,
+       0.0
+      ],
+      [
+       -2.0,
+       0.0
+      ]
+     ],
+     "fill": false
+    },
+    {
+     "kind": "line",
+     "points": [
+      [
+       0.3,
+       -2.5
+      ],
+      [
+       -0.1,
+       -2.5
+      ]
+     ],
+     "fill": false
+    },
+    {
+     "kind": "line",
+     "points": [
+      [
+       -0.9,
+       -1.3
+      ],
+      [
+       0.3,
+       -2.5
+      ],
+      [
+       0.3,
+       -2.1
+      ]
+     ],
+     "fill": false
+    },
+    {
+     "kind": "line",
+     "points": [
+      [
+       0.0,
+       1.0
+      ],
+      [
+       -2.0,
+       0.0
+      ],
+      [
+       0.0,
+       -1.0
+      ],
+      [
+       0.0,
+       1.0
+      ]
+     ],
+     "fill": false
+    },
+    {
+     "kind": "line",
+     "points": [
+      [
+       -1.9,
+       -1.3
+      ],
+      [
+       -0.7,
+       -2.5
+      ],
+      [
+       -0.7,
+       -2.1
+      ],
+      [
+       -0.7,
+       -2.5
+      ],
+      [
+       -1.1,
+       -2.5
+      ]
+     ],
+     "fill": false
+    }
+   ],
+   "pins": [
+    {
+     "number": "1",
+     "name": "K",
+     "at": [
+      -4.0,
+      0.0
+     ],
+     "dir": "right",
+     "length": 2.0
+    },
+    {
+     "number": "2",
+     "name": "A",
+     "at": [
+      2.0,
+      0.0
+     ],
+     "dir": "left",
+     "length": 2.0
+    }
+   ],
+   "refAt": [
+    0.4,
+    -1.4
+   ],
+   "valueAt": [
+    -0.8,
+    2.2
+   ],
+   "showPinNumbers": false,
+   "showPinNames": false,
+   "power": false
+  },
+  "NE555": {
+   "id": "NE555",
+   "name": "NE555",
+   "refPrefix": "U",
+   "graphics": [
+    {
+     "kind": "rect",
+     "from": [
+      -7.0,
+      6.0
+     ],
+     "to": [
+      7.0,
+      -6.0
+     ],
+     "fill": true
+    },
+    {
+     "kind": "rect",
+     "from": [
+      -7.0,
+      6.0
+     ],
+     "to": [
+      7.0,
+      -6.0
+     ],
+     "fill": true
+    }
+   ],
+   "pins": [
+    {
+     "number": "1",
+     "name": "GND",
+     "at": [
+      0.0,
+      8.0
+     ],
+     "dir": "up",
+     "length": 2.0
+    },
+    {
+     "number": "2",
+     "name": "TR",
+     "at": [
+      -10.0,
+      -4.0
+     ],
+     "dir": "right",
+     "length": 3.0
+    },
+    {
+     "number": "3",
+     "name": "Q",
+     "at": [
+      10.0,
+      -4.0
+     ],
+     "dir": "left",
+     "length": 3.0
+    },
+    {
+     "number": "4",
+     "name": "R",
+     "at": [
+      -10.0,
+      4.0
+     ],
+     "dir": "right",
+     "length": 3.0
+    },
+    {
+     "number": "5",
+     "name": "CV",
+     "at": [
+      -10.0,
+      0.0
+     ],
+     "dir": "right",
+     "length": 3.0
+    },
+    {
+     "number": "6",
+     "name": "THR",
+     "at": [
+      10.0,
+      4.0
+     ],
+     "dir": "left",
+     "length": 3.0
+    },
+    {
+     "number": "7",
+     "name": "DIS",
+     "at": [
+      10.0,
+      0.0
+     ],
+     "dir": "left",
+     "length": 3.0
+    },
+    {
+     "number": "8",
+     "name": "VCC",
+     "at": [
+      0.0,
+      -8.0
+     ],
+     "dir": "down",
+     "length": 2.0
+    }
+   ],
+   "refAt": [
+    -8.0,
+    -7.0
+   ],
+   "valueAt": [
+    2.0,
+    -7.0
+   ],
+   "showPinNumbers": true,
+   "showPinNames": true,
+   "power": false
+  },
+  "PORT": {
+   "id": "PORT",
+   "name": "PORT",
+   "refPrefix": "H",
+   "graphics": [
+    {
+     "kind": "circle",
+     "center": [
+      0.0,
+      -1.0
+     ],
+     "radius": 1.0,
+     "fill": false
+    }
+   ],
+   "pins": [
+    {
+     "number": "1",
+     "name": "1",
+     "at": [
+      0.0,
+      2.0
+     ],
+     "dir": "up",
+     "length": 2.0
+    }
+   ],
+   "refAt": [
+    0,
+    -3.5
+   ],
+   "valueAt": [
+    0,
+    -2.2
+   ],
+   "showPinNumbers": false,
+   "showPinNames": false,
+   "power": false
+  },
+  "RES": {
+   "id": "RES",
+   "name": "RES",
+   "refPrefix": "R",
+   "graphics": [
+    {
+     "kind": "rect",
+     "from": [
+      -0.8,
+      2.0
+     ],
+     "to": [
+      0.8,
+      -2.0
+     ],
+     "fill": false
+    }
+   ],
+   "pins": [
+    {
+     "number": "1",
+     "name": "",
+     "at": [
+      0.0,
+      -3.0
+     ],
+     "dir": "down",
+     "length": 1.0
+    },
+    {
+     "number": "2",
+     "name": "",
+     "at": [
+      0.0,
+      3.0
+     ],
+     "dir": "up",
+     "length": 1.0
+    }
+   ],
+   "refAt": [
+    2,
+    -0.5
+   ],
+   "valueAt": [
+    2,
+    1
+   ],
+   "showPinNumbers": false,
+   "showPinNames": false,
+   "power": false
+  },
+  "TL072": {
+   "id": "TL072",
+   "name": "TL072",
+   "refPrefix": "U",
+   "graphics": [
+    {
+     "kind": "line",
+     "points": [
+      [
+       -4.0,
+       -4.0
+      ],
+      [
+       4.0,
+       0.0
+      ],
+      [
+       -4.0,
+       4.0
+      ],
+      [
+       -4.0,
+       -4.0
+      ]
+     ],
+     "fill": true
+    },
+    {
+     "kind": "line",
+     "points": [
+      [
+       12.0,
+       -4.0
+      ],
+      [
+       20.0,
+       0.0
+      ],
+      [
+       12.0,
+       4.0
+      ],
+      [
+       12.0,
+       -4.0
+      ]
+     ],
+     "fill": true
+    }
+   ],
+   "pins": [
+    {
+     "number": "1",
+     "name": "",
+     "at": [
+      6.0,
+      0.0
+     ],
+     "dir": "left",
+     "length": 2.0
+    },
+    {
+     "number": "2",
+     "name": "-",
+     "at": [
+      -6.0,
+      2.0
+     ],
+     "dir": "right",
+     "length": 2.0
+    },
+    {
+     "number": "3",
+     "name": "+",
+     "at": [
+      -6.0,
+      -2.0
+     ],
+     "dir": "right",
+     "length": 2.0
+    },
+    {
+     "number": "4",
+     "name": "V-",
+     "at": [
+      -2.0,
+      6.0
+     ],
+     "dir": "up",
+     "length": 3.0
+    },
+    {
+     "number": "5",
+     "name": "+",
+     "at": [
+      10.0,
+      -2.0
+     ],
+     "dir": "right",
+     "length": 2.0
+    },
+    {
+     "number": "6",
+     "name": "-",
+     "at": [
+      10.0,
+      2.0
+     ],
+     "dir": "right",
+     "length": 2.0
+    },
+    {
+     "number": "7",
+     "name": "",
+     "at": [
+      22.0,
+      0.0
+     ],
+     "dir": "left",
+     "length": 2.0
+    },
+    {
+     "number": "8",
+     "name": "V+",
+     "at": [
+      -2.0,
+      -6.0
+     ],
+     "dir": "down",
+     "length": 3.0
+    }
+   ],
+   "refAt": [
+    0.0,
+    -4.0
+   ],
+   "valueAt": [
+    0.0,
+    4.0
+   ],
+   "showPinNumbers": true,
+   "showPinNames": false,
+   "power": false
+  },
+  "GND": {
+   "id": "GND",
+   "name": "GND",
+   "refPrefix": "#PWR",
+   "graphics": [
+    {
+     "kind": "line",
+     "points": [
+      [
+       0,
+       0
+      ],
+      [
+       0,
+       1
+      ]
+     ],
+     "fill": false
+    },
+    {
+     "kind": "line",
+     "points": [
+      [
+       -1,
+       1
+      ],
+      [
+       1,
+       1
+      ],
+      [
+       0,
+       2
+      ],
+      [
+       -1,
+       1
+      ]
+     ],
+     "fill": false
+    }
+   ],
+   "pins": [
+    {
+     "number": "1",
+     "name": "GND",
+     "at": [
+      0,
+      0
+     ],
+     "dir": "down",
+     "length": 0
+    }
+   ],
+   "refAt": [
+    0,
+    0
+   ],
+   "valueAt": [
+    0,
+    3.2
+   ],
+   "showPinNumbers": false,
+   "showPinNames": false,
+   "power": true
+  },
+  "VCC": {
+   "id": "VCC",
+   "name": "VCC",
+   "refPrefix": "#PWR",
+   "graphics": [
+    {
+     "kind": "line",
+     "points": [
+      [
+       0,
+       0
+      ],
+      [
+       0,
+       -1
+      ]
+     ],
+     "fill": false
+    },
+    {
+     "kind": "line",
+     "points": [
+      [
+       -1,
+       -1
+      ],
+      [
+       1,
+       -1
+      ]
+     ],
+     "fill": false
+    }
+   ],
+   "pins": [
+    {
+     "number": "1",
+     "name": "VCC",
+     "at": [
+      0,
+      0
+     ],
+     "dir": "up",
+     "length": 0
+    }
+   ],
+   "refAt": [
+    0,
+    0
+   ],
+   "valueAt": [
+    0,
+    -2
+   ],
+   "showPinNumbers": false,
+   "showPinNames": false,
+   "power": true
+  },
+  "+5V": {
+   "id": "+5V",
+   "name": "+5V",
+   "refPrefix": "#PWR",
+   "graphics": [
+    {
+     "kind": "line",
+     "points": [
+      [
+       0,
+       0
+      ],
+      [
+       0,
+       -1
+      ]
+     ],
+     "fill": false
+    },
+    {
+     "kind": "line",
+     "points": [
+      [
+       -1,
+       -1
+      ],
+      [
+       1,
+       -1
+      ]
+     ],
+     "fill": false
+    }
+   ],
+   "pins": [
+    {
+     "number": "1",
+     "name": "+5V",
+     "at": [
+      0,
+      0
+     ],
+     "dir": "up",
+     "length": 0
+    }
+   ],
+   "refAt": [
+    0,
+    0
+   ],
+   "valueAt": [
+    0,
+    -2
+   ],
+   "showPinNumbers": false,
+   "showPinNames": false,
+   "power": true
+  },
+  "+3V3": {
+   "id": "+3V3",
+   "name": "+3V3",
+   "refPrefix": "#PWR",
+   "graphics": [
+    {
+     "kind": "line",
+     "points": [
+      [
+       0,
+       0
+      ],
+      [
+       0,
+       -1
+      ]
+     ],
+     "fill": false
+    },
+    {
+     "kind": "line",
+     "points": [
+      [
+       -1,
+       -1
+      ],
+      [
+       1,
+       -1
+      ]
+     ],
+     "fill": false
+    }
+   ],
+   "pins": [
+    {
+     "number": "1",
+     "name": "+3V3",
+     "at": [
+      0,
+      0
+     ],
+     "dir": "up",
+     "length": 0
+    }
+   ],
+   "refAt": [
+    0,
+    0
+   ],
+   "valueAt": [
+    0,
+    -2
+   ],
+   "showPinNumbers": false,
+   "showPinNames": false,
+   "power": true
+  },
+  "+12V": {
+   "id": "+12V",
+   "name": "+12V",
+   "refPrefix": "#PWR",
+   "graphics": [
+    {
+     "kind": "line",
+     "points": [
+      [
+       0,
+       0
+      ],
+      [
+       0,
+       -1
+      ]
+     ],
+     "fill": false
+    },
+    {
+     "kind": "line",
+     "points": [
+      [
+       -1,
+       -1
+      ],
+      [
+       1,
+       -1
+      ]
+     ],
+     "fill": false
+    }
+   ],
+   "pins": [
+    {
+     "number": "1",
+     "name": "+12V",
+     "at": [
+      0,
+      0
+     ],
+     "dir": "up",
+     "length": 0
+    }
+   ],
+   "refAt": [
+    0,
+    0
+   ],
+   "valueAt": [
+    0,
+    -2
+   ],
+   "showPinNumbers": false,
+   "showPinNames": false,
+   "power": true
+  }
+ },
+ "footprints": {
+  "DIODETHT": {
+   "id": "DIODETHT",
+   "name": "DIODETHT",
+   "model": {
+    "kind": "asset",
+    "path": "models/DIODETHT"
+   },
+   "modelRotation": [
+    0,
+    1,
+    0,
+    0
+   ],
+   "modelOffset": [
+    0,
+    0,
+    0
+   ],
+   "modelScale": 1,
+   "pins": [
+    {
+     "number": "1",
+     "position": [
+      22.5,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "number": "2",
+     "position": [
+      -22.5,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "isWire": false
+  },
+  "CAP0603": {
+   "id": "CAP0603",
+   "name": "CAP0603",
+   "model": {
+    "kind": "asset",
+    "path": "models/CAP0603"
+   },
+   "modelRotation": [
+    0,
+    1,
+    0,
+    0
+   ],
+   "modelOffset": [
+    0,
+    0,
+    0
+   ],
+   "modelScale": 1,
+   "pins": [
+    {
+     "number": "1",
+     "position": [
+      0.8,
+      0.0,
+      -0.2
+     ]
+    },
+    {
+     "number": "2",
+     "position": [
+      -0.8,
+      0.0,
+      -0.2
+     ]
+    }
+   ],
+   "isWire": false
+  },
+  "CAPTHT": {
+   "id": "CAPTHT",
+   "name": "CAPTHT",
+   "model": {
+    "kind": "asset",
+    "path": "models/CAPTHT"
+   },
+   "modelRotation": [
+    0,
+    1,
+    0,
+    0
+   ],
+   "modelOffset": [
+    0,
+    0,
+    0
+   ],
+   "modelScale": 1,
+   "pins": [
+    {
+     "number": "1",
+     "position": [
+      12.5,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "number": "2",
+     "position": [
+      -12.5,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "isWire": false
+  },
+  "RES0603": {
+   "id": "RES0603",
+   "name": "RES0603",
+   "model": {
+    "kind": "asset",
+    "path": "models/RES0603"
+   },
+   "modelRotation": [
+    0,
+    1,
+    0,
+    0
+   ],
+   "modelOffset": [
+    0,
+    0,
+    0
+   ],
+   "modelScale": 1,
+   "pins": [
+    {
+     "number": "1",
+     "position": [
+      0.8,
+      0.0,
+      -0.2
+     ]
+    },
+    {
+     "number": "2",
+     "position": [
+      -0.8,
+      0.0,
+      -0.2
+     ]
+    }
+   ],
+   "isWire": false
+  },
+  "RESTHT": {
+   "id": "RESTHT",
+   "name": "RESTHT",
+   "model": {
+    "kind": "asset",
+    "path": "models/RESTHT"
+   },
+   "modelRotation": [
+    0,
+    1,
+    0,
+    0
+   ],
+   "modelOffset": [
+    0,
+    0,
+    0
+   ],
+   "modelScale": 1,
+   "pins": [
+    {
+     "number": "1",
+     "position": [
+      31.0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "number": "2",
+     "position": [
+      -31.0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "isWire": false
+  },
+  "RESTHT_SHORT": {
+   "id": "RESTHT_SHORT",
+   "name": "RESTHT SHORT",
+   "model": {
+    "kind": "asset",
+    "path": "models/RESTHT_SHORT"
+   },
+   "modelRotation": [
+    0,
+    1,
+    0,
+    0
+   ],
+   "modelOffset": [
+    0,
+    0,
+    0
+   ],
+   "modelScale": 1,
+   "pins": [
+    {
+     "number": "1",
+     "position": [
+      7.5,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "number": "2",
+     "position": [
+      -7.5,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "isWire": false
+  },
+  "LED5MM_A": {
+   "id": "LED5MM_A",
+   "name": "LED5MM A",
+   "model": {
+    "kind": "asset",
+    "path": "models/LED5MM"
+   },
+   "modelRotation": [
+    0,
+    1,
+    0,
+    0
+   ],
+   "modelOffset": [
+    0,
+    0,
+    0
+   ],
+   "modelScale": 1,
+   "pins": [
+    {
+     "number": "1",
+     "position": [
+      12.1,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "number": "2",
+     "position": [
+      -12.1,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "isWire": false
+  },
+  "LED5MM_B": {
+   "id": "LED5MM_B",
+   "name": "LED5MM B",
+   "model": {
+    "kind": "asset",
+    "path": "models/LED5MM_SHORT"
+   },
+   "modelRotation": [
+    0,
+    1,
+    0,
+    0
+   ],
+   "modelOffset": [
+    0,
+    0,
+    0
+   ],
+   "modelScale": 1,
+   "pins": [
+    {
+     "number": "1",
+     "position": [
+      1.3,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "number": "2",
+     "position": [
+      -1.3,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "isWire": false
+  },
+  "SOT23_3": {
+   "id": "SOT23_3",
+   "name": "SOT23 3",
+   "model": {
+    "kind": "asset",
+    "path": "models/SOT23-3"
+   },
+   "modelRotation": [
+    0,
+    1,
+    0,
+    0
+   ],
+   "modelOffset": [
+    0,
+    0,
+    0
+   ],
+   "modelScale": 1,
+   "pins": [
+    {
+     "number": "1",
+     "position": [
+      -1.2,
+      1.0,
+      0.0
+     ]
+    },
+    {
+     "number": "2",
+     "position": [
+      -1.2,
+      -1.0,
+      0.0
+     ]
+    },
+    {
+     "number": "3",
+     "position": [
+      1.2,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "isWire": false
+  },
+  "TO92": {
+   "id": "TO92",
+   "name": "TO92",
+   "model": {
+    "kind": "asset",
+    "path": "models/TO92"
+   },
+   "modelRotation": [
+    0,
+    1,
+    0,
+    0
+   ],
+   "modelOffset": [
+    0,
+    0,
+    0
+   ],
+   "modelScale": 1,
+   "pins": [
+    {
+     "number": "1",
+     "position": [
+      2.4,
+      -12.0,
+      0.0
+     ]
+    },
+    {
+     "number": "2",
+     "position": [
+      0.0,
+      -12.0,
+      0.0
+     ]
+    },
+    {
+     "number": "3",
+     "position": [
+      -2.4,
+      -12.0,
+      0.0
+     ]
+    }
+   ],
+   "isWire": false
+  },
+  "SOIC8": {
+   "id": "SOIC8",
+   "name": "SOIC8",
+   "model": {
+    "kind": "asset",
+    "path": "models/SOIC8"
+   },
+   "modelRotation": [
+    0,
+    1,
+    0,
+    0
+   ],
+   "modelOffset": [
+    0,
+    0,
+    0
+   ],
+   "modelScale": 1,
+   "pins": [
+    {
+     "number": "1",
+     "position": [
+      -1.905,
+      0.0,
+      3.0
+     ]
+    },
+    {
+     "number": "2",
+     "position": [
+      -0.635,
+      0.0,
+      3.0
+     ]
+    },
+    {
+     "number": "3",
+     "position": [
+      0.635,
+      0.0,
+      3.0
+     ]
+    },
+    {
+     "number": "4",
+     "position": [
+      1.905,
+      0.0,
+      3.0
+     ]
+    },
+    {
+     "number": "5",
+     "position": [
+      1.905,
+      0.0,
+      -3.0
+     ]
+    },
+    {
+     "number": "6",
+     "position": [
+      0.635,
+      0.0,
+      -3.0
+     ]
+    },
+    {
+     "number": "7",
+     "position": [
+      -0.635,
+      0.0,
+      -3.0
+     ]
+    },
+    {
+     "number": "8",
+     "position": [
+      -1.905,
+      0.0,
+      -3.0
+     ]
+    }
+   ],
+   "isWire": false
+  },
+  "DIP8": {
+   "id": "DIP8",
+   "name": "DIP8",
+   "model": {
+    "kind": "asset",
+    "path": "models/DIP8"
+   },
+   "modelRotation": [
+    0,
+    1,
+    0,
+    0
+   ],
+   "modelOffset": [
+    0,
+    0,
+    0
+   ],
+   "modelScale": 1,
+   "pins": [
+    {
+     "number": "1",
+     "position": [
+      -3.81,
+      -3.81,
+      3.81
+     ]
+    },
+    {
+     "number": "2",
+     "position": [
+      -1.27,
+      -3.81,
+      3.81
+     ]
+    },
+    {
+     "number": "3",
+     "position": [
+      1.27,
+      -3.81,
+      3.81
+     ]
+    },
+    {
+     "number": "4",
+     "position": [
+      3.81,
+      -3.81,
+      3.81
+     ]
+    },
+    {
+     "number": "5",
+     "position": [
+      3.81,
+      -3.81,
+      -3.81
+     ]
+    },
+    {
+     "number": "6",
+     "position": [
+      1.27,
+      -3.81,
+      -3.81
+     ]
+    },
+    {
+     "number": "7",
+     "position": [
+      -1.27,
+      -3.81,
+      -3.81
+     ]
+    },
+    {
+     "number": "8",
+     "position": [
+      -3.81,
+      -3.81,
+      -3.81
+     ]
+    }
+   ],
+   "isWire": false
+  },
+  "PIN": {
+   "id": "PIN",
+   "name": "PIN",
+   "model": {
+    "kind": "asset",
+    "path": "models/PIN"
+   },
+   "modelRotation": [
+    0,
+    1,
+    0,
+    0
+   ],
+   "modelOffset": [
+    0,
+    0,
+    0
+   ],
+   "modelScale": 1,
+   "pins": [
+    {
+     "number": "1",
+     "position": [
+      0.0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "isWire": false
+  },
+  "WIRE10X10": {
+   "id": "WIRE10X10",
+   "name": "WIRE10X10",
+   "model": {
+    "kind": "asset",
+    "path": "models/WIRE/WIRE10X10"
+   },
+   "modelRotation": [
+    0,
+    1,
+    0,
+    0
+   ],
+   "modelOffset": [
+    0,
+    0,
+    0
+   ],
+   "modelScale": 1,
+   "pins": [
+    {
+     "number": "1",
+     "position": [
+      0.0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "number": "2",
+     "position": [
+      -10.0,
+      0.0,
+      10.0
+     ]
+    }
+   ],
+   "isWire": true
+  },
+  "WIRE10X20": {
+   "id": "WIRE10X20",
+   "name": "WIRE10X20",
+   "model": {
+    "kind": "asset",
+    "path": "models/WIRE/WIRE10X20"
+   },
+   "modelRotation": [
+    0,
+    1,
+    0,
+    0
+   ],
+   "modelOffset": [
+    0,
+    0,
+    0
+   ],
+   "modelScale": 1,
+   "pins": [
+    {
+     "number": "1",
+     "position": [
+      0.0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "number": "2",
+     "position": [
+      -20.0,
+      0.0,
+      10.0
+     ]
+    }
+   ],
+   "isWire": true
+  },
+  "WIRE20X10": {
+   "id": "WIRE20X10",
+   "name": "WIRE20X10",
+   "model": {
+    "kind": "asset",
+    "path": "models/WIRE/WIRE20X10"
+   },
+   "modelRotation": [
+    0,
+    1,
+    0,
+    0
+   ],
+   "modelOffset": [
+    0,
+    0,
+    0
+   ],
+   "modelScale": 1,
+   "pins": [
+    {
+     "number": "1",
+     "position": [
+      0.0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "number": "2",
+     "position": [
+      -10.0,
+      0.0,
+      20.0
+     ]
+    }
+   ],
+   "isWire": true
+  },
+  "WIRE20X50": {
+   "id": "WIRE20X50",
+   "name": "WIRE20X50",
+   "model": {
+    "kind": "asset",
+    "path": "models/WIRE/WIRE20X50"
+   },
+   "modelRotation": [
+    0,
+    1,
+    0,
+    0
+   ],
+   "modelOffset": [
+    0,
+    0,
+    0
+   ],
+   "modelScale": 1,
+   "pins": [
+    {
+     "number": "1",
+     "position": [
+      0.0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "number": "2",
+     "position": [
+      -50.0,
+      0.0,
+      20.0
+     ]
+    }
+   ],
+   "isWire": true
+  },
+  "WIRE50X20": {
+   "id": "WIRE50X20",
+   "name": "WIRE50X20",
+   "model": {
+    "kind": "asset",
+    "path": "models/WIRE/WIRE50X20"
+   },
+   "modelRotation": [
+    0,
+    1,
+    0,
+    0
+   ],
+   "modelOffset": [
+    0,
+    0,
+    0
+   ],
+   "modelScale": 1,
+   "pins": [
+    {
+     "number": "1",
+     "position": [
+      0.0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "number": "2",
+     "position": [
+      -20.0,
+      0.0,
+      50.0
+     ]
+    }
+   ],
+   "isWire": true
+  }
+ },
+ "parts": {
+  "GND": {
+   "id": "GND",
+   "name": "GND",
+   "description": "Power symbol",
+   "symbolId": "GND",
+   "defaultValue": "GND",
+   "variants": []
+  },
+  "VCC": {
+   "id": "VCC",
+   "name": "VCC",
+   "description": "Power symbol",
+   "symbolId": "VCC",
+   "defaultValue": "VCC",
+   "variants": []
+  },
+  "+5V": {
+   "id": "+5V",
+   "name": "+5V",
+   "description": "Power symbol",
+   "symbolId": "+5V",
+   "defaultValue": "+5V",
+   "variants": []
+  },
+  "+3V3": {
+   "id": "+3V3",
+   "name": "+3V3",
+   "description": "Power symbol",
+   "symbolId": "+3V3",
+   "defaultValue": "+3V3",
+   "variants": []
+  },
+  "+12V": {
+   "id": "+12V",
+   "name": "+12V",
+   "description": "Power symbol",
+   "symbolId": "+12V",
+   "defaultValue": "+12V",
+   "variants": []
+  },
+  "BC847": {
+   "id": "BC847",
+   "name": "BC847",
+   "description": "NPN transistor, base/emitter/collector",
+   "symbolId": "BC847",
+   "defaultValue": "BC847",
+   "variants": [
+    {
+     "footprintId": "TO92",
+     "pinMap": {
+      "1": "1",
+      "2": "2",
+      "3": "3"
+     }
+    },
+    {
+     "footprintId": "SOT23_3",
+     "pinMap": {
+      "1": "1",
+      "2": "2",
+      "3": "3"
+     }
+    }
+   ]
+  },
+  "LED5MM": {
+   "id": "LED5MM",
+   "name": "LED5MM",
+   "description": "LED, 5mm",
+   "symbolId": "LED5MM",
+   "defaultValue": "LED",
+   "variants": [
+    {
+     "footprintId": "LED5MM_A",
+     "pinMap": {
+      "1": "1",
+      "2": "2"
+     }
+    },
+    {
+     "footprintId": "LED5MM_B",
+     "pinMap": {
+      "1": "1",
+      "2": "2"
+     }
+    }
+   ]
+  },
+  "RES": {
+   "id": "RES",
+   "name": "RES",
+   "description": "Resistor",
+   "symbolId": "RES",
+   "defaultValue": "10k",
+   "variants": [
+    {
+     "footprintId": "RESTHT",
+     "pinMap": {
+      "1": "1",
+      "2": "2"
+     }
+    },
+    {
+     "footprintId": "RESTHT_SHORT",
+     "pinMap": {
+      "1": "1",
+      "2": "2"
+     }
+    },
+    {
+     "footprintId": "RES0603",
+     "pinMap": {
+      "1": "1",
+      "2": "2"
+     }
+    }
+   ]
+  },
+  "CAP": {
+   "id": "CAP",
+   "name": "CAP",
+   "description": "Unpolarized capacitor",
+   "symbolId": "CAP",
+   "defaultValue": "100n",
+   "variants": [
+    {
+     "footprintId": "CAPTHT",
+     "pinMap": {
+      "1": "1",
+      "2": "2"
+     }
+    },
+    {
+     "footprintId": "CAP0603",
+     "pinMap": {
+      "1": "1",
+      "2": "2"
+     }
+    }
+   ]
+  },
+  "PORT": {
+   "id": "PORT",
+   "name": "PORT",
+   "description": "Mounting Hole with connection",
+   "symbolId": "PORT",
+   "defaultValue": "PORT",
+   "variants": [
+    {
+     "footprintId": "PIN",
+     "pinMap": {
+      "1": "1"
+     }
+    }
+   ]
+  },
+  "DIODE": {
+   "id": "DIODE",
+   "name": "DIODE",
+   "description": "1000V 1A General Purpose Rectifier Diode, DO-41",
+   "symbolId": "DIODETHT",
+   "defaultValue": "1N4148",
+   "variants": [
+    {
+     "footprintId": "DIODETHT",
+     "pinMap": {
+      "1": "1",
+      "2": "2"
+     }
+    }
+   ]
+  },
+  "BC547": {
+   "id": "BC547",
+   "name": "BC547",
+   "description": "NPN transistor, collector/base/emitter",
+   "symbolId": "BC547",
+   "defaultValue": "BC547",
+   "variants": [
+    {
+     "footprintId": "TO92",
+     "pinMap": {
+      "1": "1",
+      "2": "2",
+      "3": "3"
+     }
+    },
+    {
+     "footprintId": "SOT23_3",
+     "pinMap": {
+      "1": "1",
+      "2": "2",
+      "3": "3"
+     }
+    }
+   ]
+  },
+  "BC557": {
+   "id": "BC557",
+   "name": "BC557",
+   "description": "PNP transistor, collector/base/emitter",
+   "symbolId": "BC557",
+   "defaultValue": "BC557",
+   "variants": [
+    {
+     "footprintId": "TO92",
+     "pinMap": {
+      "1": "1",
+      "2": "2",
+      "3": "3"
+     }
+    },
+    {
+     "footprintId": "SOT23_3",
+     "pinMap": {
+      "1": "1",
+      "2": "2",
+      "3": "3"
+     }
+    }
+   ]
+  },
+  "NE555": {
+   "id": "NE555",
+   "name": "NE555",
+   "description": "Precision Timers, 555 compatible,  PDIP-8",
+   "symbolId": "NE555",
+   "defaultValue": "NE555",
+   "variants": [
+    {
+     "footprintId": "SOIC8",
+     "pinMap": {
+      "1": "1",
+      "2": "2",
+      "3": "3",
+      "4": "4",
+      "5": "5",
+      "6": "6",
+      "7": "7",
+      "8": "8"
+     }
+    },
+    {
+     "footprintId": "DIP8",
+     "pinMap": {
+      "1": "1",
+      "2": "2",
+      "3": "3",
+      "4": "4",
+      "5": "5",
+      "6": "6",
+      "7": "7",
+      "8": "8"
+     }
+    }
+   ]
+  },
+  "TL072": {
+   "id": "TL072",
+   "name": "TL072",
+   "description": "Dual Low-Noise JFET-Input Operational Amplifiers, DIP-8/SOIC-8",
+   "symbolId": "TL072",
+   "defaultValue": "TL072",
+   "variants": [
+    {
+     "footprintId": "SOIC8",
+     "pinMap": {
+      "1": "1",
+      "2": "2",
+      "3": "3",
+      "4": "4",
+      "5": "5",
+      "6": "6",
+      "7": "7",
+      "8": "8"
+     }
+    },
+    {
+     "footprintId": "DIP8",
+     "pinMap": {
+      "1": "1",
+      "2": "2",
+      "3": "3",
+      "4": "4",
+      "5": "5",
+      "6": "6",
+      "7": "7",
+      "8": "8"
+     }
+    }
+   ]
+  }
+ }
+}
