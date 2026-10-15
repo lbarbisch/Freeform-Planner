@@ -91,6 +91,9 @@ export function layoutWireLabel(project: Project, wireId: string): string {
   return `WIRE${ids.indexOf(wireId) + 1}`;
 }
 
+/** Pins closer than this (mm) touch and count as connected: no airwire is drawn between them. */
+export const TOUCH_DISTANCE = 0.01;
+
 export function computeAirwires(project: Project, netlist: Netlist = deriveNetlist(project)): Airwire[] {
   const result: Airwire[] = [];
   const wiresByNet = new Map<number, LayoutWire[]>();
@@ -125,7 +128,10 @@ export function computeAirwires(project: Project, netlist: Netlist = deriveNetli
       nodes.map((n) => n.position),
       preconnected,
     );
-    for (const [i, j] of edges) result.push({ net: net.name, from: nodes[i]!, to: nodes[j]! });
+    for (const [i, j] of edges) {
+      if (distance3(nodes[i]!.position, nodes[j]!.position) < TOUCH_DISTANCE) continue;
+      result.push({ net: net.name, from: nodes[i]!, to: nodes[j]! });
+    }
   });
   return result;
 }

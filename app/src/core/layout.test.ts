@@ -111,6 +111,16 @@ describe('pin positions and airwires', () => {
     expect(layoutWireLabel(p, r.id!)).toBe('WIRE1');
   });
 
+  it('draws no airwire between pins that touch', () => {
+    let { p, a } = twoResistors();
+    // R1.2 is at (-10,0,0); WIRE_A pin 1 is at local (5,0,0)
+    p = insertLayoutWire(p, lib, { instanceId: a, pin: '2' }, [-15, 0, 0]).project;
+    const wires = computeAirwires(p);
+    // R1.2 touches wire pin 1; the wire's far end is further from R2.1 than R1.2 is
+    expect(wires).toHaveLength(1);
+    expect([wires[0]!.from.label, wires[0]!.to.label]).toEqual(['R1', 'R2']);
+  });
+
   it('ignores wires whose anchor pin is gone', () => {
     let { p, a } = twoResistors();
     p = insertLayoutWire(p, lib, { instanceId: a, pin: '9' }, [0, 0, 0]).project;

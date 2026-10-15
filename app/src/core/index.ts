@@ -6,3 +6,5 @@ export * from './commands';
 export * from './history';
 export * from './fileFormat';
 export * from './objExport';
+export * from './symbols';
+export * from './libraryCommands';

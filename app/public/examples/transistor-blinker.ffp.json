@@ -1,0 +1,1601 @@
+{
+ "formatVersion": 1,
+ "kind": "freeform-planner-project",
+ "name": "Transistor blinker",
+ "library": {
+  "parts": {
+   "CAP": {
+    "id": "CAP",
+    "name": "CAP",
+    "description": "Unpolarized capacitor",
+    "symbolId": "CAP",
+    "defaultValue": "100n",
+    "variants": [
+     {
+      "footprintId": "CAPTHT",
+      "pinMap": {
+       "1": "1",
+       "2": "2"
+      }
+     },
+     {
+      "footprintId": "CAP0603",
+      "pinMap": {
+       "1": "1",
+       "2": "2"
+      }
+     }
+    ]
+   },
+   "LED5MM": {
+    "id": "LED5MM",
+    "name": "LED5MM",
+    "description": "LED, 5mm",
+    "symbolId": "LED5MM",
+    "defaultValue": "LED",
+    "variants": [
+     {
+      "footprintId": "LED5MM_A",
+      "pinMap": {
+       "1": "1",
+       "2": "2"
+      }
+     },
+     {
+      "footprintId": "LED5MM_B",
+      "pinMap": {
+       "1": "1",
+       "2": "2"
+      }
+     }
+    ]
+   },
+   "PORT": {
+    "id": "PORT",
+    "name": "PORT",
+    "description": "Mounting Hole with connection",
+    "symbolId": "PORT",
+    "defaultValue": "PORT",
+    "variants": [
+     {
+      "footprintId": "PIN",
+      "pinMap": {
+       "1": "1"
+      }
+     }
+    ]
+   },
+   "BC547": {
+    "id": "BC547",
+    "name": "BC547",
+    "description": "NPN transistor, collector/base/emitter",
+    "symbolId": "BC547",
+    "defaultValue": "BC547",
+    "variants": [
+     {
+      "footprintId": "TO92",
+      "pinMap": {
+       "1": "1",
+       "2": "2",
+       "3": "3"
+      }
+     },
+     {
+      "footprintId": "SOT23_3",
+      "pinMap": {
+       "1": "1",
+       "2": "2",
+       "3": "3"
+      }
+     }
+    ]
+   },
+   "RES": {
+    "id": "RES",
+    "name": "RES",
+    "description": "Resistor",
+    "symbolId": "RES",
+    "defaultValue": "10k",
+    "variants": [
+     {
+      "footprintId": "RESTHT",
+      "pinMap": {
+       "1": "1",
+       "2": "2"
+      }
+     },
+     {
+      "footprintId": "RESTHT_SHORT",
+      "pinMap": {
+       "1": "1",
+       "2": "2"
+      }
+     },
+     {
+      "footprintId": "RES0603",
+      "pinMap": {
+       "1": "1",
+       "2": "2"
+      }
+     }
+    ]
+   }
+  },
+  "symbols": {
+   "CAP": {
+    "id": "CAP",
+    "name": "CAP",
+    "refPrefix": "C",
+    "graphics": [
+     {
+      "kind": "line",
+      "points": [
+       [
+        -1.6,
+        0.6
+       ],
+       [
+        1.6,
+        0.6
+       ]
+      ],
+      "fill": false
+     },
+     {
+      "kind": "line",
+      "points": [
+       [
+        -1.6,
+        -0.6
+       ],
+       [
+        1.6,
+        -0.6
+       ]
+      ],
+      "fill": false
+     }
+    ],
+    "pins": [
+     {
+      "number": "1",
+      "name": "",
+      "at": [
+       0,
+       -3
+      ],
+      "dir": "down",
+      "length": 2.2
+     },
+     {
+      "number": "2",
+      "name": "",
+      "at": [
+       0,
+       3
+      ],
+      "dir": "up",
+      "length": 2.2
+     }
+    ],
+    "refAt": [
+     2,
+     -0.5
+    ],
+    "valueAt": [
+     2,
+     1
+    ],
+    "showPinNumbers": false,
+    "showPinNames": false,
+    "power": false
+   },
+   "LED5MM": {
+    "id": "LED5MM",
+    "name": "LED5MM",
+    "refPrefix": "D",
+    "graphics": [
+     {
+      "kind": "line",
+      "points": [
+       [
+        -2,
+        -1
+       ],
+       [
+        -2,
+        1
+       ]
+      ],
+      "fill": false
+     },
+     {
+      "kind": "line",
+      "points": [
+       [
+        0,
+        0
+       ],
+       [
+        -2,
+        0
+       ]
+      ],
+      "fill": false
+     },
+     {
+      "kind": "line",
+      "points": [
+       [
+        0.3,
+        -2.5
+       ],
+       [
+        -0.1,
+        -2.5
+       ]
+      ],
+      "fill": false
+     },
+     {
+      "kind": "line",
+      "points": [
+       [
+        -0.9,
+        -1.3
+       ],
+       [
+        0.3,
+        -2.5
+       ],
+       [
+        0.3,
+        -2.1
+       ]
+      ],
+      "fill": false
+     },
+     {
+      "kind": "line",
+      "points": [
+       [
+        0,
+        1
+       ],
+       [
+        -2,
+        0
+       ],
+       [
+        0,
+        -1
+       ],
+       [
+        0,
+        1
+       ]
+      ],
+      "fill": false
+     },
+     {
+      "kind": "line",
+      "points": [
+       [
+        -1.9,
+        -1.3
+       ],
+       [
+        -0.7,
+        -2.5
+       ],
+       [
+        -0.7,
+        -2.1
+       ],
+       [
+        -0.7,
+        -2.5
+       ],
+       [
+        -1.1,
+        -2.5
+       ]
+      ],
+      "fill": false
+     }
+    ],
+    "pins": [
+     {
+      "number": "1",
+      "name": "K",
+      "at": [
+       -4,
+       0
+      ],
+      "dir": "right",
+      "length": 2
+     },
+     {
+      "number": "2",
+      "name": "A",
+      "at": [
+       2,
+       0
+      ],
+      "dir": "left",
+      "length": 2
+     }
+    ],
+    "refAt": [
+     0.4,
+     -1.4
+    ],
+    "valueAt": [
+     -0.8,
+     2.2
+    ],
+    "showPinNumbers": false,
+    "showPinNames": false,
+    "power": false
+   },
+   "PORT": {
+    "id": "PORT",
+    "name": "PORT",
+    "refPrefix": "H",
+    "graphics": [
+     {
+      "kind": "circle",
+      "center": [
+       0,
+       -1
+      ],
+      "radius": 1,
+      "fill": false
+     }
+    ],
+    "pins": [
+     {
+      "number": "1",
+      "name": "1",
+      "at": [
+       0,
+       2
+      ],
+      "dir": "up",
+      "length": 2
+     }
+    ],
+    "refAt": [
+     0,
+     -3.5
+    ],
+    "valueAt": [
+     0,
+     -2.2
+    ],
+    "showPinNumbers": false,
+    "showPinNames": false,
+    "power": false
+   },
+   "BC547": {
+    "id": "BC547",
+    "name": "BC547",
+    "refPrefix": "Q",
+    "graphics": [
+     {
+      "kind": "line",
+      "points": [
+       [
+        0.5,
+        -0.5
+       ],
+       [
+        2,
+        -2
+       ]
+      ],
+      "fill": false
+     },
+     {
+      "kind": "line",
+      "points": [
+       [
+        0.5,
+        0.5
+       ],
+       [
+        2,
+        2
+       ],
+       [
+        2,
+        2
+       ]
+      ],
+      "fill": false
+     },
+     {
+      "kind": "line",
+      "points": [
+       [
+        0.5,
+        -1.5
+       ],
+       [
+        0.5,
+        1.5
+       ],
+       [
+        0.5,
+        1.5
+       ]
+      ],
+      "fill": false
+     },
+     {
+      "kind": "line",
+      "points": [
+       [
+        1,
+        1.4
+       ],
+       [
+        1.4,
+        1
+       ],
+       [
+        1.8,
+        1.8
+       ],
+       [
+        1,
+        1.4
+       ],
+       [
+        1,
+        1.4
+       ]
+      ],
+      "fill": true
+     },
+     {
+      "kind": "circle",
+      "center": [
+       1,
+       0
+      ],
+      "radius": 2.22,
+      "fill": false
+     }
+    ],
+    "pins": [
+     {
+      "number": "1",
+      "name": "C",
+      "at": [
+       2,
+       -4
+      ],
+      "dir": "down",
+      "length": 2
+     },
+     {
+      "number": "2",
+      "name": "B",
+      "at": [
+       -4,
+       0
+      ],
+      "dir": "right",
+      "length": 4.5
+     },
+     {
+      "number": "3",
+      "name": "E",
+      "at": [
+       2,
+       4
+      ],
+      "dir": "up",
+      "length": 2
+     }
+    ],
+    "refAt": [
+     4,
+     -1
+    ],
+    "valueAt": [
+     4,
+     1
+    ],
+    "showPinNumbers": true,
+    "showPinNames": false,
+    "power": false
+   },
+   "RES": {
+    "id": "RES",
+    "name": "RES",
+    "refPrefix": "R",
+    "graphics": [
+     {
+      "kind": "rect",
+      "from": [
+       -0.8,
+       2
+      ],
+      "to": [
+       0.8,
+       -2
+      ],
+      "fill": false
+     }
+    ],
+    "pins": [
+     {
+      "number": "1",
+      "name": "",
+      "at": [
+       0,
+       -3
+      ],
+      "dir": "down",
+      "length": 1
+     },
+     {
+      "number": "2",
+      "name": "",
+      "at": [
+       0,
+       3
+      ],
+      "dir": "up",
+      "length": 1
+     }
+    ],
+    "refAt": [
+     2,
+     -0.5
+    ],
+    "valueAt": [
+     2,
+     1
+    ],
+    "showPinNumbers": false,
+    "showPinNames": false,
+    "power": false
+   }
+  },
+  "footprints": {
+   "CAPTHT": {
+    "id": "CAPTHT",
+    "name": "CAPTHT",
+    "model": {
+     "kind": "asset",
+     "path": "models/CAPTHT"
+    },
+    "modelRotation": [
+     0,
+     1,
+     0,
+     0
+    ],
+    "modelOffset": [
+     0,
+     0,
+     0
+    ],
+    "modelScale": 1,
+    "pins": [
+     {
+      "number": "1",
+      "position": [
+       12.5,
+       0,
+       0
+      ]
+     },
+     {
+      "number": "2",
+      "position": [
+       -12.5,
+       0,
+       0
+      ]
+     }
+    ],
+    "isWire": false
+   },
+   "CAP0603": {
+    "id": "CAP0603",
+    "name": "CAP0603",
+    "model": {
+     "kind": "asset",
+     "path": "models/CAP0603"
+    },
+    "modelRotation": [
+     0,
+     1,
+     0,
+     0
+    ],
+    "modelOffset": [
+     0,
+     0,
+     0
+    ],
+    "modelScale": 1,
+    "pins": [
+     {
+      "number": "1",
+      "position": [
+       0.8,
+       0,
+       -0.2
+      ]
+     },
+     {
+      "number": "2",
+      "position": [
+       -0.8,
+       0,
+       -0.2
+      ]
+     }
+    ],
+    "isWire": false
+   },
+   "LED5MM_A": {
+    "id": "LED5MM_A",
+    "name": "LED5MM A",
+    "model": {
+     "kind": "asset",
+     "path": "models/LED5MM"
+    },
+    "modelRotation": [
+     0,
+     1,
+     0,
+     0
+    ],
+    "modelOffset": [
+     0,
+     0,
+     0
+    ],
+    "modelScale": 1,
+    "pins": [
+     {
+      "number": "1",
+      "position": [
+       12.1,
+       0,
+       0
+      ]
+     },
+     {
+      "number": "2",
+      "position": [
+       -12.1,
+       0,
+       0
+      ]
+     }
+    ],
+    "isWire": false
+   },
+   "LED5MM_B": {
+    "id": "LED5MM_B",
+    "name": "LED5MM B",
+    "model": {
+     "kind": "asset",
+     "path": "models/LED5MM_SHORT"
+    },
+    "modelRotation": [
+     0,
+     1,
+     0,
+     0
+    ],
+    "modelOffset": [
+     0,
+     0,
+     0
+    ],
+    "modelScale": 1,
+    "pins": [
+     {
+      "number": "1",
+      "position": [
+       1.3,
+       0,
+       0
+      ]
+     },
+     {
+      "number": "2",
+      "position": [
+       -1.3,
+       0,
+       0
+      ]
+     }
+    ],
+    "isWire": false
+   },
+   "PIN": {
+    "id": "PIN",
+    "name": "PIN",
+    "model": {
+     "kind": "asset",
+     "path": "models/PIN"
+    },
+    "modelRotation": [
+     0,
+     1,
+     0,
+     0
+    ],
+    "modelOffset": [
+     0,
+     0,
+     0
+    ],
+    "modelScale": 1,
+    "pins": [
+     {
+      "number": "1",
+      "position": [
+       0,
+       0,
+       0
+      ]
+     }
+    ],
+    "isWire": false
+   },
+   "TO92": {
+    "id": "TO92",
+    "name": "TO92",
+    "model": {
+     "kind": "asset",
+     "path": "models/TO92"
+    },
+    "modelRotation": [
+     0,
+     1,
+     0,
+     0
+    ],
+    "modelOffset": [
+     0,
+     0,
+     0
+    ],
+    "modelScale": 1,
+    "pins": [
+     {
+      "number": "1",
+      "position": [
+       2.4,
+       -12,
+       0
+      ]
+     },
+     {
+      "number": "2",
+      "position": [
+       0,
+       -12,
+       0
+      ]
+     },
+     {
+      "number": "3",
+      "position": [
+       -2.4,
+       -12,
+       0
+      ]
+     }
+    ],
+    "isWire": false
+   },
+   "SOT23_3": {
+    "id": "SOT23_3",
+    "name": "SOT23 3",
+    "model": {
+     "kind": "asset",
+     "path": "models/SOT23-3"
+    },
+    "modelRotation": [
+     0,
+     1,
+     0,
+     0
+    ],
+    "modelOffset": [
+     0,
+     0,
+     0
+    ],
+    "modelScale": 1,
+    "pins": [
+     {
+      "number": "1",
+      "position": [
+       -1.2,
+       1,
+       0
+      ]
+     },
+     {
+      "number": "2",
+      "position": [
+       -1.2,
+       -1,
+       0
+      ]
+     },
+     {
+      "number": "3",
+      "position": [
+       1.2,
+       0,
+       0
+      ]
+     }
+    ],
+    "isWire": false
+   },
+   "RESTHT": {
+    "id": "RESTHT",
+    "name": "RESTHT",
+    "model": {
+     "kind": "asset",
+     "path": "models/RESTHT"
+    },
+    "modelRotation": [
+     0,
+     1,
+     0,
+     0
+    ],
+    "modelOffset": [
+     0,
+     0,
+     0
+    ],
+    "modelScale": 1,
+    "pins": [
+     {
+      "number": "1",
+      "position": [
+       31,
+       0,
+       0
+      ]
+     },
+     {
+      "number": "2",
+      "position": [
+       -31,
+       0,
+       0
+      ]
+     }
+    ],
+    "isWire": false
+   },
+   "RESTHT_SHORT": {
+    "id": "RESTHT_SHORT",
+    "name": "RESTHT SHORT",
+    "model": {
+     "kind": "asset",
+     "path": "models/RESTHT_SHORT"
+    },
+    "modelRotation": [
+     0,
+     1,
+     0,
+     0
+    ],
+    "modelOffset": [
+     0,
+     0,
+     0
+    ],
+    "modelScale": 1,
+    "pins": [
+     {
+      "number": "1",
+      "position": [
+       7.5,
+       0,
+       0
+      ]
+     },
+     {
+      "number": "2",
+      "position": [
+       -7.5,
+       0,
+       0
+      ]
+     }
+    ],
+    "isWire": false
+   },
+   "RES0603": {
+    "id": "RES0603",
+    "name": "RES0603",
+    "model": {
+     "kind": "asset",
+     "path": "models/RES0603"
+    },
+    "modelRotation": [
+     0,
+     1,
+     0,
+     0
+    ],
+    "modelOffset": [
+     0,
+     0,
+     0
+    ],
+    "modelScale": 1,
+    "pins": [
+     {
+      "number": "1",
+      "position": [
+       0.8,
+       0,
+       -0.2
+      ]
+     },
+     {
+      "number": "2",
+      "position": [
+       -0.8,
+       0,
+       -0.2
+      ]
+     }
+    ],
+    "isWire": false
+   },
+   "WIRE10X10": {
+    "id": "WIRE10X10",
+    "name": "WIRE10X10",
+    "model": {
+     "kind": "asset",
+     "path": "models/WIRE/WIRE10X10"
+    },
+    "modelRotation": [
+     0,
+     1,
+     0,
+     0
+    ],
+    "modelOffset": [
+     0,
+     0,
+     0
+    ],
+    "modelScale": 1,
+    "pins": [
+     {
+      "number": "1",
+      "position": [
+       0,
+       0,
+       0
+      ]
+     },
+     {
+      "number": "2",
+      "position": [
+       -10,
+       0,
+       10
+      ]
+     }
+    ],
+    "isWire": true
+   }
+  }
+ },
+ "schematic": {
+  "instances": {
+   "i1": {
+    "id": "i1",
+    "partId": "CAP",
+    "ref": "C1",
+    "value": "100n",
+    "at": [
+     0,
+     0
+    ],
+    "rotation": 0,
+    "mirror": false
+   },
+   "i2": {
+    "id": "i2",
+    "partId": "CAP",
+    "ref": "C2",
+    "value": "100n",
+    "at": [
+     24,
+     0
+    ],
+    "rotation": 0,
+    "mirror": false
+   },
+   "i3": {
+    "id": "i3",
+    "partId": "LED5MM",
+    "ref": "D1",
+    "value": "LED",
+    "at": [
+     48,
+     0
+    ],
+    "rotation": 0,
+    "mirror": false
+   },
+   "i4": {
+    "id": "i4",
+    "partId": "LED5MM",
+    "ref": "D2",
+    "value": "LED",
+    "at": [
+     72,
+     0
+    ],
+    "rotation": 0,
+    "mirror": false
+   },
+   "i5": {
+    "id": "i5",
+    "partId": "PORT",
+    "ref": "H1",
+    "value": "PORT",
+    "at": [
+     96,
+     0
+    ],
+    "rotation": 0,
+    "mirror": false
+   },
+   "i6": {
+    "id": "i6",
+    "partId": "PORT",
+    "ref": "H2",
+    "value": "PORT",
+    "at": [
+     120,
+     0
+    ],
+    "rotation": 0,
+    "mirror": false
+   },
+   "i7": {
+    "id": "i7",
+    "partId": "BC547",
+    "ref": "Q1",
+    "value": "BC547",
+    "at": [
+     0,
+     20
+    ],
+    "rotation": 0,
+    "mirror": false
+   },
+   "i8": {
+    "id": "i8",
+    "partId": "BC547",
+    "ref": "Q2",
+    "value": "BC547",
+    "at": [
+     24,
+     20
+    ],
+    "rotation": 0,
+    "mirror": false
+   },
+   "i9": {
+    "id": "i9",
+    "partId": "RES",
+    "ref": "R1",
+    "value": "10k",
+    "at": [
+     48,
+     20
+    ],
+    "rotation": 0,
+    "mirror": false
+   },
+   "i10": {
+    "id": "i10",
+    "partId": "RES",
+    "ref": "R2",
+    "value": "10k",
+    "at": [
+     72,
+     20
+    ],
+    "rotation": 0,
+    "mirror": false
+   },
+   "i11": {
+    "id": "i11",
+    "partId": "RES",
+    "ref": "R3",
+    "value": "10k",
+    "at": [
+     96,
+     20
+    ],
+    "rotation": 0,
+    "mirror": false
+   },
+   "i12": {
+    "id": "i12",
+    "partId": "RES",
+    "ref": "R4",
+    "value": "10k",
+    "at": [
+     120,
+     20
+    ],
+    "rotation": 0,
+    "mirror": false
+   }
+  },
+  "wires": {},
+  "labels": {
+   "l1": {
+    "id": "l1",
+    "at": [
+     120,
+     2
+    ],
+    "name": "/+5V"
+   },
+   "l2": {
+    "id": "l2",
+    "at": [
+     48,
+     17
+    ],
+    "name": "/+5V"
+   },
+   "l3": {
+    "id": "l3",
+    "at": [
+     72,
+     17
+    ],
+    "name": "/+5V"
+   },
+   "l4": {
+    "id": "l4",
+    "at": [
+     96,
+     23
+    ],
+    "name": "/+5V"
+   },
+   "l5": {
+    "id": "l5",
+    "at": [
+     120,
+     23
+    ],
+    "name": "/+5V"
+   },
+   "l6": {
+    "id": "l6",
+    "at": [
+     96,
+     2
+    ],
+    "name": "/GND"
+   },
+   "l7": {
+    "id": "l7",
+    "at": [
+     2,
+     24
+    ],
+    "name": "/GND"
+   },
+   "l8": {
+    "id": "l8",
+    "at": [
+     26,
+     24
+    ],
+    "name": "/GND"
+   },
+   "l9": {
+    "id": "l9",
+    "at": [
+     50,
+     0
+    ],
+    "name": "Net-(D1-A)"
+   },
+   "l10": {
+    "id": "l10",
+    "at": [
+     48,
+     23
+    ],
+    "name": "Net-(D1-A)"
+   },
+   "l11": {
+    "id": "l11",
+    "at": [
+     0,
+     -3
+    ],
+    "name": "Net-(D1-K)"
+   },
+   "l12": {
+    "id": "l12",
+    "at": [
+     44,
+     0
+    ],
+    "name": "Net-(D1-K)"
+   },
+   "l13": {
+    "id": "l13",
+    "at": [
+     26,
+     16
+    ],
+    "name": "Net-(D1-K)"
+   },
+   "l14": {
+    "id": "l14",
+    "at": [
+     74,
+     0
+    ],
+    "name": "Net-(D2-A)"
+   },
+   "l15": {
+    "id": "l15",
+    "at": [
+     72,
+     23
+    ],
+    "name": "Net-(D2-A)"
+   },
+   "l16": {
+    "id": "l16",
+    "at": [
+     24,
+     3
+    ],
+    "name": "Net-(D2-K)"
+   },
+   "l17": {
+    "id": "l17",
+    "at": [
+     68,
+     0
+    ],
+    "name": "Net-(D2-K)"
+   },
+   "l18": {
+    "id": "l18",
+    "at": [
+     2,
+     16
+    ],
+    "name": "Net-(D2-K)"
+   },
+   "l19": {
+    "id": "l19",
+    "at": [
+     0,
+     3
+    ],
+    "name": "Net-(Q1-B)"
+   },
+   "l20": {
+    "id": "l20",
+    "at": [
+     -4,
+     20
+    ],
+    "name": "Net-(Q1-B)"
+   },
+   "l21": {
+    "id": "l21",
+    "at": [
+     120,
+     17
+    ],
+    "name": "Net-(Q1-B)"
+   },
+   "l22": {
+    "id": "l22",
+    "at": [
+     24,
+     -3
+    ],
+    "name": "Net-(Q2-B)"
+   },
+   "l23": {
+    "id": "l23",
+    "at": [
+     20,
+     20
+    ],
+    "name": "Net-(Q2-B)"
+   },
+   "l24": {
+    "id": "l24",
+    "at": [
+     96,
+     17
+    ],
+    "name": "Net-(Q2-B)"
+   }
+  }
+ },
+ "layout": {
+  "placements": {
+   "i1": {
+    "position": [
+     5.5,
+     25,
+     12.5
+    ],
+    "rotation": [
+     0,
+     0.707107,
+     0,
+     0.707107
+    ],
+    "variant": 1
+   },
+   "i2": {
+    "position": [
+     1,
+     25,
+     -12.5
+    ],
+    "rotation": [
+     0,
+     0.707107,
+     0,
+     0.707107
+    ],
+    "variant": 1
+   },
+   "i3": {
+    "position": [
+     -11.5,
+     15,
+     -16
+    ],
+    "rotation": [
+     0,
+     0,
+     0,
+     1
+    ],
+    "variant": 0
+   },
+   "i4": {
+    "position": [
+     -11.5,
+     15,
+     16
+    ],
+    "rotation": [
+     -1,
+     0,
+     0,
+     0
+    ],
+    "variant": 0
+   },
+   "i5": {
+    "position": [
+     9.5,
+     15,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     -1,
+     0
+    ],
+    "variant": 0
+   },
+   "i6": {
+    "position": [
+     -24,
+     15,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     -1,
+     0
+    ],
+    "variant": 0
+   },
+   "i7": {
+    "position": [
+     13,
+     15,
+     13.5
+    ],
+    "rotation": [
+     -0.5,
+     -0.5,
+     -0.5,
+     0.5
+    ],
+    "variant": 0
+   },
+   "i8": {
+    "position": [
+     13,
+     15,
+     -13.5
+    ],
+    "rotation": [
+     0.5,
+     0.5,
+     -0.5,
+     0.5
+    ],
+    "variant": 0
+   },
+   "i9": {
+    "position": [
+     -24,
+     15,
+     -8.5
+    ],
+    "rotation": [
+     0,
+     -0.707107,
+     0,
+     0.707107
+    ],
+    "variant": 1
+   },
+   "i10": {
+    "position": [
+     -24,
+     15,
+     8.5
+    ],
+    "rotation": [
+     0,
+     0.707107,
+     0,
+     0.707107
+    ],
+    "variant": 1
+   },
+   "i11": {
+    "position": [
+     -12,
+     15,
+     -4
+    ],
+    "rotation": [
+     0,
+     0,
+     0,
+     1
+    ],
+    "variant": 1
+   },
+   "i12": {
+    "position": [
+     -12,
+     15,
+     4
+    ],
+    "rotation": [
+     0,
+     0,
+     0,
+     1
+    ],
+    "variant": 1
+   }
+  },
+  "wires": {
+   "lw1": {
+    "id": "lw1",
+    "footprintId": "WIRE10X10",
+    "position": [
+     5,
+     15,
+     -16
+    ],
+    "rotation": [
+     -0.5,
+     0.5,
+     0.5,
+     0.5
+    ],
+    "netAnchor": {
+     "instanceId": "i1",
+     "pin": "1"
+    }
+   },
+   "lw2": {
+    "id": "lw2",
+    "footprintId": "WIRE10X10",
+    "position": [
+     0.5,
+     25,
+     6
+    ],
+    "rotation": [
+     0,
+     0,
+     0.707107,
+     0.707107
+    ],
+    "netAnchor": {
+     "instanceId": "i2",
+     "pin": "2"
+    }
+   },
+   "lw3": {
+    "id": "lw3",
+    "footprintId": "WIRE10X10",
+    "position": [
+     5,
+     15,
+     13.5
+    ],
+    "rotation": [
+     0,
+     -0.707107,
+     0,
+     0.707107
+    ],
+    "netAnchor": {
+     "instanceId": "i1",
+     "pin": "2"
+    }
+   },
+   "lw4": {
+    "id": "lw4",
+    "footprintId": "WIRE10X10",
+    "position": [
+     -5,
+     15,
+     -3.5
+    ],
+    "rotation": [
+     0,
+     1,
+     0,
+     0
+    ],
+    "netAnchor": {
+     "instanceId": "i2",
+     "pin": "1"
+    }
+   }
+  }
+ }
+}
