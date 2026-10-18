@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { computeAirwires, deriveNetlist, loadProject, round3, type Vec3 } from '../core';
+import { computeAirwires, deriveNetlist, emptyProject, instancePinPoints, loadProject, placePart, round3, symbolOf, validatePart, validateSymbol, type Vec3 } from '../core';
 import { builtinLibrary as lib } from './builtin';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -74,5 +74,23 @@ describe('golden corpus', () => {
     const { warnings, project } = loadProject(fixture(name), lib);
     expect(warnings).toEqual([]);
     expect(computeAirwires(project).length).toBeGreaterThan(0);
+  });
+});
+
+describe('multi-subpart parts', () => {
+  it('ships the TL072 as two amplifiers and a supply subpart', () => {
+    const tl = lib.symbols.TL072!;
+    expect(validateSymbol(tl)).toEqual([]);
+    expect(validatePart(lib, lib.parts.TL072!)).toEqual([]);
+    const r = placePart(emptyProject(), lib, 'TL072', [0, 0]);
+    const pins = r.ids.map((id) => {
+      const inst = r.project.schematic.instances[id]!;
+      return instancePinPoints(inst, symbolOf(r.project, inst)!).map((p) => p.pin);
+    });
+    expect(pins).toEqual([
+      ['1', '2', '3'],
+      ['5', '6', '7'],
+      ['8', '4'],
+    ]);
   });
 });

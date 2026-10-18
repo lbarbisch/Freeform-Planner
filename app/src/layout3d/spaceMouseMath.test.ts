@@ -35,6 +35,6 @@ describe('spaceMouse math (port of spaceMouse.py)', () => {
   it('moves the scene with the cap (object mode)', () => {
     const s = { deadzone: 0, panSpeed: 1, zoomSpeed: 2, rotationSpeed: 100 };
     const d = cameraDeltas({ x: 1, y: 0, z: 0.5, pitch: 0, yaw: -1 }, 0.5, s);
-    expect(d).toEqual({ panRight: -0.5, panUp: -0, zoom: 0.5, orbitUp: -0, orbitRight: 50 });
+    expect(d).toEqual({ panRight: -0.5, panUp: -0, zoom: -0.5, orbitUp: -0, orbitRight: -50 });
   });
 });

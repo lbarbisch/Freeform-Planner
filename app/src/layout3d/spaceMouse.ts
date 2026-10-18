@@ -3,10 +3,13 @@
 import * as THREE from 'three';
 import { getState } from '../app/store';
 import type { LayoutScene } from './LayoutScene';
-import { cameraDeltas, decodeButtons, decodeReport, zeroAxes, type SpaceMouseAxes } from './spaceMouseMath';
+import { cameraDeltas, decodeButtons, decodeReport, isDeflected, zeroAxes, type SpaceMouseAxes } from './spaceMouseMath';
 
 const VENDORS = [0x256f, 0x046d]; // 3Dconnexion, Logitech (older devices)
 const RESET_BUTTON_MASK = 0b10; // right button
+/** The 3Dconnexion driver's legacy mode turns cap motion into synthetic wheel events for apps it
+ * doesn't know (the browser). Wheel events this soon after cap motion are dropped. */
+const WHEEL_SUPPRESS_MS = 300;
 
 interface HIDDeviceLike {
   opened: boolean;
@@ -36,8 +39,16 @@ export class SpaceMouse {
   private raf = 0;
   private last = 0;
   private disposed = false;
+  private lastDeflected = -Infinity;
+  /** the tab is focused and visible; otherwise the device is released and the wheel left alone */
+  private active = isActiveTab();
+  private wheelGuard = false;
 
-  constructor(private scene: LayoutScene) {}
+  constructor(private scene: LayoutScene) {
+    window.addEventListener('focus', this.onFocusChange);
+    window.addEventListener('blur', this.onFocusChange);
+    document.addEventListener('visibilitychange', this.onFocusChange);
+  }
 
   /** Re-opens a device the user granted earlier, without prompting. */
   async reconnect(): Promise<void> {
@@ -65,29 +76,67 @@ export class SpaceMouse {
   }
 
   private async attach(d: HIDDeviceLike): Promise<void> {
-    if (this.disposed) return;
-    if (!d.opened) await d.open();
+    if (this.disposed || this.device === d) return;
+    if (this.active && !d.opened) await d.open();
     this.device = d;
     d.addEventListener('inputreport', (e) => {
+      if (!this.active) return;
       const axes = decodeReport(e.reportId, e.data, this.axes);
-      if (axes) this.axes = axes;
+      if (axes) {
+        this.axes = axes;
+        if (isDeflected(axes)) this.lastDeflected = performance.now();
+      }
       const buttons = decodeButtons(e.reportId, e.data);
       if (buttons !== null) {
         if (buttons & RESET_BUTTON_MASK && !(this.buttons & RESET_BUTTON_MASK)) this.scene.frameAll();
         this.buttons = buttons;
       }
     });
+    this.setWheelGuard(this.active);
     this.onStatus?.(true);
     this.last = performance.now();
     this.raf = requestAnimationFrame(this.tick);
   }
+
+  /** Releases the device while another tab or app has the focus, so the driver can serve it,
+   * and takes it back when the tab is focused again. */
+  private onFocusChange = () => {
+    const active = isActiveTab();
+    if (active === this.active || this.disposed) return;
+    this.active = active;
+    const d = this.device;
+    if (!active) {
+      this.axes = zeroAxes();
+      this.lastDeflected = -Infinity;
+      this.setWheelGuard(false);
+      if (d?.opened) void d.close().catch(() => undefined);
+    } else if (d) {
+      this.setWheelGuard(true);
+      if (!d.opened) void d.open().catch(() => undefined);
+    }
+  };
+
+  private setWheelGuard(on: boolean): void {
+    if (on === this.wheelGuard) return;
+    this.wheelGuard = on;
+    if (on) window.addEventListener('wheel', this.onWheel, { capture: true, passive: false });
+    else window.removeEventListener('wheel', this.onWheel, { capture: true });
+  }
+
+  private onWheel = (e: WheelEvent) => {
+    if (!getState().settings.spaceMouse.enabled) return;
+    if (isDeflected(this.axes) || performance.now() - this.lastDeflected < WHEEL_SUPPRESS_MS) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+    }
+  };
 
   private tick = (now: number) => {
     if (this.disposed) return;
     const dt = Math.min((now - this.last) / 1000, 0.1);
     this.last = now;
     const settings = getState().settings.spaceMouse;
-    if (settings.enabled) this.applyToCamera(cameraDeltas(this.axes, dt, settings));
+    if (settings.enabled && this.active) this.applyToCamera(cameraDeltas(this.axes, dt, settings));
     this.raf = requestAnimationFrame(this.tick);
   };
 
@@ -113,6 +162,14 @@ export class SpaceMouse {
   dispose(): void {
     this.disposed = true;
     cancelAnimationFrame(this.raf);
+    this.setWheelGuard(false);
+    window.removeEventListener('focus', this.onFocusChange);
+    window.removeEventListener('blur', this.onFocusChange);
+    document.removeEventListener('visibilitychange', this.onFocusChange);
     void this.device?.close().catch(() => undefined);
   }
+}
+
+function isActiveTab(): boolean {
+  return document.visibilityState === 'visible' && document.hasFocus();
 }

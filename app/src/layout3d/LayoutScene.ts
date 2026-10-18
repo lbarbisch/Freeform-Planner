@@ -8,11 +8,20 @@ import { applyModelTransform, cloneWithMaterials, loadModel, setHighlight } from
 
 export type Pick = { kind: 'placement'; id: string } | { kind: 'wire'; id: string } | { kind: 'airwire'; index: number } | null;
 
+export type Transforms = Record<string, { position: Vec3; rotation: Quat }>;
+
 export interface SceneCallbacks {
   onPick: (pick: Pick, additive: boolean) => void;
-  /** live transform from the gizmo */
-  onGizmoChange: (id: string, position: Vec3, rotation: Quat) => void;
+  /** live transforms of all objects moved by the gizmo */
+  onGizmoChange: (transforms: Transforms) => void;
   onGizmoEnd: () => void;
+}
+
+/** Pose of the gizmo and the selected objects when a drag started. */
+interface GizmoStart {
+  position: THREE.Vector3;
+  quaternion: THREE.Quaternion;
+  objects: Map<string, { position: THREE.Vector3; quaternion: THREE.Quaternion }>;
 }
 
 interface Entry {
@@ -36,9 +45,9 @@ export class LayoutScene {
   private airwireGroup = new THREE.Group();
   private pinGroup = new THREE.Group();
   private airwireGeometry = new THREE.CylinderGeometry(1, 1, 1, 8, 1).rotateX(Math.PI / 2);
-  // airwires are drawn on top of everything so they stay visible (and clickable) inside parts
-  private airwireMaterial = new THREE.MeshBasicMaterial({ color: AIRWIRE_COLOR, depthTest: false });
-  private airwireSelectedMaterial = new THREE.MeshBasicMaterial({ color: AIRWIRE_SELECTED, depthTest: false });
+  // airwires are depth tested like any other object, so part bodies in front of them hide them
+  private airwireMaterial = new THREE.MeshBasicMaterial({ color: AIRWIRE_COLOR });
+  private airwireSelectedMaterial = new THREE.MeshBasicMaterial({ color: AIRWIRE_SELECTED });
   private pinMaterial = new THREE.MeshBasicMaterial({ color: 0xff4040, depthTest: false });
   private pinGeometry = new THREE.SphereGeometry(0.45, 12, 8);
   private frameRequested = false;
@@ -47,7 +56,9 @@ export class LayoutScene {
   private project: Project | null = null;
   private selected = new Set<string>();
   private gizmoTarget = new THREE.Object3D();
-  private gizmoId: string | null = null;
+  /** ids moved by the gizmo; one object, or several around their common center */
+  private gizmoIds: string[] = [];
+  private gizmoStart: GizmoStart | null = null;
   private ignoreGizmo = false;
 
   airwires: Airwire[] = [];
@@ -87,12 +98,16 @@ export class LayoutScene {
     this.gizmo.addEventListener('change', () => this.invalidate());
     this.gizmo.addEventListener('dragging-changed', (e) => {
       this.orbit.enabled = !e.value;
-      if (!e.value) this.callbacks.onGizmoEnd();
+      if (e.value) this.gizmoStart = this.captureGizmoStart();
+      else {
+        this.gizmoStart = null;
+        this.callbacks.onGizmoEnd();
+      }
     });
     this.gizmo.addEventListener('objectChange', () => {
-      if (this.ignoreGizmo || !this.gizmoId) return;
-      const t = this.gizmoTarget;
-      this.callbacks.onGizmoChange(this.gizmoId, t.position.toArray() as Vec3, t.quaternion.toArray() as Quat);
+      if (this.ignoreGizmo || !this.gizmoIds.length) return;
+      this.gizmoStart ??= this.captureGizmoStart();
+      this.callbacks.onGizmoChange(this.gizmoTransforms(this.gizmoStart));
     });
     this.scene.add(this.gizmo.getHelper());
 
@@ -209,7 +224,6 @@ export class LayoutScene {
     while (meshes.length > this.airwires.length) this.airwireGroup.remove(meshes[meshes.length - 1]!);
     while (meshes.length < this.airwires.length) {
       const mesh = new THREE.Mesh(this.airwireGeometry, this.airwireMaterial);
-      mesh.renderOrder = 5;
       this.airwireGroup.add(mesh);
     }
     const a = new THREE.Vector3();
@@ -247,25 +261,59 @@ export class LayoutScene {
     }
   }
 
+  /** One selected object: the gizmo sits at its origin with its orientation. Several: at the
+   * average of their origins, world aligned; moving or turning it moves the whole group. */
   private updateGizmo(mode: 'translate' | 'rotate' | 'off', snap: { translate: number; rotate: number }): void {
-    const ids = [...this.selected].filter((id) => this.entries.has(id));
-    const id = ids.length === 1 ? ids[0]! : null;
-    if (mode === 'off' || !id) {
+    const ids = [...this.selected].filter((id) => this.entries.has(id)).sort();
+    if (mode === 'off' || !ids.length) {
       this.gizmo.detach();
-      this.gizmoId = null;
+      this.gizmoIds = [];
       return;
     }
-    const obj = this.entries.get(id)!.object;
-    this.ignoreGizmo = true;
-    this.gizmoTarget.position.copy(obj.position);
-    this.gizmoTarget.quaternion.copy(obj.quaternion);
-    this.gizmoTarget.updateMatrixWorld();
-    this.ignoreGizmo = false;
-    if (this.gizmoId !== id) this.gizmo.attach(this.gizmoTarget);
-    this.gizmoId = id;
+    // while dragging the gizmo leads and the objects follow it
+    if (!this.gizmo.dragging) {
+      this.ignoreGizmo = true;
+      if (ids.length === 1) {
+        const obj = this.entries.get(ids[0]!)!.object;
+        this.gizmoTarget.position.copy(obj.position);
+        this.gizmoTarget.quaternion.copy(obj.quaternion);
+      } else {
+        const center = new THREE.Vector3();
+        for (const id of ids) center.add(this.entries.get(id)!.object.position);
+        this.gizmoTarget.position.copy(center.divideScalar(ids.length));
+        this.gizmoTarget.quaternion.identity();
+      }
+      this.gizmoTarget.updateMatrixWorld();
+      this.ignoreGizmo = false;
+    }
+    if (!this.gizmoIds.length) this.gizmo.attach(this.gizmoTarget);
+    this.gizmoIds = ids;
     this.gizmo.setMode(mode);
     this.gizmo.setTranslationSnap(snap.translate);
     this.gizmo.setRotationSnap(THREE.MathUtils.degToRad(snap.rotate));
+  }
+
+  private captureGizmoStart(): GizmoStart {
+    const objects = new Map<string, { position: THREE.Vector3; quaternion: THREE.Quaternion }>();
+    for (const id of this.gizmoIds) {
+      const o = this.entries.get(id)?.object;
+      if (o) objects.set(id, { position: o.position.clone(), quaternion: o.quaternion.clone() });
+    }
+    return { position: this.gizmoTarget.position.clone(), quaternion: this.gizmoTarget.quaternion.clone(), objects };
+  }
+
+  /** Applies the gizmo's motion since the drag started to every object: the rotation turns
+   * them around the gizmo center, the translation moves them along. */
+  private gizmoTransforms(start: GizmoStart): Transforms {
+    const t = this.gizmoTarget;
+    const turn = t.quaternion.clone().multiply(start.quaternion.clone().invert());
+    const result: Transforms = {};
+    for (const [id, o] of start.objects) {
+      const position = o.position.clone().sub(start.position).applyQuaternion(turn).add(t.position);
+      const rotation = turn.clone().multiply(o.quaternion);
+      result[id] = { position: position.toArray() as Vec3, rotation: rotation.toArray() as Quat };
+    }
+    return result;
   }
 
   selectAirwire(index: number | null): void {
@@ -299,10 +347,8 @@ export class LayoutScene {
     const ndc = new THREE.Vector2(((clientX - rect.left) / rect.width) * 2 - 1, -((clientY - rect.top) / rect.height) * 2 + 1);
     const ray = new THREE.Raycaster();
     ray.setFromCamera(ndc, this.camera);
-    // airwires are drawn on top, so they win over parts behind them
-    const airwireHit = ray.intersectObject(this.airwireGroup, true)[0];
-    if (airwireHit) return airwireHit.object.userData.pick as Pick;
-    const targets = [...this.entries.values()].map((e) => e.object);
+    // the nearest visible object wins, whether it is a part, a wire or an airwire
+    const targets = [this.airwireGroup, ...[...this.entries.values()].map((e) => e.object)];
     for (const hit of ray.intersectObjects(targets, true)) {
       let o: THREE.Object3D | null = hit.object;
       while (o && !o.userData.pick) o = o.parent;

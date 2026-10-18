@@ -99,7 +99,7 @@ describe('pin positions and airwires', () => {
     expect(a).toBeDefined();
   });
 
-  it('routes through freeform wires: both wire pins count as connected', () => {
+  it('routes through wires: both wire pins count as connected', () => {
     let { p, a } = twoResistors();
     // R1.2 at (-10,0,0), R2.1 at (25,0,0); wire WIRE_A pins at x±5 placed at 7.5 -> 12.5 / 2.5
     const r = insertLayoutWire(p, lib, { instanceId: a, pin: '2' }, [7.5, 0, 0]);

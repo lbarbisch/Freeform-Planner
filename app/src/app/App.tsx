@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
-import { deriveNetlist } from '../core';
+import { deriveNetlist, setProjectName } from '../core';
 import { SchematicView } from '../schematic/SchematicView';
 
 // Three.js is only needed by these views; loading them on demand keeps the first load small
@@ -9,7 +9,7 @@ import { Modal } from './Dialog';
 import { newProject, openExample, openProject, saveProject } from './fileActions';
 import { isTypingTarget } from './keyboard';
 import { defaultSettings, keyLabels, type Settings } from './settings';
-import { dismissNotice, isDirty, redo, setState, setView, undo, useApp, type View } from './store';
+import { apply, dismissNotice, isDirty, redo, setState, setView, undo, useApp, type View } from './store';
 
 const VIEWS: { id: View; label: string; key: string }[] = [
   { id: 'schematic', label: 'Schematic', key: 'F1' },
@@ -59,9 +59,10 @@ export function App() {
   }, [dirty]);
 
   return (
-    <div className="app">
+    <div className="app" data-view={view}>
       <header className="topbar">
         <span className="brand">Freeform-Planner</span>
+        <ProjectName />
         <Menu label="File">
           <button onClick={newProject}>New</button>
           <button onClick={() => void openProject()} data-testid="menu-open">
@@ -88,7 +89,7 @@ export function App() {
         </Menu>
         <nav className="view-tabs" role="tablist" aria-label="Views">
           {VIEWS.map((v) => (
-            <button key={v.id} role="tab" aria-selected={view === v.id} className={view === v.id ? 'active' : ''} onClick={() => setView(v.id)} title={v.key}>
+            <button key={v.id} role="tab" aria-selected={view === v.id} className={view === v.id ? 'active' : ''} data-view={v.id} onClick={() => setView(v.id)} title={v.key}>
               {v.label}
             </button>
           ))}
@@ -138,19 +139,69 @@ function Menu({ label, children }: { label: string; children: React.ReactNode })
   );
 }
 
+function ProjectName() {
+  const name = useApp((s) => s.history.present.name);
+  // keyed by the name so the draft resets when the project changes (open, undo, ...)
+  return <ProjectNameInput key={name} name={name} />;
+}
+
+function ProjectNameInput({ name }: { name: string }) {
+  const [draft, setDraft] = useState(name);
+  const cancelled = useRef(false);
+  return (
+    <input
+      className="project-name"
+      value={draft}
+      size={Math.max(8, Math.min(32, draft.length + 1))}
+      aria-label="Project name"
+      title="Project name"
+      data-testid="project-name"
+      onChange={(e) => setDraft(e.target.value)}
+      onBlur={() => {
+        if (cancelled.current || !draft.trim()) {
+          cancelled.current = false;
+          setDraft(name);
+        } else apply((p) => setProjectName(p, draft));
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') e.currentTarget.blur();
+        else if (e.key === 'Escape') {
+          cancelled.current = true;
+          e.currentTarget.blur();
+        }
+      }}
+    />
+  );
+}
+
 function StatusBar() {
   const project = useApp((s) => s.history.present);
   const fileName = useApp((s) => s.fileName);
   const dirty = useApp(isDirty);
-  const nets = deriveNetlist(project).nets.length;
+  const cursor = useApp((s) => s.schematicCursor);
+  const netlist = deriveNetlist(project);
+  const nets = netlist.nets.length;
   return (
     <footer className="statusbar" data-testid="statusbar">
-      <span data-testid="file-name">
-        {fileName ?? project.name}
-        {dirty ? ' •' : ''}
+      <span className="status-left">
+        <span data-testid="file-name">
+          {fileName ?? project.name}
+          {dirty ? ' •' : ''}
+        </span>
+        {cursor && (
+          <span data-testid="cursor-pos" title="Cursor position (grid units)">
+            {' · '}
+            {cursor[0]}, {cursor[1]}
+          </span>
+        )}
+        {cursor && netlist.conflicts.length > 0 && (
+          <span className="warning">
+            {' · '}⚠ {netlist.conflicts.map((c) => c.names.join(' = ')).join('; ')}: one net has several label names
+          </span>
+        )}
       </span>
       <span>
-        {Object.keys(project.schematic.instances).length} parts · {nets} nets · {Object.keys(project.layout.wires).length} freeform wires
+        {Object.keys(project.schematic.instances).length} parts · {nets} nets · {Object.keys(project.layout.wires).length} wires
       </span>
     </footer>
   );
@@ -200,7 +251,7 @@ function HelpDialog({ onClose }: { onClose: () => void }) {
         <section>
           <h3>3D Layout</h3>
           <ul>
-            <li>Left click to select · right drag to orbit · middle drag to pan · wheel to zoom · {k('Home')} frame all</li>
+            <li>Left click to select (Shift or Ctrl-click to select several; they move and turn together) · right drag to orbit · middle drag to pan · wheel to zoom · {k('Home')} frame all</li>
             <li>
               Move: {k(keys.translateXPos)}/{k(keys.translateXNeg)} X · {k(keys.translateYPos)}/{k(keys.translateYNeg)} Y · {k(keys.translateZPos)}/{k(keys.translateZNeg)} Z
             </li>
@@ -208,7 +259,7 @@ function HelpDialog({ onClose }: { onClose: () => void }) {
               Rotate: {k(keys.rotateXPos)}/{k(keys.rotateXNeg)} X · {k(keys.rotateYPos)}/{k(keys.rotateYNeg)} Y · {k(keys.rotateZPos)}/{k(keys.rotateZNeg)} Z · {k(keys.resetRotation)} reset
             </li>
             <li>
-              {k(keys.swapFootprint)} next footprint variant · select an airwire and press {k(keys.insertWire)} to insert a freeform wire · {k('Del')} removes a selected wire
+              {k(keys.swapFootprint)} next footprint variant · select an airwire and press {k(keys.insertWire)} to insert a wire · {k('Del')} removes a selected wire
             </li>
             <li>Or drag the gizmo ({k('T')} move, {k('G')} toggle move/rotate)</li>
             <li>SpaceMouse: Chromium browsers via WebHID, use “Connect SpaceMouse” once</li>

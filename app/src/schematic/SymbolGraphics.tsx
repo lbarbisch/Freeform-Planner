@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { PIN_DIRECTION, pinInnerEnd, symbolBounds, transformPoint2, type Graphic, type Rotation, type SymbolDef, type Vec2 } from '../core';
+import { PIN_DIRECTION, pinInnerEnd, symbolBounds, symbolUnit, transformPoint2, type Graphic, type Rotation, type SymbolDef, type Vec2 } from '../core';
 
 /** SVG transform matching core transformPoint2: mirror x, then rotate counter-clockwise. */
 export function symbolTransform(at: Vec2, rotation: Rotation, mirror: boolean): string {
@@ -90,8 +90,9 @@ function SymbolText({ at, text, className }: { at: Vec2; text: string; className
   );
 }
 
-/** Small standalone preview (part picker, library editor lists). */
-export function SymbolPreview({ symbol, size = 48 }: { symbol: SymbolDef; size?: number }) {
+/** Small standalone preview (part picker, library editor lists). Shows subpart A. */
+export function SymbolPreview({ symbol: full, size = 48 }: { symbol: SymbolDef; size?: number }) {
+  const symbol = symbolUnit(full, 1);
   const b = symbolBounds(symbol);
   const pad = 1;
   const w = b.max[0] - b.min[0] + pad * 2;

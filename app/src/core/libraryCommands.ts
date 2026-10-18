@@ -1,6 +1,7 @@
 /** Pure edit operations and validation for libraries (used by the library editor). */
 import type { FootprintDef, Library, LibrarySet, PartDef, SymbolDef } from './model';
 import { naturalCompare } from './netlist';
+import { itemUnit, unitCount, unitName } from './symbols';
 
 export type LibraryKind = 'symbols' | 'footprints' | 'parts';
 
@@ -79,6 +80,34 @@ export function newPart(lib: Library, name = 'NEW_PART'): PartDef {
   return { id: uniqueId(name, lib.parts), name, description: '', symbolId, defaultValue: name, variants: [] };
 }
 
+/** Changes the number of subparts. Adding subparts adds empty ones (a plain symbol becomes
+ * subpart A); removing subparts deletes their graphics and pins. */
+export function setUnitCount(symbol: SymbolDef, count: number): SymbolDef {
+  const n = Math.max(1, Math.min(26, Math.round(count)));
+  if (n === unitCount(symbol)) return symbol;
+  const fit = <T extends { unit?: number | undefined }>(items: T[]): T[] =>
+    items
+      .filter((item) => itemUnit(item) <= n)
+      .map((item) => {
+        if (n > 1) return item;
+        const { unit: _, ...rest } = item;
+        return rest as T;
+      });
+  const { units: _, ...rest } = symbol;
+  return { ...rest, graphics: fit(symbol.graphics), pins: fit(symbol.pins), ...(n > 1 && { units: n }) };
+}
+
+/** Copies the drawing and pins of subpart `from` into subpart `to`. Copied pins get new numbers
+ * (continuing after the highest number in use) so every physical pin stays unique. */
+export function copyUnit(symbol: SymbolDef, from: number, to: number): SymbolDef {
+  if (from === to) return symbol;
+  const numbers = symbol.pins.map((p) => Number(p.number)).filter(Number.isFinite);
+  let next = (numbers.length ? Math.max(...numbers) : 0) + 1;
+  const graphics = symbol.graphics.filter((g) => itemUnit(g) === from).map((g) => ({ ...g, unit: to }));
+  const pins = symbol.pins.filter((p) => itemUnit(p) === from).map((p) => ({ ...p, number: String(next++), unit: to }));
+  return { ...symbol, graphics: [...symbol.graphics, ...graphics], pins: [...symbol.pins, ...pins] };
+}
+
 /** Maps every symbol pin to the footprint pin with the same number (where one exists). */
 export function autoPinMap(symbol: SymbolDef, footprint: FootprintDef): Record<string, string> {
   const fpPins = new Set(footprint.pins.map((p) => p.number));
@@ -122,6 +151,17 @@ export function validateSymbol(symbol: SymbolDef): string[] {
     if (!Number.isInteger(p.at[0]) || !Number.isInteger(p.at[1])) issues.push(`Pin ${p.number} is not on the grid; wires will not connect to it.`);
   }
   if (!symbol.refPrefix.trim()) issues.push('The reference prefix is empty.');
+  const units = unitCount(symbol);
+  for (const p of symbol.pins) {
+    if (itemUnit(p) > units) issues.push(`Pin ${p.number} belongs to subpart ${unitName(itemUnit(p))}, but the symbol has only ${units} subpart${units === 1 ? '' : 's'}.`);
+  }
+  const orphanGraphics = symbol.graphics.filter((g) => itemUnit(g) > units).length;
+  if (orphanGraphics) issues.push(`${orphanGraphics} graphic${orphanGraphics === 1 ? ' belongs' : 's belong'} to a subpart the symbol does not have.`);
+  if (units > 1) {
+    for (let u = 1; u <= units; u++) {
+      if (!symbol.pins.some((p) => itemUnit(p) === u)) issues.push(`Subpart ${unitName(u)} has no pins.`);
+    }
+  }
   return issues;
 }
 

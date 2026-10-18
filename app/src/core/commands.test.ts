@@ -163,7 +163,7 @@ describe('layout edits', () => {
     expect(cycleVariant(p, 'nope')).toBe(p);
   });
 
-  it('inserts, reshapes, moves and removes freeform wires', () => {
+  it('inserts, reshapes, moves and removes wires', () => {
     let { p, ids } = placed([0, 0]);
     const r = insertLayoutWire(p, lib, { instanceId: ids[0]!, pin: '1' }, [1, 1, 1]);
     p = r.project;

@@ -1,18 +1,15 @@
 /** Pure edit operations. Every function takes a project and returns a new project; nothing is
  * mutated. The UI calls these through the history store, which gives undo/redo for free. */
-import { add3, quatNormalize, rotateWorld, samePoint, transformPoint2, type Quat, type Rotation, type Vec2, type Vec3 } from './geometry';
+import { add3, quatFromAxisAngle, quatNormalize, rotateVec3, rotateWorld, samePoint, scale3, sub3, transformPoint2, type Quat, type Rotation, type Vec2, type Vec3 } from './geometry';
+import { nextId } from './ids';
 import { syncLayout } from './layout';
 import type { LayoutWire, LibrarySet, NetLabel, PinRef, Placement, Project, SymbolInstance, Wire } from './model';
-import { naturalCompare, symbolOf } from './netlist';
+import { naturalCompare, ownerOf, symbolOf } from './netlist';
+import { partInstances } from './units';
+
+export { nextId };
 
 // ------------------------------------------------------------------ ids & refs
-
-/** Deterministic ids: prefix + lowest free number. Keeps files diff-friendly and tests stable. */
-export function nextId(prefix: string, existing: Record<string, unknown>): string {
-  let n = Object.keys(existing).length + 1;
-  while (`${prefix}${n}` in existing) n++;
-  return `${prefix}${n}`;
-}
 
 export function nextRef(project: Project, prefix: string, exceptId?: string): string {
   const used = new Set(
@@ -31,11 +28,11 @@ export function annotate(project: Project): Project {
   const needs: SymbolInstance[] = [];
   for (const inst of ordered) {
     const symbol = symbolOf(project, inst);
-    if (symbol?.power) continue;
+    // subparts take the reference of subpart A below
+    if (symbol?.power || inst.parentId) continue;
     if (!inst.ref || inst.ref.endsWith('?') || seen.has(inst.ref)) needs.push(inst);
     else seen.add(inst.ref);
   }
-  if (needs.length === 0) return project;
   // assign in reading order (top to bottom, left to right) like most editors do
   needs.sort((a, b) => a.at[1] - b.at[1] || a.at[0] - b.at[0]);
   for (const inst of needs) {
@@ -46,6 +43,15 @@ export function annotate(project: Project): Project {
     seen.add(ref);
     instances[inst.id] = { ...inst, ref };
   }
+  let changed = needs.length > 0;
+  for (const inst of Object.values(instances)) {
+    const main = inst.parentId ? instances[inst.parentId] : undefined;
+    if (main && main.ref !== inst.ref) {
+      instances[inst.id] = { ...inst, ref: main.ref };
+      changed = true;
+    }
+  }
+  if (!changed) return project;
   return { ...project, schematic: { ...project.schematic, instances } };
 }
 
@@ -111,7 +117,9 @@ export function pruneLibrary(project: Project): Project {
 
 // ------------------------------------------------------------------ schematic
 
-export function placePart(project: Project, library: LibrarySet, partId: string, at: Vec2, opts: { rotation?: Rotation; mirror?: boolean } = {}): { project: Project; id: string } {
+/** Places a part. Multi-subpart parts get all their subparts, side by side; `ids` lists them
+ * (subpart A first, its id is `id`). */
+export function placePart(project: Project, library: LibrarySet, partId: string, at: Vec2, opts: { rotation?: Rotation; mirror?: boolean } = {}): { project: Project; id: string; ids: string[] } {
   let next = embedPart(project, library, partId);
   const part = next.library.parts[partId]!;
   const symbol = next.library.symbols[part.symbolId]!;
@@ -125,8 +133,8 @@ export function placePart(project: Project, library: LibrarySet, partId: string,
     rotation: opts.rotation ?? 0,
     mirror: opts.mirror ?? false,
   };
-  next = { ...next, schematic: { ...next.schematic, instances: { ...next.schematic.instances, [id]: instance } } };
-  return { project: syncLayout(next), id };
+  next = syncLayout({ ...next, schematic: { ...next.schematic, instances: { ...next.schematic.instances, [id]: instance } } });
+  return { project: next, id, ids: partInstances(next, id) };
 }
 
 function updateInstance(project: Project, id: string, patch: Partial<SymbolInstance>): Project {
@@ -138,12 +146,17 @@ function updateInstance(project: Project, id: string, patch: Partial<SymbolInsta
   };
 }
 
+/** Reference and value belong to the physical part, so all its subparts change together. */
+function updatePart(project: Project, id: string, patch: Partial<SymbolInstance>): Project {
+  return partInstances(project, id).reduce((p, x) => updateInstance(p, x, patch), project);
+}
+
 export function setRef(project: Project, id: string, ref: string): Project {
-  return updateInstance(project, id, { ref: ref.trim() });
+  return updatePart(project, id, { ref: ref.trim() });
 }
 
 export function setValue(project: Project, id: string, value: string): Project {
-  return updateInstance(project, id, { value });
+  return updatePart(project, id, { value });
 }
 
 export interface Selection {
@@ -208,11 +221,13 @@ export function mirrorInstance(project: Project, id: string): Project {
   return updateInstance(project, id, { mirror: !inst.mirror });
 }
 
+/** Deletes the selection. Deleting one subpart of a part deletes all of its subparts. */
 export function deleteSelection(project: Project, sel: Selection): Project {
   const instances = { ...project.schematic.instances };
   const wires = { ...project.schematic.wires };
   const labels = { ...project.schematic.labels };
-  for (const id of sel.instances) delete instances[id];
+  const owners = new Set(sel.instances.map((id) => instances[id]).filter((i) => i !== undefined).map(ownerOf));
+  for (const inst of Object.values(project.schematic.instances)) if (owners.has(ownerOf(inst))) delete instances[inst.id];
   for (const id of sel.wires) delete wires[id];
   for (const id of sel.labels) delete labels[id];
   return syncLayout({ ...project, schematic: { instances, wires, labels } });
@@ -237,6 +252,11 @@ export function addLabel(project: Project, at: Vec2, name: string): { project: P
   return { project: { ...project, schematic: { ...project.schematic, labels } }, id };
 }
 
+export function setProjectName(project: Project, name: string): Project {
+  const trimmed = name.trim();
+  return trimmed && trimmed !== project.name ? { ...project, name: trimmed } : project;
+}
+
 export function renameLabel(project: Project, id: string, name: string): Project {
   const l = project.schematic.labels[id];
   if (!l || !name.trim()) return project;
@@ -257,7 +277,7 @@ function updateLayoutWire(project: Project, id: string, patch: Partial<LayoutWir
   return { ...project, layout: { ...project.layout, wires: { ...project.layout.wires, [id]: { ...w, ...patch } } } };
 }
 
-/** A layout object is either a placed part (instance id) or a freeform wire (layout wire id). */
+/** A layout object is either a placed part (instance id) or a wire (layout wire id). */
 export function getTransform(project: Project, id: string): { position: Vec3; rotation: Quat } | undefined {
   return project.layout.placements[id] ?? project.layout.wires[id];
 }
@@ -279,8 +299,42 @@ export function rotate(project: Project, id: string, axis: Vec3, degrees: number
   return t ? setTransform(project, id, { rotation: rotateWorld(t.rotation, axis, degrees) }) : project;
 }
 
+export function setTransforms(project: Project, transforms: Record<string, { position?: Vec3; rotation?: Quat }>): Project {
+  return Object.entries(transforms).reduce((p, [id, t]) => setTransform(p, id, t), project);
+}
+
+/** Center of a group of layout objects (average of their origins). */
+export function groupPivot(project: Project, ids: string[]): Vec3 | undefined {
+  const positions = ids.map((id) => getTransform(project, id)?.position).filter((p) => p !== undefined);
+  if (!positions.length) return undefined;
+  return scale3(positions.reduce(add3, [0, 0, 0]), 1 / positions.length);
+}
+
+/** Rotates a group of layout objects around a world axis through their common center. A single
+ * object rotates around its own origin. */
+export function rotateGroup(project: Project, ids: string[], axis: Vec3, degrees: number): Project {
+  const pivot = groupPivot(project, ids);
+  if (!pivot) return project;
+  const q = quatFromAxisAngle(axis, degrees);
+  const transforms: Record<string, { position: Vec3; rotation: Quat }> = {};
+  for (const id of ids) {
+    const t = getTransform(project, id);
+    if (t) transforms[id] = { position: add3(pivot, rotateVec3(q, sub3(t.position, pivot))), rotation: rotateWorld(t.rotation, axis, degrees) };
+  }
+  return setTransforms(project, transforms);
+}
+
 export function resetRotation(project: Project, id: string): Project {
   return getTransform(project, id) ? setTransform(project, id, { rotation: [0, 0, 0, 1] }) : project;
+}
+
+/** Selects one of the part's footprint variants. */
+export function setVariant(project: Project, id: string, variant: number): Project {
+  const placement = project.layout.placements[id];
+  const inst = project.schematic.instances[id];
+  const count = inst ? (project.library.parts[inst.partId]?.variants.length ?? 0) : 0;
+  if (!placement || variant < 0 || variant >= count || variant === placement.variant) return project;
+  return updatePlacement(project, id, { variant });
 }
 
 /** Cycles through the part's footprint variants (or the wire shapes for a layout wire). */
@@ -304,7 +358,25 @@ export function cycleVariant(project: Project, id: string): Project {
   return project;
 }
 
-/** Inserts a freeform wire into the net of `anchor`. The wire footprints come from the given
+/** Wire footprints offered for layout wires: those of the library plus the ones the project
+ * already embeds, sorted by id. */
+export function wireFootprints(project: Project, library: LibrarySet): LibrarySet['footprints'][string][] {
+  const all = { ...project.library.footprints, ...library.footprints };
+  return Object.values(all)
+    .filter((f) => f.isWire)
+    .sort((a, b) => naturalCompare(a.id, b.id));
+}
+
+/** Gives a layout wire another wire footprint, embedding it from the library when needed. */
+export function setWireFootprint(project: Project, library: LibrarySet, id: string, footprintId: string): Project {
+  const wire = project.layout.wires[id];
+  const fp = library.footprints[footprintId] ?? project.library.footprints[footprintId];
+  if (!wire || !fp?.isWire || wire.footprintId === footprintId) return project;
+  const next = project.library.footprints[footprintId] ? project : { ...project, library: { ...project.library, footprints: { ...project.library.footprints, [fp.id]: fp } } };
+  return updateLayoutWire(next, id, { footprintId });
+}
+
+/** Inserts a wire into the net of `anchor`. The wire footprints come from the given
  * library and are embedded into the project. */
 export function insertLayoutWire(project: Project, library: LibrarySet, anchor: PinRef, position: Vec3): { project: Project; id: string | null } {
   const shapes = Object.values(library.footprints)

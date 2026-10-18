@@ -89,3 +89,46 @@ export function routeCorner(a: Vec2, b: Vec2, horizontalFirst: boolean): Vec2 {
 export function snap(p: Vec2, grid = 1): Vec2 {
   return [Math.round(p[0] / grid) * grid + 0, Math.round(p[1] / grid) * grid + 0];
 }
+
+// ------------------------------------------------------------------ subparts
+
+export function unitCount(symbol: SymbolDef): number {
+  return symbol.units ?? 1;
+}
+
+/** Display name of a subpart: 1 -> A, 2 -> B, ... */
+export function unitName(unit: number): string {
+  return unit >= 1 && unit <= 26 ? String.fromCharCode(64 + unit) : String(unit);
+}
+
+/** Subpart an item belongs to. Every item belongs to exactly one subpart; items without a unit
+ * belong to subpart A (that is all items of a plain symbol). */
+export function itemUnit(item: { unit?: number | undefined }): number {
+  return item.unit ?? 1;
+}
+
+export function inUnit(item: { unit?: number | undefined }, unit: number): boolean {
+  return itemUnit(item) === unit;
+}
+
+/** The symbol as seen by one subpart: only the graphics and pins of that subpart. */
+export function symbolUnit(symbol: SymbolDef, unit: number): SymbolDef {
+  if (unitCount(symbol) <= 1) return symbol;
+  return { ...symbol, graphics: symbol.graphics.filter((g) => inUnit(g, unit)), pins: symbol.pins.filter((p) => inUnit(p, unit)) };
+}
+
+const UNIT_GAP = 4;
+
+/** Offsets of all subparts from subpart A when a part is placed: side by side, on the grid. */
+export function unitOffsets(symbol: SymbolDef): Vec2[] {
+  const n = unitCount(symbol);
+  const offsets: Vec2[] = [[0, 0]];
+  let right = symbolBounds(symbolUnit(symbol, 1)).max[0];
+  for (let u = 2; u <= n; u++) {
+    const b = symbolBounds(symbolUnit(symbol, u));
+    const dx = Math.ceil(right + UNIT_GAP - b.min[0]);
+    offsets.push([dx, 0]);
+    right = dx + b.max[0];
+  }
+  return offsets;
+}

@@ -17,6 +17,9 @@ export function FootprintEditor({ footprint }: { footprint: FootprintDef }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const previewRef = useRef<FootprintPreview | null>(null);
   const [addByClick, setAddByClick] = useState(false);
+  const [selectedPin, setSelectedPin] = useState<number | null>(null);
+  // one undo step per gizmo drag
+  const pinDragKey = useRef<string | null>(null);
   const issues = useMemo(() => validateFootprint(footprint), [footprint]);
   // latest footprint for callbacks registered with the Three.js preview
   const fpRef = useRef(footprint);
@@ -29,6 +32,15 @@ export function FootprintEditor({ footprint }: { footprint: FootprintDef }) {
   useEffect(() => {
     const preview = new FootprintPreview(hostRef.current!);
     previewRef.current = preview;
+    preview.onSelectPin = setSelectedPin;
+    preview.onPinMove = (index, position) => {
+      pinDragKey.current ??= `fppin:${performance.now()}`;
+      const fp = fpRef.current;
+      applyLibrary((l) => upsert(l, 'footprints', { ...fp, pins: fp.pins.map((p, j) => (j === index ? { ...p, position } : p)) }), pinDragKey.current);
+    };
+    preview.onPinMoveEnd = () => {
+      pinDragKey.current = null;
+    };
     const ro = new ResizeObserver(() => preview.resize());
     ro.observe(hostRef.current!);
     return () => {
@@ -36,6 +48,10 @@ export function FootprintEditor({ footprint }: { footprint: FootprintDef }) {
       preview.dispose();
     };
   }, [footprint.id]);
+
+  useEffect(() => {
+    previewRef.current?.setSelectedPin(selectedPin);
+  }, [selectedPin, footprint.id]);
 
   useEffect(() => {
     previewRef.current?.show(footprint);
@@ -50,6 +66,7 @@ export function FootprintEditor({ footprint }: { footprint: FootprintDef }) {
           const numbers = fp.pins.map((x) => Number(x.number)).filter(Number.isFinite);
           const number = String((numbers.length ? Math.max(...numbers) : 0) + 1);
           applyLibrary((l) => upsert(l, 'footprints', { ...fp, pins: [...fp.pins, { number, position: p }] }));
+          setSelectedPin(fp.pins.length);
         }
       : null;
   }, [addByClick, footprint.id]);
@@ -59,6 +76,10 @@ export function FootprintEditor({ footprint }: { footprint: FootprintDef }) {
     const position = [...footprint.pins[i]!.position] as Vec3;
     position[axis] = v;
     setPin(i, { position });
+  };
+  const removePin = (i: number) => {
+    update({ pins: footprint.pins.filter((_, j) => j !== i) });
+    setSelectedPin((s) => (s === null || s === i ? null : s > i ? s - 1 : s));
   };
   const turn = (axis: Vec3) => update({ modelRotation: quatNormalize(quatMultiply(quatFromAxisAngle(axis, 90), footprint.modelRotation)).map((v) => round(v)) as FootprintDef['modelRotation'] });
 
@@ -94,6 +115,7 @@ export function FootprintEditor({ footprint }: { footprint: FootprintDef }) {
             Add pins by clicking
           </button>
           <button onClick={() => previewRef.current?.frame()}>Frame</button>
+          <span className="toolbar-hint">Click a pin to select it, then drag the gizmo arrows to move it</span>
         </div>
         <div className="canvas-host" ref={hostRef} data-testid="footprint-canvas" />
       </div>
@@ -110,7 +132,7 @@ export function FootprintEditor({ footprint }: { footprint: FootprintDef }) {
           <NumberField compact label="Z" value={footprint.modelOffset[2]} onCommit={(v) => update({ modelOffset: [footprint.modelOffset[0], footprint.modelOffset[1], v] })} />
         </div>
         <NumberField label="Model scale" value={footprint.modelScale} onCommit={(v) => v > 0 && update({ modelScale: v })} />
-        <CheckField label="Freeform wire (layout only)" value={footprint.isWire} onChange={(isWire) => update({ isWire })} />
+        <CheckField label="Wire (layout only)" value={footprint.isWire} onChange={(isWire) => update({ isWire })} />
         <h4>Pins (mm)</h4>
         <table className="pin-table" data-testid="footprint-pins">
           <thead>
@@ -124,9 +146,13 @@ export function FootprintEditor({ footprint }: { footprint: FootprintDef }) {
           </thead>
           <tbody>
             {footprint.pins.map((pin, i) => (
-              <tr key={i}>
+              <tr key={i} className={selectedPin === i ? 'selected-row' : ''} onFocus={() => setSelectedPin(i)} onClick={() => setSelectedPin(i)} data-testid={`fp-pin-row-${i}`}>
                 <td>
-                  <TextField label="" value={pin.number} onCommit={(number) => number.trim() && setPin(i, { number: number.trim() })} />
+                  <TextField label="" value={pin.number} onCommit={(number) => {
+                      if (!number.trim()) return false;
+                      setPin(i, { number: number.trim() });
+                    }}
+                  />
                 </td>
                 {([0, 1, 2] as const).map((axis) => (
                   <td key={axis}>
@@ -134,7 +160,14 @@ export function FootprintEditor({ footprint }: { footprint: FootprintDef }) {
                   </td>
                 ))}
                 <td>
-                  <button className="icon" aria-label={`Remove pin ${pin.number}`} onClick={() => update({ pins: footprint.pins.filter((_, j) => j !== i) })}>
+                  <button
+                    className="icon"
+                    aria-label={`Remove pin ${pin.number}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removePin(i);
+                    }}
+                  >
                     ×
                   </button>
                 </td>
@@ -146,6 +179,7 @@ export function FootprintEditor({ footprint }: { footprint: FootprintDef }) {
           onClick={() => {
             const numbers = footprint.pins.map((x) => Number(x.number)).filter(Number.isFinite);
             update({ pins: [...footprint.pins, { number: String((numbers.length ? Math.max(...numbers) : 0) + 1), position: [0, 0, 0] }] });
+            setSelectedPin(footprint.pins.length);
           }}
         >
           Add pin

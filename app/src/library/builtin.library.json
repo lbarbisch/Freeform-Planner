@@ -954,29 +954,64 @@
        -4.0
       ]
      ],
-     "fill": true
+     "fill": true,
+     "unit": 1
     },
     {
      "kind": "line",
      "points": [
       [
-       12.0,
+       -4.0,
        -4.0
       ],
       [
-       20.0,
+       4.0,
        0.0
       ],
       [
-       12.0,
+       -4.0,
        4.0
       ],
       [
-       12.0,
+       -4.0,
        -4.0
       ]
      ],
-     "fill": true
+     "fill": true,
+     "unit": 2
+    },
+    {
+     "kind": "rect",
+     "from": [
+      -2.0,
+      -3.0
+     ],
+     "to": [
+      2.0,
+      3.0
+     ],
+     "fill": true,
+     "unit": 3
+    },
+    {
+     "kind": "text",
+     "at": [
+      0.0,
+      -1.8
+     ],
+     "text": "V+",
+     "size": 0.8,
+     "unit": 3
+    },
+    {
+     "kind": "text",
+     "at": [
+      0.0,
+      1.8
+     ],
+     "text": "V-",
+     "size": 0.8,
+     "unit": 3
     }
    ],
    "pins": [
@@ -988,7 +1023,8 @@
       0.0
      ],
      "dir": "left",
-     "length": 2.0
+     "length": 2.0,
+     "unit": 1
     },
     {
      "number": "2",
@@ -998,7 +1034,8 @@
       2.0
      ],
      "dir": "right",
-     "length": 2.0
+     "length": 2.0,
+     "unit": 1
     },
     {
      "number": "3",
@@ -1008,70 +1045,77 @@
       -2.0
      ],
      "dir": "right",
-     "length": 2.0
-    },
-    {
-     "number": "4",
-     "name": "V-",
-     "at": [
-      -2.0,
-      6.0
-     ],
-     "dir": "up",
-     "length": 3.0
+     "length": 2.0,
+     "unit": 1
     },
     {
      "number": "5",
      "name": "+",
      "at": [
-      10.0,
+      -6.0,
       -2.0
      ],
      "dir": "right",
-     "length": 2.0
+     "length": 2.0,
+     "unit": 2
     },
     {
      "number": "6",
      "name": "-",
      "at": [
-      10.0,
+      -6.0,
       2.0
      ],
      "dir": "right",
-     "length": 2.0
+     "length": 2.0,
+     "unit": 2
     },
     {
      "number": "7",
      "name": "",
      "at": [
-      22.0,
+      6.0,
       0.0
      ],
      "dir": "left",
-     "length": 2.0
+     "length": 2.0,
+     "unit": 2
     },
     {
      "number": "8",
      "name": "V+",
      "at": [
-      -2.0,
+      0.0,
       -6.0
      ],
      "dir": "down",
-     "length": 3.0
+     "length": 3.0,
+     "unit": 3
+    },
+    {
+     "number": "4",
+     "name": "V-",
+     "at": [
+      0.0,
+      6.0
+     ],
+     "dir": "up",
+     "length": 3.0,
+     "unit": 3
     }
    ],
    "refAt": [
-    0.0,
-    -4.0
+    3.0,
+    -5.0
    ],
    "valueAt": [
-    0.0,
-    4.0
+    3.0,
+    5.0
    ],
    "showPinNumbers": true,
    "showPinNames": false,
-   "power": false
+   "power": false,
+   "units": 3
   },
   "GND": {
    "id": "GND",

@@ -3,11 +3,13 @@ import { distance3, IDENTITY_QUAT, transformPoint, type Vec3 } from './geometry'
 import type { FootprintDef, LayoutWire, PartDef, PartVariant, Placement, Project, SymbolInstance } from './model';
 import { deriveNetlist, naturalCompare, pinKey, type Netlist } from './netlist';
 import { UnionFind } from './unionFind';
+import { syncUnits } from './units';
 
-/** Parts without footprint variants (power symbols, pure schematic items) are not placed. */
+/** Parts without footprint variants (power symbols, pure schematic items) are not placed.
+ * A multi-subpart part is placed once, under the id of subpart A. */
 export function isPlaceable(project: Project, instance: SymbolInstance): boolean {
   const part = project.library.parts[instance.partId];
-  return !!part && part.variants.length > 0;
+  return !!part && part.variants.length > 0 && !instance.parentId;
 }
 
 export interface ResolvedPlacement {
@@ -153,9 +155,11 @@ function nextFreeSlot(occupied: Vec3[]): Vec3 {
   }
 }
 
-/** Adds placements for new placeable instances and removes placements (and wires anchored to
- * them) of instances that no longer exist. Returns the same object when nothing changed. */
-export function syncLayout(project: Project): Project {
+/** Completes multi-subpart parts, adds placements for new placeable instances and removes
+ * placements (and wires anchored to them) of instances that no longer exist. Returns the same
+ * object when nothing changed. */
+export function syncLayout(input: Project): Project {
+  const project = syncUnits(input);
   const { instances } = project.schematic;
   const placements = { ...project.layout.placements };
   let changed = false;

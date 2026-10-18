@@ -58,14 +58,19 @@ export interface CameraDeltas {
   orbitRight: number;
 }
 
+/** True while the cap is deflected at all (raw values, ignoring the deadzone). */
+export function isDeflected(a: SpaceMouseAxes): boolean {
+  return a.x !== 0 || a.y !== 0 || a.z !== 0 || a.pitch !== 0 || a.yaw !== 0;
+}
+
 /** Object mode: the scene follows the cap. */
 export function cameraDeltas(a: SpaceMouseAxes, dt: number, s: { deadzone: number; panSpeed: number; zoomSpeed: number; rotationSpeed: number }): CameraDeltas {
   const d = (v: number) => applyDeadzone(v, s.deadzone);
   return {
     panRight: -d(a.x) * s.panSpeed * dt,
     panUp: -d(a.y) * s.panSpeed * dt,
-    zoom: d(a.z) * s.zoomSpeed * dt,
+    zoom: -d(a.z) * s.zoomSpeed * dt,
     orbitUp: -d(a.pitch) * s.rotationSpeed * dt,
-    orbitRight: -d(a.yaw) * s.rotationSpeed * dt,
+    orbitRight: d(a.yaw) * s.rotationSpeed * dt,
   };
 }

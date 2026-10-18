@@ -7,9 +7,11 @@ import {
   boxFromPoints,
   deleteSelection,
   deriveNetlist,
+  displayRef,
   emptyBox,
   growBox,
   instancePinPoints,
+  instanceSymbol,
   isEmptyBox,
   junctionPoints,
   mirrorInstance,
@@ -24,12 +26,15 @@ import {
   samePoint,
   snap,
   symbolOf,
+  symbolUnit,
+  transformPoint2,
+  unitOffsets,
   type Box,
   type Project,
   type Rotation,
   type Vec2,
 } from '../core';
-import { apply, clearSelection, endGesture, getState, notify, project as currentProject, select, useApp, type AppSelection } from '../app/store';
+import { apply, clearSelection, endGesture, getState, notify, project as currentProject, select, setState, useApp, type AppSelection } from '../app/store';
 import { PromptDialog } from '../app/Dialog';
 import { isTypingTarget } from '../app/keyboard';
 import { PartPicker } from './PartPicker';
@@ -76,6 +81,9 @@ export function SchematicView() {
   const [lastLabel, setLastLabel] = useState('NET1');
 
   const netlist = useMemo(() => deriveNetlist(project), [project]);
+  // shown in the app's status bar
+  useEffect(() => setState({ schematicCursor: cursor }), [cursor]);
+  useEffect(() => () => setState({ schematicCursor: null }), []);
   const junctions = useMemo(() => junctionPoints(project), [project]);
   const selected = useMemo(() => new Set([...selection.instances, ...selection.wires, ...selection.labels]), [selection]);
 
@@ -234,13 +242,13 @@ export function SchematicView() {
     if (e.button !== 0) return;
 
     if (tool.kind === 'place') {
-      let id = '';
+      let ids: string[] = [];
       apply((proj) => {
         const r = placePart(proj, getState().library, tool.partId, p, { rotation: tool.rotation, mirror: tool.mirror });
-        id = r.id;
+        ids = r.ids;
         return r.project;
       });
-      if (id) select({ instances: [id] });
+      if (ids.length) select({ instances: ids });
       return;
     }
     if (tool.kind === 'wire') {
@@ -409,13 +417,14 @@ export function SchematicView() {
           ))}
 
           {Object.values(project.schematic.instances).map((inst) => {
-            const symbol = symbolOf(project, inst);
+            const symbol = instanceSymbol(project, inst);
             if (!symbol) return null;
             const b = placedBounds(symbol, inst.at, inst.rotation, inst.mirror);
+            const ref = displayRef(project, inst);
             return (
-              <g key={inst.id} data-hit="instance" data-id={inst.id} data-ref={inst.ref} className={`instance ${selected.has(inst.id) ? 'selected' : ''}`}>
+              <g key={inst.id} data-hit="instance" data-id={inst.id} data-ref={ref} className={`instance ${selected.has(inst.id) ? 'selected' : ''}`}>
                 <rect className="hit-area" x={b.min[0] - HIT_MARGIN} y={b.min[1] - HIT_MARGIN} width={b.max[0] - b.min[0] + 2 * HIT_MARGIN} height={b.max[1] - b.min[1] + 2 * HIT_MARGIN} />
-                <SymbolGraphics symbol={symbol} at={inst.at} rotation={inst.rotation} mirror={inst.mirror} refText={inst.ref} valueText={inst.value} />
+                <SymbolGraphics symbol={symbol} at={inst.at} rotation={inst.rotation} mirror={inst.mirror} refText={ref} valueText={inst.value} />
               </g>
             );
           })}
@@ -436,7 +445,9 @@ export function SchematicView() {
 
           {tool.kind === 'place' && ghostSymbol && (
             <g className="ghost" pointerEvents="none">
-              <SymbolGraphics symbol={ghostSymbol} at={cursor} rotation={tool.rotation} mirror={tool.mirror} />
+              {unitOffsets(ghostSymbol).map((offset, k) => (
+                <SymbolGraphics key={k} symbol={symbolUnit(ghostSymbol, k + 1)} at={transformPoint2(cursor, tool.rotation, tool.mirror, offset)} rotation={tool.rotation} mirror={tool.mirror} />
+              ))}
             </g>
           )}
           {tool.kind === 'wire' && draft && (
@@ -446,12 +457,6 @@ export function SchematicView() {
           {box && <rect className="select-box" x={box.min[0]} y={box.min[1]} width={box.max[0] - box.min[0]} height={box.max[1] - box.min[1]} pointerEvents="none" />}
         </svg>
         <SchematicProperties netlist={netlist} focusRef={focusRef} onRenameLabel={(id) => setPrompt({ kind: 'rename', id })} />
-      </div>
-      <div className="statusbar-sheet">
-        <span data-testid="cursor-pos">
-          {cursor[0]}, {cursor[1]}
-        </span>
-        {netlist.conflicts.length > 0 && <span className="warning">⚠ {netlist.conflicts.map((c) => c.names.join(' = ')).join('; ')}: one net has several label names</span>}
       </div>
       {prompt && (
         <PromptDialog
@@ -494,7 +499,7 @@ function nextLabelName(name: string): string {
 function itemsInBox(p: Project, b: Box): { instances: string[]; wires: string[]; labels: string[] } {
   const instances = Object.values(p.schematic.instances)
     .filter((i) => {
-      const s = symbolOf(p, i);
+      const s = instanceSymbol(p, i);
       return s && boxContains(b, placedBounds(s, i.at, i.rotation, i.mirror));
     })
     .map((i) => i.id);
@@ -510,7 +515,7 @@ function itemsInBox(p: Project, b: Box): { instances: string[]; wires: string[];
 function sheetBounds(p: Project): Box {
   let b = emptyBox();
   for (const i of Object.values(p.schematic.instances)) {
-    const s = symbolOf(p, i);
+    const s = instanceSymbol(p, i);
     if (!s) continue;
     const ib = placedBounds(s, i.at, i.rotation, i.mirror);
     b = growBox(growBox(b, ib.min), ib.max);

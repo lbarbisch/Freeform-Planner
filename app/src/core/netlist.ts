@@ -10,6 +10,7 @@
  */
 import { pointKey, pointOnSegment, transformPoint2, type Vec2 } from './geometry';
 import type { PinRef, Project, SymbolDef, SymbolInstance } from './model';
+import { symbolUnit, unitCount, unitName } from './symbols';
 import { UnionFind } from './unionFind';
 
 export interface Net {
@@ -42,9 +43,31 @@ export function symbolOf(project: Project, instance: SymbolInstance): SymbolDef 
   return part ? project.library.symbols[part.symbolId] : undefined;
 }
 
-/** Sheet position of each pin's connection point. */
+/** Id of the physical part an instance belongs to: subparts B, C, ... point to subpart A. Pins,
+ * layout placements and airwires always use this id. */
+export function ownerOf(instance: SymbolInstance): string {
+  return instance.parentId ?? instance.id;
+}
+
+export function unitOf(instance: SymbolInstance): number {
+  return instance.unit ?? 1;
+}
+
+/** The symbol restricted to the subpart the instance shows. */
+export function instanceSymbol(project: Project, instance: SymbolInstance): SymbolDef | undefined {
+  const symbol = symbolOf(project, instance);
+  return symbol && symbolUnit(symbol, unitOf(instance));
+}
+
+/** Reference shown on the sheet, with the subpart letter for multi-subpart parts ("U1A"). */
+export function displayRef(project: Project, instance: SymbolInstance): string {
+  const symbol = symbolOf(project, instance);
+  return symbol && unitCount(symbol) > 1 ? `${instance.ref}${unitName(unitOf(instance))}` : instance.ref;
+}
+
+/** Sheet position of each pin's connection point (only the pins of the instance's subpart). */
 export function instancePinPoints(instance: SymbolInstance, symbol: SymbolDef): { pin: string; point: Vec2 }[] {
-  return symbol.pins.map((p) => ({
+  return symbolUnit(symbol, unitOf(instance)).pins.map((p) => ({
     pin: p.number,
     point: transformPoint2(instance.at, instance.rotation, instance.mirror, p.at),
   }));
@@ -61,11 +84,12 @@ export function deriveNetlist(project: Project): Netlist {
   for (const instance of Object.values(instances)) {
     const symbol = symbolOf(project, instance);
     if (!symbol) continue;
+    const owner = ownerOf(instance);
     for (const { pin, point } of instancePinPoints(instance, symbol)) {
-      const item = `pin:${instance.id}:${pin}`;
+      const item = `pin:${owner}:${pin}`;
       uf.add(item);
       points.push({ item, point });
-      pinItems.push({ item, ref: { instanceId: instance.id, pin }, isPower: symbol.power, instance });
+      pinItems.push({ item, ref: { instanceId: owner, pin }, isPower: symbol.power, instance });
       if (symbol.power) uf.union(item, `name:${instance.value}`);
     }
   }

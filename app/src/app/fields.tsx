@@ -11,8 +11,9 @@ function useDraft<T>(value: T, toDraft: (v: T) => string) {
   return [draft, setDraft] as const;
 }
 
-/** Text input that commits on blur / Enter, so typing produces a single undo step. */
-export function TextField({ label, value, onCommit, testId, inputRef, placeholder }: { label: string; value: string; onCommit: (v: string) => void; testId?: string; inputRef?: React.RefObject<HTMLInputElement | null>; placeholder?: string }) {
+/** Text input that commits on blur / Enter, so typing produces a single undo step. `onCommit`
+ * may return false to reject the text, which restores the current value. */
+export function TextField({ label, value, onCommit, testId, inputRef, placeholder }: { label: string; value: string; onCommit: (v: string) => void | boolean; testId?: string; inputRef?: React.RefObject<HTMLInputElement | null>; placeholder?: string }) {
   const [draft, setDraft] = useDraft(value, String);
   const cancelled = useRef(false);
   return (
@@ -29,7 +30,7 @@ export function TextField({ label, value, onCommit, testId, inputRef, placeholde
           if (cancelled.current) {
             cancelled.current = false;
             setDraft(value);
-          } else if (draft !== value) onCommit(draft);
+          } else if (draft !== value && onCommit(draft) === false) setDraft(value);
         }}
         onKeyDown={(e) => {
           if (e.key === 'Enter') e.currentTarget.blur();

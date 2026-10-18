@@ -7,4 +7,5 @@ export * from './history';
 export * from './fileFormat';
 export * from './objExport';
 export * from './symbols';
+export * from './units';
 export * from './libraryCommands';

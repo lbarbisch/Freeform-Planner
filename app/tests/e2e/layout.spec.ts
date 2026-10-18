@@ -60,7 +60,7 @@ test.describe('3D layout', () => {
     await expect.poll(() => airwires(page)).toBe('20');
   });
 
-  test('insert a freeform wire on an airwire and remove it again', async ({ page }) => {
+  test('insert a wire on an airwire and remove it again', async ({ page }) => {
     await openApp(page);
     await page.getByTestId('part-RES').click();
     for (const x of [0, 10]) {
@@ -76,13 +76,24 @@ test.describe('3D layout', () => {
     await page.keyboard.press('F2');
     await waitForLayout(page);
     await expect.poll(() => airwires(page)).toBe('1');
+    // the staging grid puts both resistors in a row, so the airwire runs inside the leads of R1
+    // and is hidden; move R2 aside so the airwire crosses open space
+    await page.evaluate(() => {
+      const store = window.__ffp!;
+      const r2 = Object.values(store.getState().history.present.schematic.instances).find((i) => i.ref === 'R2')!.id;
+      store.apply((p) => ({ ...p, layout: { ...p.layout, placements: { ...p.layout.placements, [r2]: { ...p.layout.placements[r2]!, position: [15, 0, 30] } } } }));
+    });
     await page.waitForTimeout(300);
 
-    // click the middle of the airwire
+    // click a visible point of the airwire (parts in front of it hide it)
     const mid = await page.evaluate(() => {
       const s = window.__ffpLayout!;
       const w = s.airwires[0]!;
-      return s.project3d([(w.from.position[0] + w.to.position[0]) / 2, (w.from.position[1] + w.to.position[1]) / 2, (w.from.position[2] + w.to.position[2]) / 2]);
+      for (let t = 0.5; t < 1; t += 0.02) {
+        const p = s.project3d([0, 1, 2].map((k) => w.from.position[k]! + (w.to.position[k]! - w.from.position[k]!) * t) as [number, number, number]);
+        if (s.pickAt(p.x, p.y)?.kind === 'airwire') return p;
+      }
+      throw new Error('airwire is hidden everywhere');
     });
     await page.mouse.click(mid.x, mid.y);
     await expect(page.getByTestId('layout-info')).toContainText('Airwire');

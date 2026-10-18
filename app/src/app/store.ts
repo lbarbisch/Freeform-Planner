@@ -13,6 +13,7 @@ import {
   type Library,
   type Project,
   type Selection,
+  type Vec2,
 } from '../core';
 import { builtinLibrary } from '../library/builtin';
 import { defaultSettings, type Settings } from './settings';
@@ -20,7 +21,7 @@ import { defaultSettings, type Settings } from './settings';
 export type View = 'schematic' | 'layout' | 'library';
 
 export interface AppSelection extends Selection {
-  /** freeform wires in the 3D layout */
+  /** wires in the 3D layout */
   layoutWires: string[];
 }
 
@@ -42,6 +43,8 @@ export interface AppState {
   savedProject: Project;
   notices: Notice[];
   settings: Settings;
+  /** grid position of the mouse in the schematic, null while the schematic is not shown */
+  schematicCursor: Vec2 | null;
 }
 
 export const emptyAppSelection = (): AppSelection => ({ ...emptySelection(), layoutWires: [] });
@@ -58,6 +61,7 @@ function initialState(): AppState {
     savedProject: project,
     notices: [],
     settings: defaultSettings,
+    schematicCursor: null,
   };
 }
 

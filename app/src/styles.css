@@ -18,6 +18,11 @@
   --pin: #8b1a1a;
   --label: #1d4ed8;
   --selected: #1f6feb;
+  /* one colour per section, so the active view is recognisable at a glance */
+  --view-schematic: #15803d;
+  --view-layout: #c2410c;
+  --view-library: #7c3aed;
+  --on-view: #ffffff;
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
   color: var(--text);
@@ -45,6 +50,10 @@
     --pin: #ff8a80;
     --label: #82aaff;
     --selected: #5b9bff;
+    --view-schematic: #4ade80;
+    --view-layout: #fb923c;
+    --view-library: #c4b5fd;
+    --on-view: #12151a;
     color-scheme: dark;
   }
 }
@@ -151,12 +160,43 @@ kbd {
   gap: 6px;
   padding: 6px 10px;
   background: var(--panel);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 3px solid var(--view, var(--border));
   flex-wrap: wrap;
+}
+.app[data-view='schematic'] {
+  --view: var(--view-schematic);
+}
+.app[data-view='layout'] {
+  --view: var(--view-layout);
+}
+.app[data-view='library'] {
+  --view: var(--view-library);
+}
+/* File / Edit are plain menus, visually quieter than the view tabs */
+.menu > button {
+  background: none;
+  border-color: transparent;
+}
+.menu > button.active {
+  background: var(--panel-2);
+  border-color: var(--border);
 }
 .brand {
   font-weight: 700;
+}
+.project-name {
   margin-right: 8px;
+  padding: 3px 6px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+}
+.project-name:hover,
+.project-name:focus {
+  border-color: var(--border);
+  background: var(--bg, transparent);
 }
 .spacer {
   flex: 1;
@@ -164,7 +204,51 @@ kbd {
 .view-tabs {
   display: flex;
   gap: 4px;
-  margin-left: 12px;
+  margin-left: 8px;
+  padding-left: 12px;
+  border-left: 1px solid var(--border);
+}
+.view-tabs button {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: 600;
+  background: none;
+  border: 1px solid color-mix(in srgb, var(--tab) 45%, transparent);
+  color: var(--text);
+}
+.view-tabs button::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--tab);
+}
+.view-tabs button:hover:not(.active) {
+  border-color: var(--tab);
+  background: color-mix(in srgb, var(--tab) 12%, transparent);
+}
+.view-tabs button.active {
+  background: var(--tab);
+  border-color: var(--tab);
+  color: var(--on-view);
+}
+.view-tabs button.active::before {
+  background: var(--on-view);
+}
+.view-tabs button[data-view='schematic'] {
+  --tab: var(--view-schematic);
+}
+.view-tabs button[data-view='layout'] {
+  --tab: var(--view-layout);
+}
+.view-tabs button[data-view='library'] {
+  --tab: var(--view-library);
+}
+.status-left {
+  display: flex;
+  gap: 0;
+  white-space: pre;
 }
 .help-button {
   border-radius: 50%;
@@ -539,6 +623,55 @@ text.selected {
 .draggable {
   cursor: move;
 }
+
+/* symbol editor: selected items glow, hovered items show their hit area */
+.symbol-sheet [data-sel] {
+  cursor: pointer;
+}
+.symbol-sheet [data-sel]:hover > .hit-stroke {
+  stroke: color-mix(in srgb, var(--selected) 18%, transparent) !important;
+}
+.symbol-sheet [data-sel].selected > :is(polyline, rect, circle):not(.hit-stroke):not(.sel-halo):not(.pin-anchor) {
+  stroke: var(--selected) !important;
+}
+.symbol-sheet .sel-halo,
+.symbol-sheet .sel-halo * {
+  fill: none !important;
+  stroke: var(--selected) !important;
+  stroke-opacity: 0.35;
+  stroke-width: 0.6 !important;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+  animation: sel-pulse 1.4s ease-in-out infinite;
+}
+.symbol-sheet text.selected {
+  paint-order: stroke;
+  stroke: color-mix(in srgb, var(--selected) 30%, transparent);
+  stroke-width: 0.35;
+}
+.symbol-sheet .selected .pin-anchor {
+  fill: var(--selected);
+  opacity: 1;
+}
+@keyframes sel-pulse {
+  50% {
+    stroke-opacity: 0.15;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .symbol-sheet .sel-halo,
+  .symbol-sheet .sel-halo * {
+    animation: none;
+  }
+}
+.pin-table tr.selected-row td {
+  background: color-mix(in srgb, var(--selected) 16%, transparent);
+}
+.toolbar-label {
+  color: var(--muted);
+  font-size: 0.9em;
+}
 .symbol-preview .sym-body,
 .symbol-preview .sym-body * {
   stroke-width: 0.25;
@@ -550,27 +683,14 @@ text.selected {
 .layout-view,
 .library-view {
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto 1fr;
   height: 100%;
   min-height: 0;
-}
-.layout-view,
-.library-view {
-  grid-template-rows: auto 1fr;
 }
 .schematic-body {
   display: grid;
   grid-template-columns: 230px 1fr 280px;
   min-height: 0;
-}
-.statusbar-sheet {
-  display: flex;
-  gap: 16px;
-  padding: 2px 10px;
-  font-size: 12px;
-  color: var(--muted);
-  background: var(--panel);
-  border-top: 1px solid var(--border);
 }
 
 .part-picker {

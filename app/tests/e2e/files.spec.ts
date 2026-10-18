@@ -37,7 +37,7 @@ test.describe('files', () => {
     await page.getByRole('button', { name: 'File' }).click();
     await page.getByTestId('menu-open').click();
     await (await chooser).setFiles(join(fixtures, 'v0.1.1-transistor-blinker.legacy.json'));
-    await expect(page.getByTestId('statusbar')).toContainText('12 parts · 8 nets · 4 freeform wires');
+    await expect(page.getByTestId('statusbar')).toContainText('12 parts · 8 nets · 4 wires');
   });
 
   test('shows a readable error for invalid files', async ({ page }) => {

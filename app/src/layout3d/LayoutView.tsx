@@ -3,16 +3,19 @@ import * as THREE from 'three';
 import {
   cycleVariant,
   deriveNetlist,
+  rotateGroup,
   getTransform,
   insertLayoutWire,
   layoutWireLabel,
   removeLayoutWire,
   resetRotation,
   resolvePlacement,
-  rotate,
   round,
-  setTransform,
+  setTransforms,
+  setVariant,
+  setWireFootprint,
   translate,
+  wireFootprints,
   writeObj,
   type Airwire,
   type Vec3,
@@ -20,7 +23,7 @@ import {
 import { apply, endGesture, getState, notify, project as currentProject, select, useApp } from '../app/store';
 import { downloadBlob } from '../app/persistence';
 import { isTypingTarget } from '../app/keyboard';
-import { LayoutScene, type Pick } from './LayoutScene';
+import { LayoutScene, type Pick, type Transforms } from './LayoutScene';
 import { SpaceMouse } from './spaceMouse';
 
 type GizmoMode = 'translate' | 'rotate' | 'off';
@@ -67,7 +70,11 @@ export function LayoutView() {
           select({ layoutWires, instances: additive ? s.instances : [] });
         }
       },
-      onGizmoChange: (id, position, rotation) => apply((p) => setTransform(p, id, { position: position.map((v) => round(v, 4)) as Vec3, rotation }), `gizmo:${id}`),
+      onGizmoChange: (transforms: Transforms) => {
+        const rounded: Transforms = {};
+        for (const [id, t] of Object.entries(transforms)) rounded[id] = { position: t.position.map((v) => round(v, 4)) as Vec3, rotation: t.rotation };
+        apply((p) => setTransforms(p, rounded), `gizmo:${Object.keys(transforms).join(',')}`);
+      },
       onGizmoEnd: () => endGesture(),
     });
     scene.onFrame = () => {
@@ -181,7 +188,8 @@ export function LayoutView() {
         apply((p) => targets.reduce((acc, id) => translate(acc, id, moves[key]!), p), e.repeat ? keyId : null);
       } else if (turns[key]) {
         const [axis, d] = turns[key]!;
-        apply((p) => targets.reduce((acc, id) => rotate(acc, id, axis, d), p), e.repeat ? keyId : null);
+        // several objects turn together around their common center
+        apply((p) => rotateGroup(p, targets, axis, d), e.repeat ? keyId : null);
       } else if (key === k.resetRotation) {
         apply((p) => targets.reduce(resetRotation, p));
       } else if (key === k.swapFootprint) {
@@ -258,7 +266,9 @@ function LayoutInfo({ airwire, airwires }: { airwire: number | null; airwires: A
   const project = useApp((s) => s.history.present);
   const selection = useApp((s) => s.selection);
   const keys = useApp((s) => s.settings.keys);
+  const library = useApp((s) => s.library);
   const netlist = useMemo(() => deriveNetlist(project), [project]);
+  const shapes = useMemo(() => wireFootprints(project, library), [project, library]);
   const ids = [...selection.instances, ...selection.layoutWires];
 
   let body: React.ReactNode = <p className="muted">Nothing selected. Left-click a part, wire or airwire.</p>;
@@ -276,7 +286,7 @@ function LayoutInfo({ airwire, airwires }: { airwire: number | null; airwires: A
         <dd>
           {aw.to.label}.{aw.to.pin}
         </dd>
-        <dd className="hint">Press {keys.insertWire.toUpperCase()} to insert a freeform wire</dd>
+        <dd className="hint">Press {keys.insertWire.toUpperCase()} to insert a wire</dd>
       </dl>
     );
   } else if (ids.length === 1) {
@@ -298,14 +308,39 @@ function LayoutInfo({ airwire, airwires }: { airwire: number | null; airwires: A
               <dd>{r.instance.value}</dd>
               <dt>Footprint</dt>
               <dd>
-                {r.footprint.name} ({r.placement.variant + 1}/{r.part.variants.length})
+                <select
+                  value={Math.min(r.placement.variant, r.part.variants.length - 1)}
+                  onChange={(e) => apply((p) => setVariant(p, id, Number(e.target.value)))}
+                  disabled={r.part.variants.length < 2}
+                  aria-label="Footprint variant"
+                  data-testid="footprint-variant"
+                >
+                  {r.part.variants.map((v, i) => (
+                    <option key={i} value={i}>
+                      {i + 1}. {project.library.footprints[v.footprintId]?.name ?? v.footprintId}
+                    </option>
+                  ))}
+                </select>
               </dd>
             </>
           )}
           {wire && (
             <>
-              <dt>Shape</dt>
-              <dd>{project.library.footprints[wire.footprintId]?.name}</dd>
+              <dt>Footprint</dt>
+              <dd>
+                <select
+                  value={wire.footprintId}
+                  onChange={(e) => apply((p) => setWireFootprint(p, getState().library, id, e.target.value))}
+                  aria-label="Wire footprint"
+                  data-testid="wire-footprint"
+                >
+                  {shapes.map((f) => (
+                    <option key={f.id} value={f.id}>
+                      {f.name}
+                    </option>
+                  ))}
+                </select>
+              </dd>
             </>
           )}
           <dt>Nets</dt>
@@ -318,7 +353,11 @@ function LayoutInfo({ airwire, airwires }: { airwire: number | null; airwires: A
       );
     }
   } else if (ids.length > 1) {
-    body = <p>{ids.length} objects selected</p>;
+    body = (
+      <p>
+        {ids.length} objects selected. The gizmo moves and turns them together around their common center.
+      </p>
+    );
   }
   return <aside className="side-panel">{body}</aside>;
 }

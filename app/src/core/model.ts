@@ -17,6 +17,11 @@ const quat = z.tuple([z.number(), z.number(), z.number(), z.number()]);
 export const pinDirectionSchema = z.enum(['left', 'right', 'up', 'down']);
 export type PinDirection = z.infer<typeof pinDirectionSchema>;
 
+/** Subpart (1 = A, 2 = B, ...) a symbol item belongs to; items without one belong to subpart A.
+ * Subparts are independent: each has its own graphics and pins, pin numbers are unique across
+ * the whole symbol. */
+const unitSchema = z.number().int().positive().optional();
+
 export const symbolPinSchema = z.object({
   number: z.string().min(1),
   name: z.string(),
@@ -24,14 +29,15 @@ export const symbolPinSchema = z.object({
   at: vec2,
   dir: pinDirectionSchema,
   length: z.number().nonnegative(),
+  unit: unitSchema,
 });
 export type SymbolPin = z.infer<typeof symbolPinSchema>;
 
 export const graphicSchema = z.discriminatedUnion('kind', [
-  z.object({ kind: z.literal('line'), points: z.array(vec2).min(2), fill: z.boolean().default(false) }),
-  z.object({ kind: z.literal('rect'), from: vec2, to: vec2, fill: z.boolean().default(false) }),
-  z.object({ kind: z.literal('circle'), center: vec2, radius: z.number().positive(), fill: z.boolean().default(false) }),
-  z.object({ kind: z.literal('text'), at: vec2, text: z.string(), size: z.number().positive().default(1) }),
+  z.object({ kind: z.literal('line'), points: z.array(vec2).min(2), fill: z.boolean().default(false), unit: unitSchema }),
+  z.object({ kind: z.literal('rect'), from: vec2, to: vec2, fill: z.boolean().default(false), unit: unitSchema }),
+  z.object({ kind: z.literal('circle'), center: vec2, radius: z.number().positive(), fill: z.boolean().default(false), unit: unitSchema }),
+  z.object({ kind: z.literal('text'), at: vec2, text: z.string(), size: z.number().positive().default(1), unit: unitSchema }),
 ]);
 export type Graphic = z.infer<typeof graphicSchema>;
 
@@ -48,6 +54,8 @@ export const symbolDefSchema = z.object({
   showPinNames: z.boolean().default(false),
   /** power symbols (GND, +5V, ...) name their net and have no footprint */
   power: z.boolean().default(false),
+  /** number of subparts (e.g. the four gates of a 7400); every subpart is placed in the schematic */
+  units: z.number().int().positive().optional(),
 });
 export type SymbolDef = z.infer<typeof symbolDefSchema>;
 
@@ -77,7 +85,7 @@ export const footprintDefSchema = z.object({
   modelOffset: vec3.default([0, 0, 0]),
   modelScale: z.number().positive().default(1),
   pins: z.array(footprintPinSchema),
-  /** freeform wires are layout-only objects and never appear in the schematic */
+  /** wires are layout-only objects and never appear in the schematic */
   isWire: z.boolean().default(false),
 });
 export type FootprintDef = z.infer<typeof footprintDefSchema>;
@@ -125,6 +133,10 @@ export const symbolInstanceSchema = z.object({
   at: vec2,
   rotation: rotationSchema,
   mirror: z.boolean(),
+  /** subpart shown by this instance (multi-subpart symbols only) */
+  unit: z.number().int().positive().optional(),
+  /** instance of subpart A when this is another subpart of the same physical part */
+  parentId: z.string().min(1).optional(),
 });
 export type SymbolInstance = z.infer<typeof symbolInstanceSchema>;
 

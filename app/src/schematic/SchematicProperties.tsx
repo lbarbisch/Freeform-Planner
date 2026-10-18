@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { mirrorInstance, rotateInstance, setRef, setValue, type Netlist } from '../core';
+import { instanceSymbol, mirrorInstance, ownerOf, partInstances, rotateInstance, setRef, setValue, symbolOf, unitCount, unitName, unitOf, type Netlist } from '../core';
 import { apply, endGesture, select, useApp } from '../app/store';
 import { TextField } from '../app/fields';
 
@@ -23,10 +23,18 @@ export function SchematicProperties({ netlist, focusRef, onRenameLabel }: { netl
     const part = inst && project.library.parts[inst.partId];
     if (inst && part) {
       const isPower = project.library.symbols[part.symbolId]?.power;
+      const symbol = symbolOf(project, inst);
+      const units = symbol ? unitCount(symbol) : 1;
+      const owner = ownerOf(inst);
       body = (
         <div className="props" data-testid="instance-props">
           <h3>{part.name}</h3>
           {part.description && <p className="muted">{part.description}</p>}
+          {units > 1 && (
+            <p className="muted" data-testid="prop-unit">
+              Subpart {unitName(unitOf(inst))} of {units}. Reference and value belong to the whole part; deleting one subpart deletes all of them.
+            </p>
+          )}
           {!isPower && <TextField label="Reference" value={inst.ref} inputRef={refInput} testId="prop-ref" onCommit={(v) => apply((p) => setRef(p, inst.id, v))} />}
           <TextField label={isPower ? 'Net name' : 'Value'} value={inst.value} testId="prop-value" onCommit={(v) => apply((p) => setValue(p, inst.id, v))} />
           <div className="actions">
@@ -38,11 +46,11 @@ export function SchematicProperties({ netlist, focusRef, onRenameLabel }: { netl
               <h4>Pins</h4>
               <table className="mini">
                 <tbody>
-                  {(project.library.symbols[part.symbolId]?.pins ?? []).map((pin) => (
+                  {(instanceSymbol(project, inst)?.pins ?? []).map((pin) => (
                     <tr key={pin.number}>
                       <td>{pin.number}</td>
                       <td>{pin.name}</td>
-                      <td>{netlist.nets[netlist.netOfPin.get(`${inst.id}:${pin.number}`) ?? -1]?.name}</td>
+                      <td>{netlist.nets[netlist.netOfPin.get(`${owner}:${pin.number}`) ?? -1]?.name}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -81,7 +89,7 @@ export function SchematicProperties({ netlist, focusRef, onRenameLabel }: { netl
               <button
                 className="link"
                 title="Select the parts of this net"
-                onClick={() => select({ instances: [...new Set(net.nodes.map((n) => n.instanceId))] })}
+                onClick={() => select({ instances: [...new Set(net.nodes.flatMap((n) => partInstances(project, n.instanceId)))] })}
               >
                 <strong>{net.name}</strong>
               </button>{' '}

@@ -15,7 +15,7 @@
 ### Workflow
 
 1. **Schematic** (F1): pick parts from the library list, connect pins with wires, net labels or power symbols.
-2. **3D Layout** (F2): parts appear on a staging grid as soon as they are placed in the schematic. Arrange them; yellow airwires show what still has to be connected (minimum spanning tree per net). Insert freeform wires on airwires.
+2. **3D Layout** (F2): parts appear on a staging grid as soon as they are placed in the schematic. Arrange them; yellow airwires show what still has to be connected (minimum spanning tree per net). Insert wires on airwires.
 3. **Library** (F3): create symbols, footprints (import an OBJ/MTL model and click on it to place pin anchors) and parts that link a symbol to one or more footprint variants.
 4. **Save** (Ctrl+S) writes a `.ffp.json` project. Projects contain copies of the parts they use, so they open the same way on any machine. Unsaved work is also kept in the browser.
 
@@ -26,8 +26,8 @@
 | Rotate X / Y / Z | `W` / `S` — `D` / `A` — `E` / `Q` |
 | Reset rotation | `R` |
 | Next footprint variant | `F` |
-| Insert freeform wire | select an airwire, then `I` (was Ctrl+W, which browsers reserve) |
-| Remove freeform wire | `Del` |
+| Insert wire | select an airwire, then `I` (was Ctrl+W, which browsers reserve) |
+| Remove wire | `Del` |
 | Gizmo move / rotate | `T` / `G` |
 | Orbit / pan / zoom | right drag / middle drag / wheel |
 | Frame all | `Home` |
@@ -90,7 +90,7 @@ Convert the pickled `.ffps` file once, then open the resulting `.json` in the ap
 python tools/convert_legacy.py project my-project.ffps my-project.json
 ```
 
-The schematic is generated: one net label per connected pin, carrying the old net names. Positions, rotations, footprint choices and freeform wires are kept.
+The schematic is generated: one net label per connected pin, carrying the old net names. Positions, rotations, footprint choices and wires are kept.
 
 ---
 

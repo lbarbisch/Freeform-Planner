@@ -70,7 +70,7 @@ export const keyLabels: Record<keyof Settings['keys'], string> = {
   translateZPos: 'Move +Z',
   translateZNeg: 'Move −Z',
   swapFootprint: 'Next footprint variant',
-  insertWire: 'Insert freeform wire (airwire selected)',
+  insertWire: 'Insert wire (airwire selected)',
 };
 
 /** Merges stored settings over the defaults so new settings get default values. */

@@ -88,7 +88,7 @@ export function migrateLegacy(legacy: LegacyProject, library: LibrarySet, name =
       project.schematic.labels[labelId] = { id: labelId, at: point, name: net };
       anchor ??= { instanceId: id, pin };
     }
-    // freeform wires are stored as WIREn_1 / WIREn_2 members of the net
+    // wires are stored as WIREn_1 / WIREn_2 members of the net
     const wireNames = new Set(
       Object.keys(members)
         .filter((k) => /^WIRE\d+_\d+$/.test(k))
