@@ -71,9 +71,29 @@ jobs:
 
       - run: npx playwright install --with-deps ${{ matrix.browser }}
 
+      # Firefox (unlike Chromium/WebKit) has no built-in software WebGL. On the GPU-less runner
+      # headless Firefox finds no GL driver at all, so it runs headed inside a virtual X display
+      # (Xvfb) where Mesa's software renderer (llvmpipe) provides OpenGL.
+      - if: ${{ matrix.browser == 'firefox' }}
+        run: sudo apt-get install -y --no-install-recommends xvfb libegl1 libgl1 libgl1-mesa-dri libgbm1
+
+      - name: Check WebGL
+        run: |
+          node tools/webgl-check.ts ${{ matrix.browser }}
+          if [ "${{ matrix.browser }}" = firefox ]; then
+            HEADED=1 xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" node tools/webgl-check.ts firefox
+          fi
+
       # Screenshot baselines are per platform. Missing Linux baselines are created on the first
       # run and uploaded below; commit them to make the comparison strict from then on.
-      - run: npx playwright test --project=${{ matrix.browser }} --update-snapshots=missing
+      - name: Run end-to-end tests
+        run: |
+          if [ "${{ matrix.browser }}" = firefox ]; then
+            xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" \
+              npx playwright test --project=firefox --update-snapshots=missing --headed
+          else
+            npx playwright test --project=${{ matrix.browser }} --update-snapshots=missing
+          fi
         env:
           CI: "true"
 

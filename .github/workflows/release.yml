@@ -46,7 +46,13 @@ jobs:
       # the full end-to-end suite runs against the exact files that get released;
       # screenshot baselines must exist (no --update-snapshots here)
       - run: npx playwright install --with-deps
-      - run: npx playwright test
+      # Firefox has no built-in software WebGL: run it headed in Xvfb on Mesa's llvmpipe (see ci.yml)
+      - run: sudo apt-get install -y --no-install-recommends xvfb libegl1 libgl1 libgl1-mesa-dri libgbm1
+      - name: Run end-to-end tests
+        run: |
+          npx playwright test --project=chromium --project=webkit
+          xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" \
+            npx playwright test --project=firefox --headed
         env:
           CI: "true"
 
