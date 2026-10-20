@@ -22,7 +22,15 @@ export default defineConfig({
   },
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'], viewport: { width: 1400, height: 850 } } },
-    { name: 'firefox', use: { ...devices['Desktop Firefox'], viewport: { width: 1400, height: 850 } } },
+    {
+      name: 'firefox',
+      use: {
+        ...devices['Desktop Firefox'],
+        viewport: { width: 1400, height: 850 },
+        // headless Firefox on GPU-less Linux runners disables WebGL unless forced (software rendering)
+        launchOptions: { firefoxUserPrefs: { 'webgl.force-enabled': true } },
+      },
+    },
     { name: 'webkit', use: { ...devices['Desktop Safari'], viewport: { width: 1400, height: 850 } } },
   ],
   webServer: {
