@@ -1,7 +1,7 @@
 {
   "name": "freeform-planner",
   "private": true,
-  "version": "2.0.0-alpha.0",
+  "version": "0.2.0",
   "type": "module",
   "description": "Freeform 3D electronics layout planner with schematic and library editor",
   "license": "GPL-3.0-or-later",

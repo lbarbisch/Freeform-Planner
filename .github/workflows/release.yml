@@ -11,10 +11,10 @@ permissions:
   id-token: write
 
 jobs:
-  # ------------------------------------------------------------------ 2.0+ web app
+  # ------------------------------------------------------------------ v0.2+ web app (v0.1.x were the Python app)
   web:
     name: Test and build the web app
-    if: ${{ !startsWith(github.ref_name, 'v0.') }}
+    if: ${{ !startsWith(github.ref_name, 'v0.1.') }}
     runs-on: ubuntu-latest
     defaults:
       run:
