@@ -1,81 +1,72 @@
 name: Release
 
+# Runs only after CI succeeded on a pushed v*.*.* tag. CI does all checks and tests; the release
+# publishes exactly the build artifact CI tested and does no testing or building of its own.
 on:
-  push:
-    tags:
-      - "v*.*.*"
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
 
 permissions:
   contents: write   # create GitHub Releases and upload assets
+  actions: read     # download the build artifact from the CI run
   pages: write      # deploy the web app
   id-token: write
 
 jobs:
   # ------------------------------------------------------------------ v0.2+ web app (v0.1.x were the Python app)
   web:
-    name: Test and build the web app
-    if: ${{ !startsWith(github.ref_name, 'v0.1.') }}
+    name: Publish the web app
+    # for a tag push, head_branch is the tag name
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      startsWith(github.event.workflow_run.head_branch, 'v') &&
+      !startsWith(github.event.workflow_run.head_branch, 'v0.1.')
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: app
+    env:
+      TAG: ${{ github.event.workflow_run.head_branch }}
+      SHA: ${{ github.event.workflow_run.head_sha }}
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
         with:
-          node-version: 24
-          cache: npm
-          cache-dependency-path: app/package-lock.json
+          ref: ${{ github.event.workflow_run.head_sha }}
 
-      - run: npm ci
-
-      - name: Tag must match package.json version
+      - name: Tag must exist, point at the tested commit and match package.json version
         run: |
-          version="v$(node -p "require('./package.json').version")"
-          if [ "$version" != "${{ github.ref_name }}" ]; then
-            echo "::error::tag ${{ github.ref_name }} does not match package.json version $version"
+          git fetch --depth=1 origin "refs/tags/$TAG:refs/tags/$TAG"
+          if [ "$(git rev-list -n 1 "refs/tags/$TAG")" != "$SHA" ]; then
+            echo "::error::tag $TAG does not point at the CI-tested commit $SHA"
+            exit 1
+          fi
+          version="v$(node -p "require('./app/package.json').version")"
+          if [ "$version" != "$TAG" ]; then
+            echo "::error::tag $TAG does not match package.json version $version"
             exit 1
           fi
 
-      - run: npm run typecheck
-      - run: npm run lint
-      - run: npm run coverage
-      - run: npm run build
-
-      # the full end-to-end suite runs against the exact files that get released;
-      # screenshot baselines must exist (no --update-snapshots here)
-      - run: npx playwright install --with-deps
-      # Firefox has no built-in software WebGL: run it headed in Xvfb on Mesa's llvmpipe (see ci.yml)
-      - run: sudo apt-get install -y --no-install-recommends xvfb libegl1 libgl1 libgl1-mesa-dri libgbm1
-      - name: Run end-to-end tests
-        run: |
-          npx playwright test --project=chromium --project=webkit
-          xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" \
-            npx playwright test --project=firefox --headed
-        env:
-          CI: "true"
-
-      - name: Upload Playwright report
-        if: ${{ failure() }}
-        uses: actions/upload-artifact@v4
+      # exactly the build that CI type-checked, unit-tested and end-to-end tested
+      - uses: actions/download-artifact@v4
         with:
-          name: playwright-report
-          path: app/playwright-report
+          name: web-build
+          path: dist
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Zip the static site
-        run: cd dist && zip -r "../Freeform-Planner-${{ github.ref_name }}-web.zip" .
+        run: cd dist && zip -r "../Freeform-Planner-$TAG-web.zip" .
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          name: "Release ${{ github.ref_name }}"
-          files: app/Freeform-Planner-${{ github.ref_name }}-web.zip
+          tag_name: ${{ env.TAG }}
+          name: "Release ${{ env.TAG }}"
+          files: Freeform-Planner-${{ env.TAG }}-web.zip
           generate_release_notes: true
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: app/dist
+          path: dist
 
   pages:
     name: Deploy to GitHub Pages

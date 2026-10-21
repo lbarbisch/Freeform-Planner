@@ -3,6 +3,7 @@ name: CI
 on:
   push:
     branches: ["**"]
+    tags: ["v*.*.*"]   # a release (release.yml) is published only after CI passed on the tag
   pull_request:
     branches: ["**"]
 
