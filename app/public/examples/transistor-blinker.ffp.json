@@ -119,6 +119,22 @@
       }
      }
     ]
+   },
+   "GND": {
+    "id": "GND",
+    "name": "GND",
+    "description": "Power symbol",
+    "symbolId": "GND",
+    "defaultValue": "GND",
+    "variants": []
+   },
+   "+5V": {
+    "id": "+5V",
+    "name": "+5V",
+    "description": "Power symbol",
+    "symbolId": "+5V",
+    "defaultValue": "+5V",
+    "variants": []
    }
   },
   "symbols": {
@@ -563,6 +579,130 @@
     "showPinNumbers": false,
     "showPinNames": false,
     "power": false
+   },
+   "GND": {
+    "id": "GND",
+    "name": "GND",
+    "refPrefix": "#PWR",
+    "graphics": [
+     {
+      "kind": "line",
+      "points": [
+       [
+        0,
+        0
+       ],
+       [
+        0,
+        1
+       ]
+      ],
+      "fill": false
+     },
+     {
+      "kind": "line",
+      "points": [
+       [
+        -1,
+        1
+       ],
+       [
+        1,
+        1
+       ],
+       [
+        0,
+        2
+       ],
+       [
+        -1,
+        1
+       ]
+      ],
+      "fill": false
+     }
+    ],
+    "pins": [
+     {
+      "number": "1",
+      "name": "GND",
+      "at": [
+       0,
+       0
+      ],
+      "dir": "down",
+      "length": 0
+     }
+    ],
+    "refAt": [
+     0,
+     0
+    ],
+    "valueAt": [
+     0,
+     3.2
+    ],
+    "showPinNumbers": false,
+    "showPinNames": false,
+    "power": true
+   },
+   "+5V": {
+    "id": "+5V",
+    "name": "+5V",
+    "refPrefix": "#PWR",
+    "graphics": [
+     {
+      "kind": "line",
+      "points": [
+       [
+        0,
+        0
+       ],
+       [
+        0,
+        -1
+       ]
+      ],
+      "fill": false
+     },
+     {
+      "kind": "line",
+      "points": [
+       [
+        -1,
+        -1
+       ],
+       [
+        1,
+        -1
+       ]
+      ],
+      "fill": false
+     }
+    ],
+    "pins": [
+     {
+      "number": "1",
+      "name": "+5V",
+      "at": [
+       0,
+       0
+      ],
+      "dir": "up",
+      "length": 0
+     }
+    ],
+    "refAt": [
+     0,
+     0
+    ],
+    "valueAt": [
+     0,
+     -2
+    ],
+    "showPinNumbers": false,
+    "showPinNames": false,
+    "power": true
    }
   },
   "footprints": {
@@ -1013,10 +1153,10 @@
     "ref": "C1",
     "value": "100n",
     "at": [
-     0,
-     0
+     42,
+     -15
     ],
-    "rotation": 0,
+    "rotation": 90,
     "mirror": false
    },
    "i2": {
@@ -1025,10 +1165,10 @@
     "ref": "C2",
     "value": "100n",
     "at": [
-     24,
-     0
+     60,
+     -15
     ],
-    "rotation": 0,
+    "rotation": 90,
     "mirror": false
    },
    "i3": {
@@ -1037,10 +1177,10 @@
     "ref": "D1",
     "value": "LED",
     "at": [
-     48,
-     0
+     34,
+     -23
     ],
-    "rotation": 0,
+    "rotation": 90,
     "mirror": false
    },
    "i4": {
@@ -1049,10 +1189,10 @@
     "ref": "D2",
     "value": "LED",
     "at": [
-     72,
-     0
+     68,
+     -23
     ],
-    "rotation": 0,
+    "rotation": 90,
     "mirror": false
    },
    "i5": {
@@ -1061,8 +1201,8 @@
     "ref": "H1",
     "value": "PORT",
     "at": [
-     96,
-     0
+     77,
+     -7
     ],
     "rotation": 0,
     "mirror": false
@@ -1073,10 +1213,10 @@
     "ref": "H2",
     "value": "PORT",
     "at": [
-     120,
-     0
+     77,
+     -31
     ],
-    "rotation": 0,
+    "rotation": 180,
     "mirror": false
    },
    "i7": {
@@ -1085,8 +1225,8 @@
     "ref": "Q1",
     "value": "BC547",
     "at": [
-     0,
-     20
+     66,
+     -9
     ],
     "rotation": 0,
     "mirror": false
@@ -1097,11 +1237,11 @@
     "ref": "Q2",
     "value": "BC547",
     "at": [
-     24,
-     20
+     36,
+     -9
     ],
     "rotation": 0,
-    "mirror": false
+    "mirror": true
    },
    "i9": {
     "id": "i9",
@@ -1109,8 +1249,8 @@
     "ref": "R1",
     "value": "10k",
     "at": [
-     48,
-     20
+     34,
+     -30
     ],
     "rotation": 0,
     "mirror": false
@@ -1121,8 +1261,8 @@
     "ref": "R2",
     "value": "10k",
     "at": [
-     72,
-     20
+     68,
+     -30
     ],
     "rotation": 0,
     "mirror": false
@@ -1133,10 +1273,10 @@
     "ref": "R3",
     "value": "10k",
     "at": [
-     96,
-     20
+     57,
+     -30
     ],
-    "rotation": 0,
+    "rotation": 180,
     "mirror": false
    },
    "i12": {
@@ -1145,208 +1285,332 @@
     "ref": "R4",
     "value": "10k",
     "at": [
-     120,
-     20
+     45,
+     -30
+    ],
+    "rotation": 180,
+    "mirror": false
+   },
+   "i13": {
+    "id": "i13",
+    "partId": "GND",
+    "ref": "#PWR",
+    "value": "GND",
+    "at": [
+     34,
+     -3
+    ],
+    "rotation": 0,
+    "mirror": false
+   },
+   "i14": {
+    "id": "i14",
+    "partId": "GND",
+    "ref": "#PWR",
+    "value": "GND",
+    "at": [
+     68,
+     -3
+    ],
+    "rotation": 0,
+    "mirror": false
+   },
+   "i15": {
+    "id": "i15",
+    "partId": "GND",
+    "ref": "#PWR",
+    "value": "GND",
+    "at": [
+     77,
+     -3
+    ],
+    "rotation": 0,
+    "mirror": false
+   },
+   "i16": {
+    "id": "i16",
+    "partId": "+5V",
+    "ref": "#PWR",
+    "value": "+5V",
+    "at": [
+     77,
+     -35
+    ],
+    "rotation": 0,
+    "mirror": false
+   },
+   "i17": {
+    "id": "i17",
+    "partId": "+5V",
+    "ref": "#PWR",
+    "value": "+5V",
+    "at": [
+     34,
+     -35
+    ],
+    "rotation": 0,
+    "mirror": false
+   },
+   "i18": {
+    "id": "i18",
+    "partId": "+5V",
+    "ref": "#PWR",
+    "value": "+5V",
+    "at": [
+     57,
+     -35
+    ],
+    "rotation": 0,
+    "mirror": false
+   },
+   "i19": {
+    "id": "i19",
+    "partId": "+5V",
+    "ref": "#PWR",
+    "value": "+5V",
+    "at": [
+     68,
+     -35
+    ],
+    "rotation": 0,
+    "mirror": false
+   },
+   "i20": {
+    "id": "i20",
+    "partId": "+5V",
+    "ref": "#PWR",
+    "value": "+5V",
+    "at": [
+     45,
+     -35
     ],
     "rotation": 0,
     "mirror": false
    }
   },
-  "wires": {},
-  "labels": {
-   "l1": {
-    "id": "l1",
-    "at": [
-     120,
-     2
+  "wires": {
+   "w1": {
+    "id": "w1",
+    "a": [
+     63,
+     -15
     ],
-    "name": "/+5V"
-   },
-   "l2": {
-    "id": "l2",
-    "at": [
-     48,
-     17
-    ],
-    "name": "/+5V"
-   },
-   "l3": {
-    "id": "l3",
-    "at": [
-     72,
-     17
-    ],
-    "name": "/+5V"
-   },
-   "l4": {
-    "id": "l4",
-    "at": [
-     96,
-     23
-    ],
-    "name": "/+5V"
-   },
-   "l5": {
-    "id": "l5",
-    "at": [
-     120,
-     23
-    ],
-    "name": "/+5V"
-   },
-   "l6": {
-    "id": "l6",
-    "at": [
-     96,
-     2
-    ],
-    "name": "/GND"
-   },
-   "l7": {
-    "id": "l7",
-    "at": [
-     2,
-     24
-    ],
-    "name": "/GND"
-   },
-   "l8": {
-    "id": "l8",
-    "at": [
-     26,
-     24
-    ],
-    "name": "/GND"
-   },
-   "l9": {
-    "id": "l9",
-    "at": [
-     50,
-     0
-    ],
-    "name": "Net-(D1-A)"
-   },
-   "l10": {
-    "id": "l10",
-    "at": [
-     48,
-     23
-    ],
-    "name": "Net-(D1-A)"
-   },
-   "l11": {
-    "id": "l11",
-    "at": [
-     0,
-     -3
-    ],
-    "name": "Net-(D1-K)"
-   },
-   "l12": {
-    "id": "l12",
-    "at": [
-     44,
-     0
-    ],
-    "name": "Net-(D1-K)"
-   },
-   "l13": {
-    "id": "l13",
-    "at": [
-     26,
-     16
-    ],
-    "name": "Net-(D1-K)"
-   },
-   "l14": {
-    "id": "l14",
-    "at": [
-     74,
-     0
-    ],
-    "name": "Net-(D2-A)"
-   },
-   "l15": {
-    "id": "l15",
-    "at": [
-     72,
-     23
-    ],
-    "name": "Net-(D2-A)"
-   },
-   "l16": {
-    "id": "l16",
-    "at": [
-     24,
-     3
-    ],
-    "name": "Net-(D2-K)"
-   },
-   "l17": {
-    "id": "l17",
-    "at": [
+    "b": [
      68,
-     0
-    ],
-    "name": "Net-(D2-K)"
+     -15
+    ]
    },
-   "l18": {
-    "id": "l18",
-    "at": [
-     2,
-     16
+   "w2": {
+    "id": "w2",
+    "a": [
+     68,
+     -15
     ],
-    "name": "Net-(D2-K)"
+    "b": [
+     68,
+     -19
+    ]
    },
-   "l19": {
-    "id": "l19",
-    "at": [
-     0,
-     3
+   "w3": {
+    "id": "w3",
+    "a": [
+     40,
+     -9
     ],
-    "name": "Net-(Q1-B)"
+    "b": [
+     57,
+     -15
+    ]
    },
-   "l20": {
-    "id": "l20",
-    "at": [
-     -4,
-     20
+   "w4": {
+    "id": "w4",
+    "a": [
+     34,
+     -5
     ],
-    "name": "Net-(Q1-B)"
+    "b": [
+     34,
+     -3
+    ]
    },
-   "l21": {
-    "id": "l21",
-    "at": [
-     120,
-     17
+   "w5": {
+    "id": "w5",
+    "a": [
+     68,
+     -15
     ],
-    "name": "Net-(Q1-B)"
+    "b": [
+     68,
+     -13
+    ]
    },
-   "l22": {
-    "id": "l22",
-    "at": [
-     24,
+   "w6": {
+    "id": "w6",
+    "a": [
+     68,
      -3
     ],
-    "name": "Net-(Q2-B)"
+    "b": [
+     68,
+     -5
+    ]
    },
-   "l23": {
-    "id": "l23",
-    "at": [
-     20,
-     20
+   "w8": {
+    "id": "w8",
+    "a": [
+     45,
+     -15
     ],
-    "name": "Net-(Q2-B)"
+    "b": [
+     62,
+     -9
+    ]
    },
-   "l24": {
-    "id": "l24",
-    "at": [
-     96,
-     17
+   "w9": {
+    "id": "w9",
+    "a": [
+     34,
+     -13
     ],
-    "name": "Net-(Q2-B)"
+    "b": [
+     34,
+     -15
+    ]
+   },
+   "w10": {
+    "id": "w10",
+    "a": [
+     34,
+     -15
+    ],
+    "b": [
+     39,
+     -15
+    ]
+   },
+   "w11": {
+    "id": "w11",
+    "a": [
+     34,
+     -19
+    ],
+    "b": [
+     34,
+     -15
+    ]
+   },
+   "w12": {
+    "id": "w12",
+    "a": [
+     77,
+     -3
+    ],
+    "b": [
+     77,
+     -5
+    ]
+   },
+   "w13": {
+    "id": "w13",
+    "a": [
+     77,
+     -35
+    ],
+    "b": [
+     77,
+     -33
+    ]
+   },
+   "w14": {
+    "id": "w14",
+    "a": [
+     57,
+     -27
+    ],
+    "b": [
+     57,
+     -15
+    ]
+   },
+   "w15": {
+    "id": "w15",
+    "a": [
+     68,
+     -27
+    ],
+    "b": [
+     68,
+     -25
+    ]
+   },
+   "w16": {
+    "id": "w16",
+    "a": [
+     34,
+     -27
+    ],
+    "b": [
+     34,
+     -25
+    ]
+   },
+   "w17": {
+    "id": "w17",
+    "a": [
+     34,
+     -35
+    ],
+    "b": [
+     34,
+     -33
+    ]
+   },
+   "w18": {
+    "id": "w18",
+    "a": [
+     57,
+     -35
+    ],
+    "b": [
+     57,
+     -33
+    ]
+   },
+   "w19": {
+    "id": "w19",
+    "a": [
+     68,
+     -33
+    ],
+    "b": [
+     68,
+     -35
+    ]
+   },
+   "w20": {
+    "id": "w20",
+    "a": [
+     45,
+     -33
+    ],
+    "b": [
+     45,
+     -35
+    ]
+   },
+   "w21": {
+    "id": "w21",
+    "a": [
+     45,
+     -27
+    ],
+    "b": [
+     45,
+     -15
+    ]
    }
-  }
+  },
+  "labels": {}
  },
  "layout": {
   "placements": {
@@ -1470,9 +1734,9 @@
     ],
     "rotation": [
      0,
-     -0.707107,
+     -0.7071067811865475,
      0,
-     0.707107
+     0.7071067811865475
     ],
     "variant": 1
    },
