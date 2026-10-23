@@ -12,6 +12,8 @@ export type Transforms = Record<string, { position: Vec3; rotation: Quat }>;
 
 export interface SceneCallbacks {
   onPick: (pick: Pick, additive: boolean) => void;
+  /** parts and wires inside a rectangle dragged with the left button */
+  onBoxSelect: (ids: string[], additive: boolean) => void;
   /** live transforms of all objects moved by the gizmo */
   onGizmoChange: (transforms: Transforms) => void;
   onGizmoEnd: () => void;
@@ -326,20 +328,64 @@ export class LayoutScene {
 
   private installPicking(): void {
     const el = this.renderer.domElement;
-    let down: { x: number; y: number } | null = null;
+    // `box` is false when the press started on a gizmo handle
+    let down: { x: number; y: number; box: boolean } | null = null;
+    let boxEl: HTMLDivElement | null = null;
     el.addEventListener('pointerdown', (e) => {
-      if (e.button === 0) down = { x: e.clientX, y: e.clientY };
+      if (e.button !== 0) return;
+      down = { x: e.clientX, y: e.clientY, box: this.gizmo.axis === null };
+    });
+    el.addEventListener('pointermove', (e) => {
+      if (!down?.box || this.gizmo.dragging || Math.hypot(e.clientX - down.x, e.clientY - down.y) <= 4) return;
+      if (!boxEl) {
+        boxEl = document.createElement('div');
+        boxEl.className = 'select-box-3d';
+        this.container.appendChild(boxEl);
+        el.setPointerCapture(e.pointerId);
+      }
+      const r = this.container.getBoundingClientRect();
+      Object.assign(boxEl.style, {
+        left: `${Math.min(down.x, e.clientX) - r.left}px`,
+        top: `${Math.min(down.y, e.clientY) - r.top}px`,
+        width: `${Math.abs(e.clientX - down.x)}px`,
+        height: `${Math.abs(e.clientY - down.y)}px`,
+      });
     });
     el.addEventListener('pointerup', (e) => {
       if (e.button !== 0 || !down) return;
-      const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y);
+      const start = down;
       down = null;
+      if (boxEl) {
+        boxEl.remove();
+        boxEl = null;
+        if (el.hasPointerCapture(e.pointerId)) el.releasePointerCapture(e.pointerId);
+        const rect = { minX: Math.min(start.x, e.clientX), maxX: Math.max(start.x, e.clientX), minY: Math.min(start.y, e.clientY), maxY: Math.max(start.y, e.clientY) };
+        this.callbacks.onBoxSelect(this.idsInRect(rect), e.shiftKey || e.ctrlKey);
+        return;
+      }
+      const moved = Math.hypot(e.clientX - start.x, e.clientY - start.y);
       if (moved > 4 || this.gizmo.dragging) return;
       // the gizmo consumes clicks on its handles
       if (this.gizmo.axis !== null) return;
       this.callbacks.onPick(this.pickAt(e.clientX, e.clientY), e.shiftKey || e.ctrlKey);
     });
     el.addEventListener('contextmenu', (e) => e.preventDefault());
+  }
+
+  /** Parts and wires whose bounding box center is inside a screen rectangle (client coordinates). */
+  private idsInRect(r: { minX: number; maxX: number; minY: number; maxY: number }): string[] {
+    const ids: string[] = [];
+    const box = new THREE.Box3();
+    const center = new THREE.Vector3();
+    for (const [id, entry] of this.entries) {
+      box.setFromObject(entry.object).getCenter(center);
+      if (box.isEmpty()) entry.object.getWorldPosition(center);
+      // behind the camera
+      if (center.clone().project(this.camera).z > 1) continue;
+      const p = this.project3d(center.toArray() as Vec3);
+      if (p.x >= r.minX && p.x <= r.maxX && p.y >= r.minY && p.y <= r.maxY) ids.push(id);
+    }
+    return ids;
   }
 
   pickAt(clientX: number, clientY: number): Pick {

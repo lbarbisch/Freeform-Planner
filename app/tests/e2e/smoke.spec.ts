@@ -14,7 +14,14 @@ test('app starts without errors and every view renders', async ({ page }) => {
   await expect(page.getByTestId('lib-item-RES')).toBeVisible();
 
   await page.getByRole('button', { name: 'Help' }).click();
+  await page.getByTestId('menu-help').click();
   await expect(page.getByRole('dialog', { name: 'Help' })).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+
+  await page.getByRole('button', { name: 'Help' }).click();
+  await page.getByTestId('menu-about').click();
+  await expect(page.getByTestId('about')).toContainText(/Freeform-Planner \d+\.\d+\.\d+/);
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog')).toHaveCount(0);
 

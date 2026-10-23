@@ -250,12 +250,6 @@ kbd {
   gap: 0;
   white-space: pre;
 }
-.help-button {
-  border-radius: 50%;
-  width: 28px;
-  padding: 0;
-}
-
 .menubar {
   display: flex;
   align-items: center;
@@ -705,6 +699,11 @@ text.selected {
   height: 100%;
   min-height: 0;
 }
+/* no toolbar: the menus live in the app bar */
+.schematic-view,
+.layout-view {
+  grid-template-rows: 1fr;
+}
 .schematic-body {
   display: grid;
   grid-template-columns: 230px 1fr 280px;
@@ -779,6 +778,15 @@ text.selected {
 }
 .canvas-host canvas {
   display: block;
+}
+.select-box-3d {
+  position: absolute;
+  pointer-events: none;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border: 1px dashed var(--accent);
+}
+.transform-row {
+  margin-bottom: 8px;
 }
 .side-panel dl {
   display: grid;

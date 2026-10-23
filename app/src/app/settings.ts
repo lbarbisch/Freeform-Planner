@@ -1,4 +1,5 @@
-/** User settings, mirroring settings.py of v0.1.x. Key names follow KeyboardEvent.key (lower case). */
+/** User settings, mirroring settings.py of v0.1.x. Key names follow KeyboardEvent.key (lower case),
+ * letters may carry a `shift+` prefix. */
 
 export interface Settings {
   rotationIncrement: number;
@@ -36,7 +37,8 @@ export const defaultSettings: Settings = {
   translationIncrement: 1,
   airwireThickness: 0.2,
   keys: {
-    resetRotation: 'r',
+    // M / R pick the gizmo mode
+    resetRotation: 'shift+r',
     rotateXPos: 'w',
     rotateXNeg: 's',
     rotateYPos: 'd',
@@ -80,7 +82,24 @@ export function mergeSettings(stored: unknown): Settings {
   return {
     ...defaultSettings,
     ...s,
-    keys: { ...defaultSettings.keys, ...(s.keys ?? {}) },
+    keys: migrateKeys({ ...defaultSettings.keys, ...(s.keys ?? {}) }),
     spaceMouse: { ...defaultSettings.spaceMouse, ...(s.spaceMouse ?? {}) },
   };
+}
+
+function migrateKeys(keys: Settings['keys']): Settings['keys'] {
+  // R used to reset the rotation; it now selects the rotate gizmo
+  return keys.resetRotation === 'r' ? { ...keys, resetRotation: defaultSettings.keys.resetRotation } : keys;
+}
+
+/** The key setting a key press matches, e.g. `r` or `shift+r`. Shift is only part of the
+ * combination for letters; for other keys it already changes `key` itself. */
+export function keyCombo(e: { key: string; shiftKey: boolean }): string {
+  const key = e.key.toLowerCase();
+  return e.shiftKey && /^[a-z]$/.test(key) ? `shift+${key}` : key;
+}
+
+/** Display form of a key setting: `shift+r` -> `Shift+R`. */
+export function keyLabel(combo: string): string {
+  return combo.startsWith('shift+') ? `Shift+${combo.slice(6).toUpperCase()}` : combo.toUpperCase();
 }

@@ -46,6 +46,8 @@ export interface AppState {
   /** grid position of the mouse in the schematic, null while the schematic is not shown */
   schematicCursor: Vec2 | null;
   viewMenus: ViewMenus | null;
+  /** SpaceMouse connection of the 3D layout; null while the layout is not shown or WebHID is missing */
+  spaceMouse: { connected: boolean; connect: () => void } | null;
 }
 
 export interface MenuAction {
@@ -57,14 +59,17 @@ export interface MenuAction {
   testId?: string;
 }
 
-/** Menu entries contributed by the current view; the app bar adds them to Edit and shows Tools / View. */
+/** Menu entries contributed by the current view; the app bar adds them to File / Edit and shows Tools / View. */
 export interface ViewMenus {
-  edit: MenuAction[];
-  tools: MenuAction[];
-  view: MenuAction[];
+  /** added to the File menu */
+  file?: MenuAction[];
+  /** added to the Edit menu */
+  edit?: MenuAction[];
+  tools?: MenuAction[];
+  view?: MenuAction[];
 }
 
-export const emptyAppSelection =(): AppSelection => ({ ...emptySelection(), layoutWires: [] });
+export const emptyAppSelection = (): AppSelection => ({ ...emptySelection(), layoutWires: [] });
 
 function initialState(): AppState {
   const project = emptyProject();
@@ -80,6 +85,7 @@ function initialState(): AppState {
     settings: defaultSettings,
     schematicCursor: null,
     viewMenus: null,
+    spaceMouse: null,
   };
 }
 

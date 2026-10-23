@@ -47,7 +47,7 @@ test.describe('3D layout', () => {
     expect(after.position[1]).toBeCloseTo(before.position[1] + 1);
     expect(after.rotation).not.toEqual(before.rotation);
 
-    await page.keyboard.press('r');
+    await page.keyboard.press('Shift+R');
     after = (await getProject(page)).layout.placements[id]!;
     expect(after.rotation).toEqual([0, 0, 0, 1]);
 
@@ -90,23 +90,61 @@ test.describe('3D layout', () => {
       const s = window.__ffpLayout!;
       const w = s.airwires[0]!;
       for (let t = 0.5; t < 1; t += 0.02) {
-        const p = s.project3d([0, 1, 2].map((k) => w.from.position[k]! + (w.to.position[k]! - w.from.position[k]!) * t) as [number, number, number]);
+        const q = s.project3d([0, 1, 2].map((k) => w.from.position[k]! + (w.to.position[k]! - w.from.position[k]!) * t) as [number, number, number]);
+        // Firefox and WebKit deliver whole-pixel pointer coordinates
+        const p = { x: Math.round(q.x), y: Math.round(q.y) };
         if (s.pickAt(p.x, p.y)?.kind === 'airwire') return p;
       }
       throw new Error('airwire is hidden everywhere');
     });
     await page.mouse.click(mid.x, mid.y);
     await expect(page.getByTestId('layout-info')).toContainText('Airwire');
-    await page.keyboard.press('i');
+    await page.getByTestId('insert-wire').click();
     expect(Object.keys((await getProject(page)).layout.wires)).toHaveLength(1);
     // the wire sits on the first pin: one airwire from its other end to the second part
     await expect.poll(() => airwires(page)).toBe('1');
     await expect(page.getByTestId('layout-info')).toContainText('WIRE1');
 
-    await page.keyboard.press('Delete');
+    await page.getByTestId('delete-wire').click();
     expect(Object.keys((await getProject(page)).layout.wires)).toHaveLength(0);
     await page.keyboard.press('Control+z');
     expect(Object.keys((await getProject(page)).layout.wires)).toHaveLength(1);
+    await page.getByTestId('layout-canvas').click({ position: { x: 5, y: 5 } });
+    await page.keyboard.press('Control+a');
+    await page.keyboard.press('Delete');
+    expect(Object.keys((await getProject(page)).layout.wires)).toHaveLength(0);
+  });
+
+  test('box selection, select all and typing position and rotation', async ({ page }) => {
+    await openApp(page);
+    await openExample(page);
+    await page.waitForTimeout(300);
+    const box = (await page.getByTestId('layout-canvas').boundingBox())!;
+    await page.mouse.move(box.x + 5, box.y + 5);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 4 });
+    await page.mouse.move(box.x + box.width - 5, box.y + box.height - 5, { steps: 4 });
+    await page.mouse.up();
+    const selected = () => page.evaluate(() => window.__ffp!.getState().selection);
+    expect((await selected()).instances).toHaveLength(12);
+    expect((await selected()).layoutWires).toHaveLength(4);
+
+    await page.keyboard.press('Escape');
+    expect((await selected()).instances).toHaveLength(0);
+    await page.keyboard.press('Control+a');
+    expect((await selected()).instances).toHaveLength(12);
+    expect((await selected()).layoutWires).toHaveLength(4);
+
+    const id = await instanceId(page, 'R3');
+    await page.evaluate((i) => window.__ffp!.select({ instances: [i] }), id);
+    await page.getByTestId('position-x').fill('12.5');
+    await page.getByTestId('position-x').press('Enter');
+    await page.getByTestId('rotation-z').fill('90');
+    await page.getByTestId('rotation-z').press('Enter');
+    const t = (await getProject(page)).layout.placements[id]!;
+    expect(t.position[0]).toBe(12.5);
+    expect(t.rotation[2]).toBeCloseTo(Math.SQRT1_2);
+    expect(t.rotation[3]).toBeCloseTo(Math.SQRT1_2);
   });
 
   test('export OBJ writes all parts and airwires', async ({ page }) => {
@@ -114,6 +152,7 @@ test.describe('3D layout', () => {
     await openExample(page);
     const downloads: string[] = [];
     page.on('download', async (d) => downloads.push(readFileSync((await d.path())!, 'utf-8')));
+    await page.getByRole('button', { name: 'File' }).click();
     await page.getByTestId('export-obj').click();
     await expect.poll(() => downloads.length).toBe(2);
     const obj = downloads.find((d) => d.startsWith('# Freeform-Planner 3D scene export'))!;

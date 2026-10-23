@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import {
   cycleVariant,
@@ -11,6 +11,7 @@ import {
   resetRotation,
   resolvePlacement,
   round,
+  setTransform,
   setTransforms,
   setVariant,
   setWireFootprint,
@@ -18,11 +19,14 @@ import {
   wireFootprints,
   writeObj,
   type Airwire,
+  type Quat,
   type Vec3,
 } from '../core';
-import { apply, endGesture, getState, notify, project as currentProject, select, useApp } from '../app/store';
+import { apply, endGesture, getState, notify, project as currentProject, select, setState, useApp } from '../app/store';
 import { downloadBlob } from '../app/persistence';
+import { NumberField } from '../app/fields';
 import { isTypingTarget } from '../app/keyboard';
+import { keyCombo, keyLabel } from '../app/settings';
 import { LayoutScene, type Pick, type Transforms } from './LayoutScene';
 import { SpaceMouse } from './spaceMouse';
 
@@ -40,12 +44,11 @@ export function LayoutView() {
   const project = useApp((s) => s.history.present);
   const selection = useApp((s) => s.selection);
   const settings = useApp((s) => s.settings);
+  const spaceMouse = useApp((s) => s.spaceMouse);
   const [gizmo, setGizmo] = useState<GizmoMode>('translate');
   const [airwire, setAirwire] = useState<number | null>(null);
   const [airwires, setAirwires] = useState<Airwire[]>([]);
   const [loading, setLoading] = useState(0);
-  const [spaceMouseState, setSpaceMouseState] = useState<'unsupported' | 'idle' | 'connected'>(() => (SpaceMouse.supported ? 'idle' : 'unsupported'));
-  const spaceMouseRef = useRef<SpaceMouse | null>(null);
 
   const selectedIds = useMemo(() => new Set([...selection.instances, ...selection.layoutWires]), [selection]);
 
@@ -70,6 +73,14 @@ export function LayoutView() {
           select({ layoutWires, instances: additive ? s.instances : [] });
         }
       },
+      onBoxSelect: (ids: string[], additive: boolean) => {
+        setAirwire(null);
+        const wires = currentProject().layout.wires;
+        const s = getState().selection;
+        const instances = ids.filter((id) => !wires[id]);
+        const layoutWires = ids.filter((id) => wires[id]);
+        select(additive ? { instances: [...new Set([...s.instances, ...instances])], layoutWires: [...new Set([...s.layoutWires, ...layoutWires])] } : { instances, layoutWires });
+      },
       onGizmoChange: (transforms: Transforms) => {
         const rounded: Transforms = {};
         for (const [id, t] of Object.entries(transforms)) rounded[id] = { position: t.position.map((v) => round(v, 4)) as Vec3, rotation: t.rotation };
@@ -86,8 +97,10 @@ export function LayoutView() {
     const ro = new ResizeObserver(() => scene.resize());
     ro.observe(container);
     const sm = new SpaceMouse(scene);
-    spaceMouseRef.current = sm;
-    sm.onStatus = (connected) => setSpaceMouseState(connected ? 'connected' : 'idle');
+    // shared with the View menu and the settings dialog
+    const connect = () => void sm.request();
+    if (SpaceMouse.supported) setState({ spaceMouse: { connected: false, connect } });
+    sm.onStatus = (connected) => setState({ spaceMouse: { connected, connect } });
     void sm.reconnect();
     // frame once the first models are in
     let framed = false;
@@ -102,6 +115,7 @@ export function LayoutView() {
       window.clearInterval(frameWhenLoaded);
       ro.disconnect();
       sm.dispose();
+      setState({ spaceMouse: null });
       scene.dispose();
       sceneRef.current = null;
       if (window.__ffpLayout === scene) delete window.__ffpLayout;
@@ -116,53 +130,109 @@ export function LayoutView() {
     sceneRef.current?.selectAirwire(airwire);
   }, [project, selectedIds, gizmo, settings, airwire]);
 
-  // keyboard: same bindings as v0.1.x (configurable in settings)
+  // ---------------------------------------------------------------- actions
+
+  const insertWire = useCallback((index: number) => {
+    const aw = sceneRef.current?.airwires[index];
+    if (!aw) return;
+    const netlist = deriveNetlist(currentProject());
+    const anchor = netlist.nets.find((n) => n.name === aw.net)?.nodes[0];
+    if (!anchor) return;
+    let newId: string | null = null;
+    apply((proj) => {
+      const r = insertLayoutWire(proj, getState().library, anchor, aw.from.position);
+      newId = r.id;
+      return r.project;
+    });
+    if (newId) {
+      setAirwire(null);
+      select({ layoutWires: [newId] });
+    } else notify('warning', 'The library has no wire footprints.');
+  }, []);
+
+  const deleteWires = useCallback(() => {
+    const ids = getState().selection.layoutWires;
+    if (ids.length) apply((p) => ids.reduce(removeLayoutWire, p));
+  }, []);
+
+  const selectAll = useCallback(() => {
+    const p = currentProject();
+    setAirwire(null);
+    select({ instances: Object.keys(p.layout.placements), layoutWires: Object.keys(p.layout.wires) });
+  }, []);
+
+  const zoomToFit = useCallback(() => sceneRef.current?.frameAll(), []);
+
+  const exportObj = useCallback(() => {
+    const scene = sceneRef.current;
+    if (!scene) return;
+    const base = (getState().fileName ?? currentProject().name ?? 'layout').replace(/\.ffp\.json$|\.json$/i, '');
+    const { obj, mtl } = writeObj(scene.collectExport(), `${base}.mtl`);
+    downloadBlob(`${base}.obj`, new Blob([obj], { type: 'model/obj' }));
+    downloadBlob(`${base}.mtl`, new Blob([mtl], { type: 'text/plain' }));
+    notify('info', `Exported ${base}.obj and ${base}.mtl`);
+  }, []);
+
+  // ---------------------------------------------------------------- app bar menus
+
+  useEffect(() => {
+    setState({
+      viewMenus: {
+        file: [{ label: 'Export OBJ…', run: exportObj, testId: 'export-obj' }],
+        edit: [
+          { label: 'Select all', shortcut: 'Ctrl+A', run: selectAll },
+          { label: 'Delete wire', shortcut: 'Del', run: deleteWires },
+        ],
+        tools: [
+          { label: 'Move', shortcut: 'M', active: gizmo === 'translate', run: () => setGizmo('translate') },
+          { label: 'Rotate', shortcut: 'R', active: gizmo === 'rotate', run: () => setGizmo('rotate') },
+          { label: 'No gizmo', active: gizmo === 'off', run: () => setGizmo('off') },
+        ],
+        view: [
+          { label: 'Zoom to fit', shortcut: 'Home', run: zoomToFit },
+          ...(spaceMouse ? [{ label: spaceMouse.connected ? 'SpaceMouse connected' : 'Connect SpaceMouse…', active: spaceMouse.connected, run: spaceMouse.connect }] : []),
+        ],
+      },
+    });
+  }, [gizmo, spaceMouse, exportObj, selectAll, deleteWires, zoomToFit]);
+  useEffect(() => () => setState({ viewMenus: null }), []);
+
+  // ---------------------------------------------------------------- keyboard
+
+  // same bindings as v0.1.x (configurable in settings)
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (isTypingTarget(e.target) || e.ctrlKey || e.metaKey || e.altKey) return;
+      if (isTypingTarget(e.target) || e.altKey) return;
+      if (e.ctrlKey || e.metaKey) {
+        if (e.key.toLowerCase() === 'a') {
+          selectAll();
+          e.preventDefault();
+        }
+        return;
+      }
       const k = settings.keys;
-      const key = e.key.toLowerCase();
-      const scene = sceneRef.current;
+      const key = keyCombo(e);
       const sel = getState().selection;
       const targets = [...sel.instances.filter((id) => currentProject().layout.placements[id]), ...sel.layoutWires];
 
-      if (key === k.insertWire && airwire !== null && scene) {
-        const aw = scene.airwires[airwire];
-        if (!aw) return;
-        const p = currentProject();
-        const netlist = deriveNetlist(p);
-        const net = netlist.nets.find((n) => n.name === aw.net);
-        const anchor = net?.nodes[0];
-        if (!anchor) return;
-        let newId: string | null = null;
-        apply((proj) => {
-          const r = insertLayoutWire(proj, getState().library, anchor, aw.from.position);
-          newId = r.id;
-          return r.project;
-        });
-        if (newId) {
-          setAirwire(null);
-          select({ layoutWires: [newId] });
-        } else notify('warning', 'The library has no wire footprints.');
+      if (key === k.insertWire && airwire !== null) {
+        insertWire(airwire);
         e.preventDefault();
         return;
       }
       if ((key === 'delete' || key === 'backspace') && sel.layoutWires.length) {
-        apply((p) => sel.layoutWires.reduce(removeLayoutWire, p));
+        deleteWires();
         e.preventDefault();
         return;
       }
-      if (key === 'home') {
-        scene?.frameAll();
-        return;
-      }
+      if (key === 'home') return zoomToFit();
       if (key === 'escape') {
         setAirwire(null);
         select({});
         return;
       }
-      if (key === 't') return setGizmo('translate');
-      if (key === 'g') return setGizmo((g) => (g === 'rotate' ? 'translate' : 'rotate'));
+      if (key === 'm') return setGizmo('translate');
+      if (key === 'r') return setGizmo('rotate');
       if (targets.length === 0) return;
 
       const step = settings.translationIncrement;
@@ -204,46 +274,13 @@ export function LayoutView() {
       window.removeEventListener('keydown', onKey);
       window.removeEventListener('keyup', onKeyUp);
     };
-  }, [settings, airwire]);
-
-  const exportObj = () => {
-    const scene = sceneRef.current;
-    if (!scene) return;
-    const base = (getState().fileName ?? currentProject().name ?? 'layout').replace(/\.ffp\.json$|\.json$/i, '');
-    const { obj, mtl } = writeObj(scene.collectExport(), `${base}.mtl`);
-    downloadBlob(`${base}.obj`, new Blob([obj], { type: 'model/obj' }));
-    downloadBlob(`${base}.mtl`, new Blob([mtl], { type: 'text/plain' }));
-    notify('info', `Exported ${base}.obj and ${base}.mtl`);
-  };
+  }, [settings, airwire, insertWire, deleteWires, selectAll, zoomToFit]);
 
   return (
     <div className="layout-view">
-      <div className="toolbar" role="toolbar" aria-label="3D tools">
-        <button className={gizmo === 'translate' ? 'active' : ''} onClick={() => setGizmo('translate')} title="Move gizmo (T)">
-          Move
-        </button>
-        <button className={gizmo === 'rotate' ? 'active' : ''} onClick={() => setGizmo('rotate')} title="Rotate gizmo (G)">
-          Rotate
-        </button>
-        <button className={gizmo === 'off' ? 'active' : ''} onClick={() => setGizmo('off')} title="Hide gizmo">
-          No gizmo
-        </button>
-        <span className="sep" />
-        <button onClick={() => sceneRef.current?.frameAll()} title="Frame all (Home)">
-          Frame all
-        </button>
-        <button onClick={exportObj} data-testid="export-obj">
-          Export OBJ
-        </button>
-        {spaceMouseState !== 'unsupported' && (
-          <button onClick={() => void spaceMouseRef.current?.request()} title="Connect a 3Dconnexion SpaceMouse (WebHID)">
-            {spaceMouseState === 'connected' ? 'SpaceMouse ✓' : 'Connect SpaceMouse'}
-          </button>
-        )}
-      </div>
       <div className="layout-body">
         <div className="canvas-host" ref={containerRef} data-testid="layout-canvas" data-airwires={airwires.length} data-loading={loading} />
-        <LayoutInfo airwire={airwire} airwires={airwires} />
+        <LayoutInfo airwire={airwire} airwires={airwires} onInsertWire={insertWire} onDeleteWires={deleteWires} />
       </div>
     </div>
   );
@@ -253,16 +290,19 @@ function toggle(list: string[], id: string): string[] {
   return list.includes(id) ? list.filter((x) => x !== id) : [...list, id];
 }
 
-function fmt3(v: Vec3): string {
-  return v.map((n) => round(n, 2)).join(', ');
-}
+const AXES = ['X', 'Y', 'Z'] as const;
 
-function eulerDeg(q: [number, number, number, number]): string {
+function eulerDeg(q: Quat): Vec3 {
   const e = new THREE.Euler().setFromQuaternion(new THREE.Quaternion(...q), 'XYZ');
-  return [e.x, e.y, e.z].map((r) => round(THREE.MathUtils.radToDeg(r), 1)).join(', ');
+  return [e.x, e.y, e.z].map((r) => round(THREE.MathUtils.radToDeg(r), 2)) as Vec3;
 }
 
-function LayoutInfo({ airwire, airwires }: { airwire: number | null; airwires: Airwire[] }) {
+function quatFromEulerDeg(deg: Vec3): Quat {
+  const [x, y, z] = deg.map((d) => THREE.MathUtils.degToRad(d)) as Vec3;
+  return new THREE.Quaternion().setFromEuler(new THREE.Euler(x, y, z, 'XYZ')).toArray() as Quat;
+}
+
+function LayoutInfo({ airwire, airwires, onInsertWire, onDeleteWires }: { airwire: number | null; airwires: Airwire[]; onInsertWire: (index: number) => void; onDeleteWires: () => void }) {
   const project = useApp((s) => s.history.present);
   const selection = useApp((s) => s.selection);
   const keys = useApp((s) => s.settings.keys);
@@ -271,23 +311,29 @@ function LayoutInfo({ airwire, airwires }: { airwire: number | null; airwires: A
   const shapes = useMemo(() => wireFootprints(project, library), [project, library]);
   const ids = [...selection.instances, ...selection.layoutWires];
 
-  let body: React.ReactNode = <p className="muted">Nothing selected. Left-click a part, wire or airwire.</p>;
+  let body: React.ReactNode = <p className="muted">Nothing selected. Left-click a part, wire or airwire, or drag a box to select several.</p>;
   const aw = airwire !== null ? airwires[airwire] : undefined;
   if (aw) {
     body = (
-      <dl data-testid="layout-info">
-        <dt>Airwire</dt>
-        <dd>{aw.net}</dd>
-        <dt>From</dt>
-        <dd>
-          {aw.from.label}.{aw.from.pin}
-        </dd>
-        <dt>To</dt>
-        <dd>
-          {aw.to.label}.{aw.to.pin}
-        </dd>
-        <dd className="hint">Press {keys.insertWire.toUpperCase()} to insert a wire</dd>
-      </dl>
+      <>
+        <dl data-testid="layout-info">
+          <dt>Airwire</dt>
+          <dd>{aw.net}</dd>
+          <dt>From</dt>
+          <dd>
+            {aw.from.label}.{aw.from.pin}
+          </dd>
+          <dt>To</dt>
+          <dd>
+            {aw.to.label}.{aw.to.pin}
+          </dd>
+        </dl>
+        <div className="actions">
+          <button onClick={() => onInsertWire(airwire!)} title={`Insert a wire on this airwire (${keyLabel(keys.insertWire)})`} data-testid="insert-wire">
+            Insert wire
+          </button>
+        </div>
+      </>
     );
   } else if (ids.length === 1) {
     const id = ids[0]!;
@@ -298,65 +344,108 @@ function LayoutInfo({ airwire, airwires }: { airwire: number | null; airwires: A
       const netNames = r
         ? [...new Set(r.part.variants.length ? Object.keys(r.variant.pinMap).map((pin) => netlist.nets[netlist.netOfPin.get(`${id}:${pin}`) ?? -1]?.name).filter(Boolean) : [])]
         : [netlist.nets[netlist.netOfPin.get(`${wire!.netAnchor.instanceId}:${wire!.netAnchor.pin}`) ?? -1]?.name ?? '(no net)'];
+      const euler = eulerDeg(t.rotation);
       body = (
-        <dl data-testid="layout-info">
-          <dt>Designator</dt>
-          <dd>{r ? r.instance.ref : layoutWireLabel(project, id)}</dd>
-          {r && (
-            <>
-              <dt>Value</dt>
-              <dd>{r.instance.value}</dd>
-              <dt>Footprint</dt>
-              <dd>
-                <select
-                  value={Math.min(r.placement.variant, r.part.variants.length - 1)}
-                  onChange={(e) => apply((p) => setVariant(p, id, Number(e.target.value)))}
-                  disabled={r.part.variants.length < 2}
-                  aria-label="Footprint variant"
-                  data-testid="footprint-variant"
-                >
-                  {r.part.variants.map((v, i) => (
-                    <option key={i} value={i}>
-                      {i + 1}. {project.library.footprints[v.footprintId]?.name ?? v.footprintId}
-                    </option>
-                  ))}
-                </select>
-              </dd>
-            </>
-          )}
+        <>
+          <dl data-testid="layout-info">
+            <dt>Designator</dt>
+            <dd>{r ? r.instance.ref : layoutWireLabel(project, id)}</dd>
+            {r && (
+              <>
+                <dt>Value</dt>
+                <dd>{r.instance.value}</dd>
+                <dt>Footprint</dt>
+                <dd>
+                  <select
+                    value={Math.min(r.placement.variant, r.part.variants.length - 1)}
+                    onChange={(e) => apply((p) => setVariant(p, id, Number(e.target.value)))}
+                    disabled={r.part.variants.length < 2}
+                    aria-label="Footprint variant"
+                    data-testid="footprint-variant"
+                  >
+                    {r.part.variants.map((v, i) => (
+                      <option key={i} value={i}>
+                        {i + 1}. {project.library.footprints[v.footprintId]?.name ?? v.footprintId}
+                      </option>
+                    ))}
+                  </select>
+                </dd>
+              </>
+            )}
+            {wire && (
+              <>
+                <dt>Footprint</dt>
+                <dd>
+                  <select
+                    value={wire.footprintId}
+                    onChange={(e) => apply((p) => setWireFootprint(p, getState().library, id, e.target.value))}
+                    aria-label="Wire footprint"
+                    data-testid="wire-footprint"
+                  >
+                    {shapes.map((f) => (
+                      <option key={f.id} value={f.id}>
+                        {f.name}
+                      </option>
+                    ))}
+                  </select>
+                </dd>
+              </>
+            )}
+            <dt>Nets</dt>
+            <dd>{netNames.join(', ') || '–'}</dd>
+          </dl>
+          <h4>Position (mm)</h4>
+          <div className="row transform-row">
+            {AXES.map((axis, i) => (
+              <NumberField
+                key={axis}
+                compact
+                label={axis}
+                value={round(t.position[i]!, 4)}
+                testId={`position-${axis.toLowerCase()}`}
+                onCommit={(v) => apply((p) => setTransform(p, id, { position: t.position.map((c, j) => (j === i ? v : c)) as Vec3 }))}
+              />
+            ))}
+          </div>
+          <h4>Rotation (°)</h4>
+          <div className="row transform-row">
+            {AXES.map((axis, i) => (
+              <NumberField
+                key={axis}
+                compact
+                step={15}
+                label={axis}
+                value={euler[i]!}
+                testId={`rotation-${axis.toLowerCase()}`}
+                onCommit={(v) => apply((p) => setTransform(p, id, { rotation: quatFromEulerDeg(euler.map((c, j) => (j === i ? v : c)) as Vec3) }))}
+              />
+            ))}
+          </div>
           {wire && (
-            <>
-              <dt>Footprint</dt>
-              <dd>
-                <select
-                  value={wire.footprintId}
-                  onChange={(e) => apply((p) => setWireFootprint(p, getState().library, id, e.target.value))}
-                  aria-label="Wire footprint"
-                  data-testid="wire-footprint"
-                >
-                  {shapes.map((f) => (
-                    <option key={f.id} value={f.id}>
-                      {f.name}
-                    </option>
-                  ))}
-                </select>
-              </dd>
-            </>
+            <div className="actions">
+              <button onClick={onDeleteWires} title="Delete this wire (Del)" data-testid="delete-wire">
+                Delete wire
+              </button>
+            </div>
           )}
-          <dt>Nets</dt>
-          <dd>{netNames.join(', ') || '–'}</dd>
-          <dt>Position</dt>
-          <dd>{fmt3(t.position)}</dd>
-          <dt>Rotation (XYZ°)</dt>
-          <dd>{eulerDeg(t.rotation)}</dd>
-        </dl>
+        </>
       );
     }
   } else if (ids.length > 1) {
+    const wireCount = selection.layoutWires.length;
     body = (
-      <p>
-        {ids.length} objects selected. The gizmo moves and turns them together around their common center.
-      </p>
+      <>
+        <p>
+          {ids.length} objects selected. The gizmo moves and turns them together around their common center.
+        </p>
+        {wireCount > 0 && (
+          <div className="actions">
+            <button onClick={onDeleteWires} data-testid="delete-wire">
+              Delete {wireCount} wire{wireCount === 1 ? '' : 's'}
+            </button>
+          </div>
+        )}
+      </>
     );
   }
   return <aside className="side-panel">{body}</aside>;

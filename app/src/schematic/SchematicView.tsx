@@ -378,9 +378,6 @@ export function SchematicView() {
 
   return (
     <div className="schematic-view">
-      <div className="toolbar">
-        <span className="toolbar-hint">{toolHint(tool, draft !== null, horizontalFirst)}</span>
-      </div>
       <div className="schematic-body">
         <PartPicker active={tool.kind === 'place' ? tool.partId : null} onPick={(partId) => switchTool({ kind: 'place', partId, rotation: 0, mirror: false })} />
         <svg
@@ -471,19 +468,6 @@ export function SchematicView() {
       )}
     </div>
   );
-}
-
-function toolHint(tool: Tool, drafting: boolean, horizontalFirst: boolean): string {
-  switch (tool.kind) {
-    case 'select':
-      return 'Drag to move · Shift-click to add · Right/middle-drag to pan · Wheel to zoom';
-    case 'wire':
-      return drafting ? `Click to add a corner (${horizontalFirst ? 'horizontal' : 'vertical'} first, / to toggle) · double-click or Esc to finish` : 'Click to start a wire';
-    case 'label':
-      return 'Click on a wire end or pin to place a net label';
-    case 'place':
-      return 'Click to place · R rotate · X mirror · Esc to stop';
-  }
 }
 
 /** NET1 -> NET2, keeps names without a trailing number. */

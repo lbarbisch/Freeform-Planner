@@ -8,8 +8,11 @@ const LibraryView = lazy(() => import('../library-ui/LibraryView').then((m) => (
 import { Modal } from './Dialog';
 import { newProject, openExample, openProject, saveProject } from './fileActions';
 import { isTypingTarget } from './keyboard';
-import { defaultSettings, keyLabels, type Settings } from './settings';
+import { defaultSettings, keyCombo, keyLabel, keyLabels, type Settings } from './settings';
 import { apply, dismissNotice, isDirty, redo, setState, setView, undo, useApp, type MenuAction, type View } from './store';
+
+/** from package.json, see vite.config.ts */
+declare const __APP_VERSION__: string;
 
 const VIEWS: { id: View; label: string; key: string }[] = [
   { id: 'schematic', label: 'Schematic', key: 'F1' },
@@ -19,7 +22,7 @@ const VIEWS: { id: View; label: string; key: string }[] = [
 
 export function App() {
   const view = useApp((s) => s.view);
-  const [dialog, setDialog] = useState<'help' | 'settings' | null>(null);
+  const [dialog, setDialog] = useState<'help' | 'settings' | 'about' | null>(null);
   const dirty = useApp(isDirty);
   const viewMenus = useApp((s) => s.viewMenus);
 
@@ -79,6 +82,12 @@ export function App() {
             <button onClick={() => void saveProject(true)}>
               Save as… <kbd>Ctrl+Shift+S</kbd>
             </button>
+            {viewMenus?.file?.length ? (
+              <>
+                <hr className="menu-sep" />
+                <MenuActions actions={viewMenus.file} />
+              </>
+            ) : null}
           </Menu>
           <Menu label="Edit">
             <button onClick={undo}>
@@ -87,25 +96,33 @@ export function App() {
             <button onClick={redo}>
               Redo <kbd>Ctrl+Y</kbd>
             </button>
-            {viewMenus && viewMenus.edit.length > 0 && (
+            {viewMenus?.edit?.length ? (
               <>
                 <hr className="menu-sep" />
                 <MenuActions actions={viewMenus.edit} />
                 <hr className="menu-sep" />
               </>
-            )}
+            ) : null}
             <button onClick={() => setDialog('settings')}>Settings…</button>
           </Menu>
-          {viewMenus && viewMenus.tools.length > 0 && (
+          {viewMenus?.tools?.length ? (
             <Menu label="Tools">
               <MenuActions actions={viewMenus.tools} />
             </Menu>
-          )}
-          {viewMenus && viewMenus.view.length > 0 && (
+          ) : null}
+          {viewMenus?.view?.length ? (
             <Menu label="View">
               <MenuActions actions={viewMenus.view} />
             </Menu>
-          )}
+          ) : null}
+          <Menu label="Help">
+            <button onClick={() => setDialog('help')} data-testid="menu-help">
+              Help <kbd>?</kbd>
+            </button>
+            <button onClick={() => setDialog('about')} data-testid="menu-about">
+              About Freeform-Planner…
+            </button>
+          </Menu>
         </MenuBar>
         <nav className="view-tabs" role="tablist" aria-label="Views">
           {VIEWS.map((v) => (
@@ -114,10 +131,6 @@ export function App() {
             </button>
           ))}
         </nav>
-        <span className="spacer" />
-        <button className="help-button" onClick={() => setDialog('help')} aria-label="Help">
-          ?
-        </button>
       </header>
       <main className="workspace">
         {view === 'schematic' && <SchematicView />}
@@ -130,6 +143,7 @@ export function App() {
       <Notices />
       {dialog === 'help' && <HelpDialog onClose={() => setDialog(null)} />}
       {dialog === 'settings' && <SettingsDialog onClose={() => setDialog(null)} />}
+      {dialog === 'about' && <AboutDialog onClose={() => setDialog(null)} />}
     </div>
   );
 }
@@ -287,7 +301,7 @@ function Notices() {
 
 function HelpDialog({ onClose }: { onClose: () => void }) {
   const keys = useApp((s) => s.settings.keys);
-  const k = (key: string) => <kbd>{key.toUpperCase()}</kbd>;
+  const k = (key: string) => <kbd>{keyLabel(key)}</kbd>;
   return (
     <Modal title="Help" onClose={onClose} wide>
       <div className="help">
@@ -313,7 +327,8 @@ function HelpDialog({ onClose }: { onClose: () => void }) {
         <section>
           <h3>3D Layout</h3>
           <ul>
-            <li>Left click to select (Shift or Ctrl-click to select several; they move and turn together) · right drag to orbit · middle drag to pan · wheel to zoom · {k('Home')} frame all</li>
+            <li>Left click to select (Shift or Ctrl-click to select several; they move and turn together) · left drag to box-select · {k('Ctrl+A')} select all</li>
+            <li>Right drag to orbit · middle drag to pan · wheel to zoom · {k('Home')} zoom to fit</li>
             <li>
               Move: {k(keys.translateXPos)}/{k(keys.translateXNeg)} X · {k(keys.translateYPos)}/{k(keys.translateYNeg)} Y · {k(keys.translateZPos)}/{k(keys.translateZNeg)} Z
             </li>
@@ -323,8 +338,8 @@ function HelpDialog({ onClose }: { onClose: () => void }) {
             <li>
               {k(keys.swapFootprint)} next footprint variant · select an airwire and press {k(keys.insertWire)} to insert a wire · {k('Del')} removes a selected wire
             </li>
-            <li>Or drag the gizmo ({k('T')} move, {k('G')} toggle move/rotate)</li>
-            <li>SpaceMouse: Chromium browsers via WebHID, use “Connect SpaceMouse” once</li>
+            <li>Or drag the gizmo ({k('M')} move, {k('R')} rotate); position and rotation can also be typed in the panel on the right</li>
+            <li>SpaceMouse: Chromium browsers via WebHID, use View → Connect SpaceMouse once</li>
           </ul>
         </section>
         <section>
@@ -351,6 +366,7 @@ function SettingsDialog({ onClose }: { onClose: () => void }) {
           <NumberSetting label="Translation step (mm)" value={settings.translationIncrement} onChange={(translationIncrement) => set({ translationIncrement })} />
           <NumberSetting label="Airwire thickness (mm)" value={settings.airwireThickness} onChange={(airwireThickness) => set({ airwireThickness })} />
           <h3>SpaceMouse</h3>
+          <SpaceMouseStatus />
           <label className="field check">
             <input type="checkbox" checked={settings.spaceMouse.enabled} onChange={(e) => set({ spaceMouse: { ...settings.spaceMouse, enabled: e.target.checked } })} />
             <span>Enabled</span>
@@ -365,12 +381,12 @@ function SettingsDialog({ onClose }: { onClose: () => void }) {
             <label key={id} className="field">
               <span>{keyLabels[id]}</span>
               <input
-                value={settings.keys[id]}
+                value={keyLabel(settings.keys[id])}
                 maxLength={12}
                 onKeyDown={(e) => {
                   if (e.key === 'Tab') return;
                   e.preventDefault();
-                  if (e.key.length === 1 || /^(Home|End|Insert|Delete|F\d+)$/.test(e.key)) set({ keys: { ...settings.keys, [id]: e.key.toLowerCase() } });
+                  if (e.key.length === 1 || /^(Home|End|Insert|Delete|F\d+)$/.test(e.key)) set({ keys: { ...settings.keys, [id]: keyCombo(e) } });
                 }}
                 onChange={() => undefined}
                 aria-label={keyLabels[id]}
@@ -383,6 +399,50 @@ function SettingsDialog({ onClose }: { onClose: () => void }) {
         <button onClick={() => set(defaultSettings)}>Restore defaults</button>
         <button className="primary" onClick={onClose}>
           Done
+        </button>
+      </div>
+    </Modal>
+  );
+}
+
+function SpaceMouseStatus() {
+  const spaceMouse = useApp((s) => s.spaceMouse);
+  let status: React.ReactNode;
+  if (!('hid' in navigator)) status = 'Not supported by this browser (needs WebHID: Chrome, Edge or another Chromium browser).';
+  else if (spaceMouse?.connected) status = 'Connected ✓';
+  else if (spaceMouse)
+    status = (
+      <>
+        Not connected. <button onClick={spaceMouse.connect}>Connect SpaceMouse…</button>
+      </>
+    );
+  else status = 'Not connected. Open the 3D Layout to connect it.';
+  return (
+    <p className="muted" data-testid="spacemouse-status">
+      {status}
+    </p>
+  );
+}
+
+function AboutDialog({ onClose }: { onClose: () => void }) {
+  return (
+    <Modal title="About Freeform-Planner" onClose={onClose}>
+      <div className="about" data-testid="about">
+        <p>
+          <b>Freeform-Planner</b> {__APP_VERSION__}
+        </p>
+        <p>A browser app for planning freeform / point-to-point electronic circuits. Draw a schematic, place the components in 3D space and follow the airwires until everything is connected.</p>
+        <p>
+          Source code and releases:{' '}
+          <a href="https://github.com/lbarbisch/Freeform-Planner" target="_blank" rel="noreferrer">
+            github.com/lbarbisch/Freeform-Planner
+          </a>
+        </p>
+        <p className="muted">Licensed under the GNU General Public License v3.0 or later.</p>
+      </div>
+      <div className="actions">
+        <button className="primary" onClick={onClose}>
+          Close
         </button>
       </div>
     </Modal>
