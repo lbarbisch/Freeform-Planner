@@ -101,6 +101,8 @@ export const partDefSchema = z.object({
   id: z.string().min(1),
   name: z.string(),
   description: z.string().default(''),
+  /** category the part is listed under, e.g. Passives, Transistors; missing = Other */
+  group: z.string().optional(),
   symbolId: z.string().min(1),
   defaultValue: z.string(),
   variants: z.array(partVariantSchema),

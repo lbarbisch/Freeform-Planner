@@ -63,6 +63,31 @@ test.describe('library editor', () => {
     await expect(page.getByRole('alert')).toContainText('used by BC547, BC557, BC847');
   });
 
+  test('part groups show up in the schematic part list', async ({ page }) => {
+    await openApp(page);
+    await page.keyboard.press('F3');
+    await page.getByTestId('lib-item-RES').click();
+    await expect(page.getByTestId('part-group')).toHaveValue('Passives');
+    await page.getByTestId('part-group').fill('Logic');
+    await page.getByTestId('part-group').press('Enter');
+    await page.keyboard.press('F1');
+    await expect(page.locator('.part-picker section', { has: page.getByRole('heading', { name: 'Logic' }) }).getByTestId('part-RES')).toBeVisible();
+  });
+
+  test('footprint: pick a built-in model and type its rotation', async ({ page }) => {
+    await openApp(page);
+    await page.keyboard.press('F3');
+    await page.getByRole('tab', { name: /Footprints/ }).click();
+    await page.getByTestId('lib-new').click();
+    await page.getByTestId('footprint-model').selectOption('models/TO92');
+    await page.getByTestId('model-rotation-z').fill('90');
+    await page.getByTestId('model-rotation-z').press('Enter');
+    const fp = await page.evaluate(() => window.__ffp!.getState().library.footprints['NEW_FOOTPRINT']!);
+    expect(fp.model).toEqual({ kind: 'asset', path: 'models/TO92' });
+    expect(fp.modelRotation[2]).toBeCloseTo(Math.SQRT1_2);
+    expect(fp.modelRotation[3]).toBeCloseTo(Math.SQRT1_2);
+  });
+
   test('library changes persist across reloads', async ({ page }) => {
     await openApp(page);
     await page.keyboard.press('F3');

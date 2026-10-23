@@ -2,7 +2,7 @@
 import * as THREE from 'three';
 import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
-import type { FootprintDef, ModelSource } from '../core';
+import { round, type FootprintDef, type ModelSource, type Quat, type Vec3 } from '../core';
 
 const cache = new Map<string, Promise<THREE.Group>>();
 
@@ -95,6 +95,26 @@ export function cloneWithMaterials(template: THREE.Object3D): THREE.Object3D {
 }
 
 /** Applies the footprint's model transform to a model clone. */
+/** Rotation as XYZ Euler angles in degrees, for editing in the properties panels. */
+export function eulerDeg(q: Quat): Vec3 {
+  const e = new THREE.Euler().setFromQuaternion(new THREE.Quaternion(...q), 'XYZ');
+  const [x, y, z] = [e.x, e.y, e.z].map((r) => THREE.MathUtils.radToDeg(r)) as Vec3;
+  // (x+180, 180-y, z+180) is the same rotation; show whichever has the smaller angles,
+  // e.g. Y 180 instead of X -180, Z -180
+  const wrap = (d: number) => {
+    const w = ((d % 360) + 360) % 360;
+    return w > 180 ? w - 360 : w;
+  };
+  const alt: Vec3 = [wrap(x + 180), wrap(180 - y), wrap(z + 180)];
+  const size = (v: Vec3) => v.reduce((s, d) => s + Math.abs(d), 0);
+  return (size(alt) + 1e-6 < size([x, y, z]) ? alt : [x, y, z]).map((d) => round(d, 2) + 0) as Vec3;
+}
+
+export function quatFromEulerDeg(deg: Vec3): Quat {
+  const [x, y, z] = deg.map((d) => THREE.MathUtils.degToRad(d)) as Vec3;
+  return new THREE.Quaternion().setFromEuler(new THREE.Euler(x, y, z, 'XYZ')).toArray() as Quat;
+}
+
 export function applyModelTransform(model: THREE.Object3D, fp: FootprintDef): void {
   model.quaternion.set(...fp.modelRotation);
   model.position.set(...fp.modelOffset);

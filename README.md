@@ -112,7 +112,7 @@ app/tests/e2e/       Playwright end-to-end and screenshot tests
 - **Golden corpus:** `app/fixtures/` holds project files of every released format version. Every build must still load them, and the v0.1.1 example must produce the same airwires the Python version computed.
 - **Example project:** `app/public/examples/` must load without warnings and save back unchanged.
 - **Screenshot tests** catch rendering changes. Baselines are stored per platform under `app/tests/e2e/__screenshots__/`. The first CI run on Linux uploads missing baselines as the `screenshot-baselines-linux` artifact; commit them to make the comparison strict.
-- **Release:** push a tag `vX.Y.Z` that matches the version in `app/package.json`. Once CI has passed on that tag, the release workflow publishes exactly the tested build as a zip on GitHub Releases and deploys it to GitHub Pages.
+- **Release:** push a tag `vX.Y.Z`. CI builds the tag with that version (shown in Help ▸ About); `app/package.json` does not need to be changed. Once CI has passed on that tag, the release workflow publishes exactly the tested build as a zip on GitHub Releases and deploys it to GitHub Pages.
 - Format changes need a migration in `app/src/core/fileFormat.ts` and a new fixture. Bug fixes come with a regression test.
 
 ---

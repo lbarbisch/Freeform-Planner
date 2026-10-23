@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   autoPinMap,
   duplicateItem,
+  groupParts,
   mergeLibraries,
   newFootprint,
   newPart,
@@ -58,6 +59,15 @@ describe('library commands', () => {
     const l = lib();
     const fp = { ...l.footprints.R_LONG!, pins: [l.footprints.R_LONG!.pins[0]!] };
     expect(autoPinMap(l.symbols.R!, fp)).toEqual({ '1': '1' });
+  });
+
+  it('groups parts, power symbols under Power and ungrouped parts under Other', () => {
+    const l = lib();
+    const parts = Object.values(l.parts).map((p) => ({ ...p, group: p.id === 'RES' ? 'Passives' : '' }));
+    const groups = groupParts(l, parts);
+    expect(groups.map((g) => g.group)).toEqual(['Passives', 'Power', 'Other']);
+    expect(groups[0]!.parts.map((p) => p.id)).toEqual(['RES']);
+    expect(groups[1]!.parts.map((p) => p.id)).toEqual(['GND']);
   });
 
   it('merges libraries', () => {

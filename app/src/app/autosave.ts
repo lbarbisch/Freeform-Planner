@@ -61,5 +61,11 @@ export async function startPersistence(): Promise<() => void> {
 /** Built-in items added in newer app versions appear in existing user libraries. */
 function withNewBuiltins(lib: Library): Library {
   const add = <K extends 'symbols' | 'footprints' | 'parts'>(kind: K) => ({ ...builtinLibrary[kind], ...lib[kind] });
-  return { ...lib, symbols: add('symbols'), footprints: add('footprints'), parts: add('parts') };
+  const parts = add('parts');
+  // part groups came later: built-in parts stored without one get the built-in group
+  for (const [id, part] of Object.entries(parts)) {
+    const group = builtinLibrary.parts[id]?.group;
+    if (!part.group && group) parts[id] = { ...part, group };
+  }
+  return { ...lib, symbols: add('symbols'), footprints: add('footprints'), parts };
 }

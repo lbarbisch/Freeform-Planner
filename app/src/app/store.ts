@@ -46,7 +46,7 @@ export interface AppState {
   /** grid position of the mouse in the schematic, null while the schematic is not shown */
   schematicCursor: Vec2 | null;
   viewMenus: ViewMenus | null;
-  /** SpaceMouse connection of the 3D layout; null while the layout is not shown or WebHID is missing */
+  /** SpaceMouse connection; null while no 3D view (layout, footprint editor) is shown or WebHID is missing */
   spaceMouse: { connected: boolean; connect: () => void } | null;
 }
 

@@ -416,7 +416,7 @@ function SpaceMouseStatus() {
         Not connected. <button onClick={spaceMouse.connect}>Connect SpaceMouse…</button>
       </>
     );
-  else status = 'Not connected. Open the 3D Layout to connect it.';
+  else status = 'Not connected. Open the 3D Layout or a footprint in the Library to connect it.';
   return (
     <p className="muted" data-testid="spacemouse-status">
       {status}

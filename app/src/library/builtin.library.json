@@ -2229,6 +2229,7 @@
    "id": "GND",
    "name": "GND",
    "description": "Power symbol",
+   "group": "Power",
    "symbolId": "GND",
    "defaultValue": "GND",
    "variants": []
@@ -2237,6 +2238,7 @@
    "id": "VCC",
    "name": "VCC",
    "description": "Power symbol",
+   "group": "Power",
    "symbolId": "VCC",
    "defaultValue": "VCC",
    "variants": []
@@ -2245,6 +2247,7 @@
    "id": "+5V",
    "name": "+5V",
    "description": "Power symbol",
+   "group": "Power",
    "symbolId": "+5V",
    "defaultValue": "+5V",
    "variants": []
@@ -2253,6 +2256,7 @@
    "id": "+3V3",
    "name": "+3V3",
    "description": "Power symbol",
+   "group": "Power",
    "symbolId": "+3V3",
    "defaultValue": "+3V3",
    "variants": []
@@ -2261,6 +2265,7 @@
    "id": "+12V",
    "name": "+12V",
    "description": "Power symbol",
+   "group": "Power",
    "symbolId": "+12V",
    "defaultValue": "+12V",
    "variants": []
@@ -2269,6 +2274,7 @@
    "id": "BC847",
    "name": "BC847",
    "description": "NPN transistor, base/emitter/collector",
+   "group": "Transistors",
    "symbolId": "BC847",
    "defaultValue": "BC847",
    "variants": [
@@ -2294,6 +2300,7 @@
    "id": "LED5MM",
    "name": "LED5MM",
    "description": "LED, 5mm",
+   "group": "Diodes",
    "symbolId": "LED5MM",
    "defaultValue": "LED",
    "variants": [
@@ -2317,6 +2324,7 @@
    "id": "RES",
    "name": "RES",
    "description": "Resistor",
+   "group": "Passives",
    "symbolId": "RES",
    "defaultValue": "10k",
    "variants": [
@@ -2347,6 +2355,7 @@
    "id": "CAP",
    "name": "CAP",
    "description": "Unpolarized capacitor",
+   "group": "Passives",
    "symbolId": "CAP",
    "defaultValue": "100n",
    "variants": [
@@ -2370,6 +2379,7 @@
    "id": "PORT",
    "name": "PORT",
    "description": "Mounting Hole with connection",
+   "group": "Connectors",
    "symbolId": "PORT",
    "defaultValue": "PORT",
    "variants": [
@@ -2385,6 +2395,7 @@
    "id": "DIODE",
    "name": "DIODE",
    "description": "1000V 1A General Purpose Rectifier Diode, DO-41",
+   "group": "Diodes",
    "symbolId": "DIODETHT",
    "defaultValue": "1N4148",
    "variants": [
@@ -2401,6 +2412,7 @@
    "id": "BC547",
    "name": "BC547",
    "description": "NPN transistor, collector/base/emitter",
+   "group": "Transistors",
    "symbolId": "BC547",
    "defaultValue": "BC547",
    "variants": [
@@ -2426,6 +2438,7 @@
    "id": "BC557",
    "name": "BC557",
    "description": "PNP transistor, collector/base/emitter",
+   "group": "Transistors",
    "symbolId": "BC557",
    "defaultValue": "BC557",
    "variants": [
@@ -2451,6 +2464,7 @@
    "id": "NE555",
    "name": "NE555",
    "description": "Precision Timers, 555 compatible,  PDIP-8",
+   "group": "Analog",
    "symbolId": "NE555",
    "defaultValue": "NE555",
    "variants": [
@@ -2486,6 +2500,7 @@
    "id": "TL072",
    "name": "TL072",
    "description": "Dual Low-Noise JFET-Input Operational Amplifiers, DIP-8/SOIC-8",
+   "group": "Analog",
    "symbolId": "TL072",
    "defaultValue": "TL072",
    "variants": [

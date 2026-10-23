@@ -5,6 +5,22 @@ import { itemUnit, unitCount, unitName } from './symbols';
 
 export type LibraryKind = 'symbols' | 'footprints' | 'parts';
 
+/** Group a part is listed under; power symbols without a group are listed under Power. */
+export function partGroup(lib: LibrarySet, part: PartDef): string {
+  return part.group?.trim() || (lib.symbols[part.symbolId]?.power ? 'Power' : 'Other');
+}
+
+/** Parts sorted into their groups: groups by name with Power and Other last, parts by name. */
+export function groupParts(lib: LibrarySet, parts: PartDef[]): { group: string; parts: PartDef[] }[] {
+  const groups = new Map<string, PartDef[]>();
+  for (const part of [...parts].sort((a, b) => naturalCompare(a.name, b.name))) {
+    const g = partGroup(lib, part);
+    groups.set(g, [...(groups.get(g) ?? []), part]);
+  }
+  const rank = (g: string) => (g === 'Other' ? 2 : g === 'Power' ? 1 : 0);
+  return [...groups.keys()].sort((a, b) => rank(a) - rank(b) || naturalCompare(a, b)).map((group) => ({ group, parts: groups.get(group)! }));
+}
+
 /** Turns a display name into an id that is unique within the collection. */
 export function uniqueId(name: string, existing: Record<string, unknown>): string {
   const base = name.trim().replace(/[^A-Za-z0-9_+-]+/g, '_').replace(/^_+|_+$/g, '') || 'ITEM';

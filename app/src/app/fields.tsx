@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 
 /** Local draft of a value that resets whenever the value changes from outside. */
 function useDraft<T>(value: T, toDraft: (v: T) => string) {
@@ -13,7 +13,8 @@ function useDraft<T>(value: T, toDraft: (v: T) => string) {
 
 /** Text input that commits on blur / Enter, so typing produces a single undo step. `onCommit`
  * may return false to reject the text, which restores the current value. */
-export function TextField({ label, value, onCommit, testId, inputRef, placeholder }: { label: string; value: string; onCommit: (v: string) => void | boolean; testId?: string; inputRef?: React.RefObject<HTMLInputElement | null>; placeholder?: string }) {
+export function TextField({ label, value, onCommit, testId, inputRef, placeholder, suggestions }: { label: string; value: string; onCommit: (v: string) => void | boolean; testId?: string; inputRef?: React.RefObject<HTMLInputElement | null>; placeholder?: string; suggestions?: string[] }) {
+  const listId = useId();
   const [draft, setDraft] = useDraft(value, String);
   const cancelled = useRef(false);
   return (
@@ -23,6 +24,7 @@ export function TextField({ label, value, onCommit, testId, inputRef, placeholde
         ref={inputRef}
         value={draft}
         placeholder={placeholder}
+        list={suggestions ? listId : undefined}
         data-testid={testId}
         onChange={(e) => setDraft(e.target.value)}
         // the only place that commits, so Enter + blur cannot create two undo steps
@@ -40,6 +42,13 @@ export function TextField({ label, value, onCommit, testId, inputRef, placeholde
           }
         }}
       />
+      {suggestions && (
+        <datalist id={listId}>
+          {suggestions.map((s) => (
+            <option key={s} value={s} />
+          ))}
+        </datalist>
+      )}
     </label>
   );
 }

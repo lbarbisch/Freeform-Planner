@@ -1,42 +1,51 @@
 /** Small Three.js viewer for the footprint editor: shows the model in footprint space with
- * numbered pin markers, reports clicked surface points and lets the user select a pin and
- * drag it with a move gizmo. */
+ * numbered pin markers, reports clicked surface points and lets the user select a pin or the
+ * model and drag it with a gizmo (pins move, the model moves or turns). */
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
-import type { FootprintDef, Vec3 } from '../core';
-import { applyModelTransform, cloneWithMaterials, loadModel } from '../layout3d/models';
+import { round, type FootprintDef, type Quat, type Vec3 } from '../core';
+import { applyModelTransform, cloneWithMaterials, loadModel, setHighlight } from '../layout3d/models';
 
 const PIN_COLOR = 0xff4040;
 const PIN_SELECTED_COLOR = 0x33ff66;
+const MODEL_SELECTED_COLOR = 0x2f8f2f;
 
 const round2 = (v: number) => Math.round(v * 100) / 100 + 0;
+
+export type PreviewSelection = { kind: 'pin'; index: number } | { kind: 'model' } | null;
 
 export class FootprintPreview {
   private renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
   private scene = new THREE.Scene();
-  private camera = new THREE.PerspectiveCamera(40, 1, 0.1, 2000);
-  private controls: OrbitControls;
+  readonly camera = new THREE.PerspectiveCamera(40, 1, 0.1, 2000);
+  readonly controls: OrbitControls;
   private gizmo: TransformControls;
-  /** the gizmo moves this proxy; the pin follows through onPinMove */
+  /** the gizmo moves this proxy; the pin or model follows through onPinMove / onModelMove */
   private gizmoTarget = new THREE.Object3D();
   private modelRoot = new THREE.Group();
   private pinRoot = new THREE.Group();
-  private pinGeometry = new THREE.SphereGeometry(0.35, 12, 8);
+  private pinGeometry = new THREE.SphereGeometry(0.175, 12, 8);
   private pinMaterial = new THREE.MeshBasicMaterial({ color: PIN_COLOR, depthTest: false });
   private pinSelectedMaterial = new THREE.MeshBasicMaterial({ color: PIN_SELECTED_COLOR, depthTest: false });
   private disposed = false;
   private loadToken = 0;
-  private lastModelKey = '';
+  private lastSourceKey = '';
+  private model: THREE.Object3D | null = null;
+  private footprint: FootprintDef | null = null;
   private pins: Vec3[] = [];
-  private selectedPin: number | null = null;
-  /** clicked on the model surface (not on a pin) */
+  private selection: PreviewSelection = null;
+  private modelMode: 'translate' | 'rotate' = 'translate';
+  /** clicked on the model surface while adding pins by clicking */
   onPick: ((p: Vec3) => void) | null = null;
-  /** clicked on a pin marker, or on empty space (null) */
-  onSelectPin: ((index: number | null) => void) | null = null;
+  /** clicked on a pin marker, the model, or empty space (null) */
+  onSelect: ((selection: PreviewSelection) => void) | null = null;
   /** live pin position while the gizmo is dragged */
   onPinMove: ((index: number, position: Vec3) => void) | null = null;
-  onPinMoveEnd: (() => void) | null = null;
+  /** live model offset and rotation while the gizmo is dragged */
+  onModelMove: ((offset: Vec3, rotation: Quat) => void) | null = null;
+  /** a gizmo drag ended */
+  onMoveEnd: (() => void) | null = null;
 
   constructor(private host: HTMLElement) {
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -59,12 +68,13 @@ export class FootprintPreview {
     this.gizmo.addEventListener('change', () => this.render());
     this.gizmo.addEventListener('dragging-changed', (e) => {
       this.controls.enabled = !e.value;
-      if (!e.value) this.onPinMoveEnd?.();
+      if (!e.value) this.onMoveEnd?.();
     });
     this.gizmo.addEventListener('objectChange', () => {
-      if (this.selectedPin === null) return;
       const p = this.gizmoTarget.position;
-      this.onPinMove?.(this.selectedPin, [round2(p.x), round2(p.y), round2(p.z)]);
+      const position: Vec3 = [round2(p.x), round2(p.y), round2(p.z)];
+      if (this.selection?.kind === 'pin') this.onPinMove?.(this.selection.index, position);
+      else if (this.selection?.kind === 'model') this.onModelMove?.(position, this.gizmoTarget.quaternion.toArray().map((v) => round(v, 6)) as Quat);
     });
     this.scene.add(this.gizmo.getHelper());
 
@@ -77,10 +87,10 @@ export class FootprintPreview {
       // the gizmo consumes clicks on its handles
       if (this.gizmo.dragging || this.gizmo.axis !== null) return;
       const pin = this.pickPin(e.clientX, e.clientY);
-      if (pin !== null) return this.onSelectPin?.(pin);
+      if (pin !== null) return this.onSelect?.({ kind: 'pin', index: pin });
       const hit = this.pick(e.clientX, e.clientY);
       if (hit && this.onPick) this.onPick(hit);
-      else this.onSelectPin?.(null);
+      else this.onSelect?.(hit ? { kind: 'model' } : null);
     });
     this.resize();
   }
@@ -99,20 +109,25 @@ export class FootprintPreview {
   }
 
   show(fp: FootprintDef): void {
-    const modelKey = JSON.stringify([fp.model, fp.modelRotation, fp.modelOffset, fp.modelScale]);
-    if (modelKey !== this.lastModelKey) {
-      const firstLoad = this.lastModelKey === '';
-      this.lastModelKey = modelKey;
+    this.footprint = fp;
+    const sourceKey = JSON.stringify(fp.model);
+    if (sourceKey !== this.lastSourceKey) {
+      const firstLoad = this.lastSourceKey === '';
+      this.lastSourceKey = sourceKey;
       const token = ++this.loadToken;
       void loadModel(fp.model).then((template) => {
         if (token !== this.loadToken || this.disposed) return;
         this.modelRoot.clear();
-        const model = cloneWithMaterials(template);
-        applyModelTransform(model, fp);
-        this.modelRoot.add(model);
+        this.model = cloneWithMaterials(template);
+        // the latest transform, which may have changed while loading
+        applyModelTransform(this.model, this.footprint ?? fp);
+        this.modelRoot.add(this.model);
         if (firstLoad) this.frame();
-        this.render();
+        this.syncSelection();
       });
+    } else if (this.model) {
+      // moving or turning the model must not reload it
+      applyModelTransform(this.model, fp);
     }
     this.pins = fp.pins.map((p) => p.position);
     for (const old of this.pinRoot.children) {
@@ -127,33 +142,51 @@ export class FootprintPreview {
       marker.renderOrder = 10;
       marker.userData.pinIndex = i;
       const label = textSprite(pin.number);
-      label.position.set(0, 1.2, 0);
+      label.position.set(0, 0.6, 0);
       marker.add(label);
       this.pinRoot.add(marker);
     });
     this.syncSelection();
   }
 
-  /** Highlights a pin and puts the move gizmo on it (null hides the gizmo). */
-  setSelectedPin(index: number | null): void {
-    this.selectedPin = index;
+  /** Highlights a pin or the model and puts the gizmo on it (null hides the gizmo). */
+  setSelection(selection: PreviewSelection): void {
+    this.selection = selection;
+    this.syncSelection();
+  }
+
+  /** Whether the gizmo moves or turns the model; pins are only moved. */
+  setModelMode(mode: 'translate' | 'rotate'): void {
+    this.modelMode = mode;
     this.syncSelection();
   }
 
   private syncSelection(): void {
-    const index = this.selectedPin !== null && this.selectedPin < this.pins.length ? this.selectedPin : null;
+    const sel = this.selection;
+    const index = sel?.kind === 'pin' && sel.index < this.pins.length ? sel.index : null;
     this.pinRoot.children.forEach((m, i) => {
       const mesh = m as THREE.Mesh;
       mesh.material = i === index ? this.pinSelectedMaterial : this.pinMaterial;
       mesh.scale.setScalar(i === index ? 1.4 : 1);
     });
-    if (index === null) {
-      this.gizmo.detach();
-    } else {
-      // while dragging the gizmo leads and the pin follows it
-      if (!this.gizmo.dragging) this.gizmoTarget.position.set(...this.pins[index]!);
-      if (this.gizmo.object !== this.gizmoTarget) this.gizmo.attach(this.gizmoTarget);
+    const fp = sel?.kind === 'model' ? this.footprint : null;
+    if (this.model) setHighlight(this.model, fp ? MODEL_SELECTED_COLOR : null);
+    // while dragging the gizmo leads and the pin or model follows it
+    if (index !== null) {
+      this.gizmo.setMode('translate');
+      if (!this.gizmo.dragging) {
+        this.gizmoTarget.position.set(...this.pins[index]!);
+        this.gizmoTarget.quaternion.identity();
+      }
+    } else if (fp) {
+      this.gizmo.setMode(this.modelMode);
+      if (!this.gizmo.dragging) {
+        this.gizmoTarget.position.set(...fp.modelOffset);
+        this.gizmoTarget.quaternion.set(...fp.modelRotation);
+      }
     }
+    if (index === null && !fp) this.gizmo.detach();
+    else if (this.gizmo.object !== this.gizmoTarget) this.gizmo.attach(this.gizmoTarget);
     this.render();
   }
 
@@ -218,7 +251,7 @@ function textSprite(text: string): THREE.Sprite {
     ctx.fillText(text, 32, 34);
   }
   const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(canvas), depthTest: false }));
-  sprite.scale.setScalar(1.4);
+  sprite.scale.setScalar(0.7);
   sprite.renderOrder = 11;
   return sprite;
 }

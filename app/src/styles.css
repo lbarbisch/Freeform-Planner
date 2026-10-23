@@ -717,7 +717,8 @@ text.selected {
   flex-direction: column;
   gap: 6px;
 }
-.part-picker h3 {
+.part-picker h3,
+.library-list h3.list-group {
   font-size: 12px;
   text-transform: uppercase;
   color: var(--muted);
@@ -851,6 +852,9 @@ text.selected {
   min-height: 0;
   min-width: 0;
 }
+.editor-canvas.no-toolbar {
+  grid-template-rows: 1fr;
+}
 .part-editor {
   padding: 14px 18px;
   max-width: 880px;
@@ -914,4 +918,10 @@ text.selected {
   .library-list {
     max-height: 220px;
   }
+}
+.add-pin-row {
+  align-items: center;
+}
+.add-pin-row .field {
+  margin-bottom: 0;
 }

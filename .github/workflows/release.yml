@@ -32,16 +32,16 @@ jobs:
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
 
-      - name: Tag must exist, point at the tested commit and match package.json version
+      # the version comes from the tag: CI built this artifact with APP_VERSION=$TAG
+      - name: Tag must be a version and point at the tested commit
         run: |
+          if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::tag $TAG is not a version tag vX.Y.Z"
+            exit 1
+          fi
           git fetch --depth=1 origin "refs/tags/$TAG:refs/tags/$TAG"
           if [ "$(git rev-list -n 1 "refs/tags/$TAG")" != "$SHA" ]; then
             echo "::error::tag $TAG does not point at the CI-tested commit $SHA"
-            exit 1
-          fi
-          version="v$(node -p "require('./app/package.json').version")"
-          if [ "$version" != "$TAG" ]; then
-            echo "::error::tag $TAG does not match package.json version $version"
             exit 1
           fi
 

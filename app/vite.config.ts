@@ -2,7 +2,10 @@ import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import { readFileSync } from 'node:fs';
 
-const { version } = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf-8')) as { version: string };
+// release builds get the version from the git tag (CI sets APP_VERSION=v1.2.3), other builds
+// use package.json
+const packageVersion = (JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf-8')) as { version: string }).version;
+const version = process.env.APP_VERSION?.replace(/^v/, '') || packageVersion;
 
 export default defineConfig({
   // relative base so the build works from any sub path (GitHub Pages, file shares, Tauri)

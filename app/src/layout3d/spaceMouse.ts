@@ -1,8 +1,8 @@
 /** 3Dconnexion SpaceMouse via WebHID (Chromium based browsers). Optional: without WebHID or a
  * device the app works the same. */
 import * as THREE from 'three';
-import { getState } from '../app/store';
-import type { LayoutScene } from './LayoutScene';
+import type { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { getState, setState, type AppState, type MenuAction } from '../app/store';
 import { cameraDeltas, decodeButtons, decodeReport, isDeflected, zeroAxes, type SpaceMouseAxes } from './spaceMouseMath';
 
 const VENDORS = [0x256f, 0x046d]; // 3Dconnexion, Logitech (older devices)
@@ -27,6 +27,33 @@ interface HIDLike {
 
 const hid = (): HIDLike | undefined => (navigator as unknown as { hid?: HIDLike }).hid;
 
+/** What the SpaceMouse steers: a camera orbiting a target (3D layout, footprint editor). */
+export interface SpaceMouseView {
+  readonly camera: THREE.PerspectiveCamera;
+  readonly orbit: OrbitControls;
+  invalidate(): void;
+  frameAll(): void;
+}
+
+/** Steers a view with the SpaceMouse while it is shown and publishes the connection state for
+ * the View menu and the settings dialog. Returns the cleanup. */
+export function attachSpaceMouse(view: SpaceMouseView): () => void {
+  const sm = new SpaceMouse(view);
+  const connect = () => void sm.request();
+  if (SpaceMouse.supported) setState({ spaceMouse: { connected: false, connect } });
+  sm.onStatus = (connected) => setState({ spaceMouse: { connected, connect } });
+  void sm.reconnect();
+  return () => {
+    sm.dispose();
+    setState({ spaceMouse: null });
+  };
+}
+
+/** View menu entry: connect, or a checked entry once connected. */
+export function spaceMouseMenu(state: AppState['spaceMouse']): MenuAction[] {
+  return state ? [{ label: state.connected ? 'SpaceMouse connected' : 'Connect SpaceMouse…', active: state.connected, run: state.connect }] : [];
+}
+
 export class SpaceMouse {
   static get supported(): boolean {
     return !!hid();
@@ -44,7 +71,7 @@ export class SpaceMouse {
   private active = isActiveTab();
   private wheelGuard = false;
 
-  constructor(private scene: LayoutScene) {
+  constructor(private scene: SpaceMouseView) {
     window.addEventListener('focus', this.onFocusChange);
     window.addEventListener('blur', this.onFocusChange);
     document.addEventListener('visibilitychange', this.onFocusChange);
@@ -80,7 +107,8 @@ export class SpaceMouse {
     if (this.active && !d.opened) await d.open();
     this.device = d;
     d.addEventListener('inputreport', (e) => {
-      if (!this.active) return;
+      // the device outlives this controller when the view is closed and opened again
+      if (!this.active || this.disposed) return;
       const axes = decodeReport(e.reportId, e.data, this.axes);
       if (axes) {
         this.axes = axes;

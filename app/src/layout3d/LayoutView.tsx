@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import * as THREE from 'three';
 import {
   cycleVariant,
   deriveNetlist,
@@ -19,7 +18,6 @@ import {
   wireFootprints,
   writeObj,
   type Airwire,
-  type Quat,
   type Vec3,
 } from '../core';
 import { apply, endGesture, getState, notify, project as currentProject, select, setState, useApp } from '../app/store';
@@ -28,7 +26,8 @@ import { NumberField } from '../app/fields';
 import { isTypingTarget } from '../app/keyboard';
 import { keyCombo, keyLabel } from '../app/settings';
 import { LayoutScene, type Pick, type Transforms } from './LayoutScene';
-import { SpaceMouse } from './spaceMouse';
+import { eulerDeg, quatFromEulerDeg } from './models';
+import { attachSpaceMouse, spaceMouseMenu } from './spaceMouse';
 
 type GizmoMode = 'translate' | 'rotate' | 'off';
 
@@ -96,12 +95,7 @@ export function LayoutView() {
     window.__ffpLayout = scene;
     const ro = new ResizeObserver(() => scene.resize());
     ro.observe(container);
-    const sm = new SpaceMouse(scene);
-    // shared with the View menu and the settings dialog
-    const connect = () => void sm.request();
-    if (SpaceMouse.supported) setState({ spaceMouse: { connected: false, connect } });
-    sm.onStatus = (connected) => setState({ spaceMouse: { connected, connect } });
-    void sm.reconnect();
+    const detachSpaceMouse = attachSpaceMouse(scene);
     // frame once the first models are in
     let framed = false;
     const frameWhenLoaded = window.setInterval(() => {
@@ -114,8 +108,7 @@ export function LayoutView() {
     return () => {
       window.clearInterval(frameWhenLoaded);
       ro.disconnect();
-      sm.dispose();
-      setState({ spaceMouse: null });
+      detachSpaceMouse();
       scene.dispose();
       sceneRef.current = null;
       if (window.__ffpLayout === scene) delete window.__ffpLayout;
@@ -190,7 +183,7 @@ export function LayoutView() {
         ],
         view: [
           { label: 'Zoom to fit', shortcut: 'Home', run: zoomToFit },
-          ...(spaceMouse ? [{ label: spaceMouse.connected ? 'SpaceMouse connected' : 'Connect SpaceMouse…', active: spaceMouse.connected, run: spaceMouse.connect }] : []),
+          ...spaceMouseMenu(spaceMouse),
         ],
       },
     });
@@ -291,16 +284,6 @@ function toggle(list: string[], id: string): string[] {
 }
 
 const AXES = ['X', 'Y', 'Z'] as const;
-
-function eulerDeg(q: Quat): Vec3 {
-  const e = new THREE.Euler().setFromQuaternion(new THREE.Quaternion(...q), 'XYZ');
-  return [e.x, e.y, e.z].map((r) => round(THREE.MathUtils.radToDeg(r), 2)) as Vec3;
-}
-
-function quatFromEulerDeg(deg: Vec3): Quat {
-  const [x, y, z] = deg.map((d) => THREE.MathUtils.degToRad(d)) as Vec3;
-  return new THREE.Quaternion().setFromEuler(new THREE.Euler(x, y, z, 'XYZ')).toArray() as Quat;
-}
 
 function LayoutInfo({ airwire, airwires, onInsertWire, onDeleteWires }: { airwire: number | null; airwires: Airwire[]; onInsertWire: (index: number) => void; onDeleteWires: () => void }) {
   const project = useApp((s) => s.history.present);

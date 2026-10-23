@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { autoPinMap, naturalCompare, upsert, validatePart, type PartDef, type PartVariant } from '../core';
+import { autoPinMap, naturalCompare, partGroup, upsert, validatePart, type PartDef, type PartVariant } from '../core';
 import { applyLibrary, useApp } from '../app/store';
 import { Issues, TextField } from '../app/fields';
 import { SymbolPreview } from '../schematic/SymbolGraphics';
@@ -10,6 +10,7 @@ export function PartEditor({ part }: { part: PartDef }) {
   const symbol = library.symbols[part.symbolId];
   const footprintIds = useMemo(() => Object.keys(library.footprints).sort(naturalCompare), [library.footprints]);
   const symbolIds = useMemo(() => Object.keys(library.symbols).sort(naturalCompare), [library.symbols]);
+  const groups = useMemo(() => [...new Set(['Passives', 'Diodes', 'Transistors', 'Analog', 'Logic', 'Connectors', 'Power', ...Object.values(library.parts).map((p) => partGroup(library, p))])].sort(naturalCompare), [library]);
 
   const update = (patch: Partial<PartDef>) => applyLibrary((l) => upsert(l, 'parts', { ...part, ...patch }));
   const setVariant = (i: number, v: PartVariant) => update({ variants: part.variants.map((x, j) => (j === i ? v : x)) });
@@ -26,6 +27,14 @@ export function PartEditor({ part }: { part: PartDef }) {
         <TextField label="Name" value={part.name} onCommit={(name) => update({ name })} testId="part-name" />
         <TextField label="Default value" value={part.defaultValue} onCommit={(defaultValue) => update({ defaultValue })} testId="part-value" />
         <TextField label="Description" value={part.description} onCommit={(description) => update({ description })} />
+        <TextField
+          label="Group"
+          value={part.group ?? ''}
+          placeholder={partGroup(library, { ...part, group: '' })}
+          suggestions={groups}
+          testId="part-group"
+          onCommit={(g) => update({ group: g.trim() || undefined })}
+        />
         <label className="field">
           <span>Symbol</span>
           <select value={part.symbolId} onChange={(e) => update({ symbolId: e.target.value })} data-testid="part-symbol">

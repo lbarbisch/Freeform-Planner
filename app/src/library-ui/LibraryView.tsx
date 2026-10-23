@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   duplicateItem,
+  groupParts,
   loadLibrary,
   mergeLibraries,
   naturalCompare,
@@ -39,11 +40,15 @@ export function LibraryView() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [query, setQuery] = useState('');
 
-  const items = useMemo(() => {
+  // parts are listed by group, symbols and footprints in one list
+  const sections = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return Object.values(library[kind] as Record<string, { id: string; name: string }>)
-      .filter((i) => !q || `${i.id} ${i.name}`.toLowerCase().includes(q))
+    const match = (i: { id: string; name: string; group?: string }) => !q || `${i.id} ${i.name} ${i.group ?? ''}`.toLowerCase().includes(q);
+    if (kind === 'parts') return groupParts(library, Object.values(library.parts).filter(match)).map((g) => ({ title: g.group, items: g.parts }));
+    const items = Object.values(library[kind] as Record<string, { id: string; name: string }>)
+      .filter(match)
       .sort((a, b) => naturalCompare(a.name, b.name));
+    return [{ title: null, items }];
   }, [library, kind, query]);
 
   const issueCount = (id: string): number => {
@@ -171,26 +176,40 @@ export function LibraryView() {
               Delete
             </button>
           </div>
-          <ul>
-            {items.map((item) => {
-              const issues = issueCount(item.id);
-              const symbol = kind === 'symbols' ? library.symbols[item.id] : kind === 'parts' ? library.symbols[library.parts[item.id]!.symbolId] : undefined;
-              return (
-                <li key={item.id}>
-                  <button className={`part-item ${selectedId === item.id ? 'active' : ''}`} onClick={() => setSelectedId(item.id)} data-testid={`lib-item-${item.id}`}>
-                    {symbol && <SymbolPreview symbol={symbol} size={30} />}
-                    <span>
-                      <strong>{item.name}</strong>
-                      <small>
-                        {item.id}
-                        {issues > 0 && <span className="warning"> · ⚠ {issues}</span>}
-                      </small>
-                    </span>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
+          {sections.map((section) => (
+            <section key={section.title ?? ''}>
+              {section.title && <h3 className="list-group">{section.title}</h3>}
+              <ul>
+                {section.items.map((item) => {
+                  const issues = issueCount(item.id);
+                  const warning = issues > 0 && <span className="warning"> ⚠ {issues}</span>;
+                  const symbol = kind === 'symbols' ? library.symbols[item.id] : kind === 'parts' ? library.symbols[library.parts[item.id]!.symbolId] : undefined;
+                  return (
+                    <li key={item.id}>
+                      <button className={`part-item ${selectedId === item.id ? 'active' : ''}`} onClick={() => setSelectedId(item.id)} data-testid={`lib-item-${item.id}`}>
+                        {symbol && <SymbolPreview symbol={symbol} size={30} />}
+                        {kind === 'symbols' ? (
+                          <span>
+                            <strong>{item.name}</strong>
+                            {warning}
+                          </span>
+                        ) : (
+                          <span>
+                            <strong>{item.name}</strong>
+                            <small>
+                              {item.id}
+                              {issues > 0 && ' ·'}
+                              {warning}
+                            </small>
+                          </span>
+                        )}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          ))}
         </aside>
         <main className="library-editor">
           {!current && <p className="empty-hint">Select an item on the left, or create a new one.</p>}
