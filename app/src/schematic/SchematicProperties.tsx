@@ -1,7 +1,9 @@
 import { useEffect, useRef } from 'react';
-import { instanceSymbol, mirrorInstance, ownerOf, partInstances, rotateInstance, setRef, setValue, symbolOf, unitCount, unitName, unitOf, type Netlist } from '../core';
+import { instanceSymbol, mirrorInstance, ownerOf, partInstances, setRef, setRotation, setValue, symbolOf, unitCount, unitName, unitOf, type Netlist, type Rotation } from '../core';
 import { apply, endGesture, select, useApp } from '../app/store';
 import { TextField } from '../app/fields';
+
+const ROTATIONS: Rotation[] = [0, 90, 180, 270];
 
 export function SchematicProperties({ netlist, focusRef, onRenameLabel }: { netlist: Netlist; focusRef: number; onRenameLabel: (id: string) => void }) {
   const project = useApp((s) => s.history.present);
@@ -37,8 +39,17 @@ export function SchematicProperties({ netlist, focusRef, onRenameLabel }: { netl
           )}
           {!isPower && <TextField label="Reference" value={inst.ref} inputRef={refInput} testId="prop-ref" onCommit={(v) => apply((p) => setRef(p, inst.id, v))} />}
           <TextField label={isPower ? 'Net name' : 'Value'} value={inst.value} testId="prop-value" onCommit={(v) => apply((p) => setValue(p, inst.id, v))} />
+          <label className="field">
+            <span>Rotation</span>
+            <select value={inst.rotation} onChange={(e) => apply((p) => setRotation(p, inst.id, Number(e.target.value) as Rotation))} data-testid="prop-rotation">
+              {ROTATIONS.map((r) => (
+                <option key={r} value={r}>
+                  {r}°
+                </option>
+              ))}
+            </select>
+          </label>
           <div className="actions">
-            <button onClick={() => apply((p) => rotateInstance(p, inst.id))}>Rotate</button>
             <button onClick={() => apply((p) => mirrorInstance(p, inst.id))}>Mirror</button>
           </div>
           {!isPower && (

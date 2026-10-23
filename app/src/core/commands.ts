@@ -215,6 +215,12 @@ export function rotateInstance(project: Project, id: string): Project {
   return updateInstance(project, id, { rotation: ((inst.rotation + 90) % 360) as Rotation });
 }
 
+export function setRotation(project: Project, id: string, rotation: Rotation): Project {
+  const inst = project.schematic.instances[id];
+  if (!inst || inst.rotation === rotation) return project;
+  return updateInstance(project, id, { rotation });
+}
+
 export function mirrorInstance(project: Project, id: string): Project {
   const inst = project.schematic.instances[id];
   if (!inst) return project;

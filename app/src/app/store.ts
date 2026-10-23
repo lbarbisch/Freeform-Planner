@@ -45,9 +45,26 @@ export interface AppState {
   settings: Settings;
   /** grid position of the mouse in the schematic, null while the schematic is not shown */
   schematicCursor: Vec2 | null;
+  viewMenus: ViewMenus | null;
 }
 
-export const emptyAppSelection = (): AppSelection => ({ ...emptySelection(), layoutWires: [] });
+export interface MenuAction {
+  label: string;
+  run: () => void;
+  shortcut?: string;
+  /** shown as checked, e.g. the current tool */
+  active?: boolean;
+  testId?: string;
+}
+
+/** Menu entries contributed by the current view; the app bar adds them to Edit and shows Tools / View. */
+export interface ViewMenus {
+  edit: MenuAction[];
+  tools: MenuAction[];
+  view: MenuAction[];
+}
+
+export const emptyAppSelection =(): AppSelection => ({ ...emptySelection(), layoutWires: [] });
 
 function initialState(): AppState {
   const project = emptyProject();
@@ -62,6 +79,7 @@ function initialState(): AppState {
     notices: [],
     settings: defaultSettings,
     schematicCursor: null,
+    viewMenus: null,
   };
 }
 

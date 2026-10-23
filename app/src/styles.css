@@ -256,6 +256,11 @@ kbd {
   padding: 0;
 }
 
+.menubar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
 .menu {
   position: relative;
 }
@@ -283,6 +288,19 @@ kbd {
 }
 .menu-items button:hover {
   background: var(--accent-soft);
+}
+/* current tool */
+.menu-items button.checked {
+  font-weight: 600;
+}
+.menu-check {
+  display: inline-block;
+  width: 1.2em;
+}
+.menu-sep {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 4px 2px;
 }
 
 .workspace {

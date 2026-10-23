@@ -18,6 +18,7 @@ import {
   resetRotation,
   rotate,
   rotateInstance,
+  setRotation,
   setRef,
   setTransform,
   setValue,
@@ -101,6 +102,10 @@ describe('schematic edits', () => {
     expect(p.schematic.instances[id]!.rotation).toBe(0);
     expect(rotateInstance(p, 'nope')).toBe(p);
     expect(mirrorInstance(p, 'nope')).toBe(p);
+    p = setRotation(p, id, 270);
+    expect(p.schematic.instances[id]!.rotation).toBe(270);
+    expect(setRotation(p, id, 270)).toBe(p);
+    expect(setRotation(p, 'nope', 90)).toBe(p);
     expect(setValue(p, 'nope', 'x')).toBe(p);
   });
 

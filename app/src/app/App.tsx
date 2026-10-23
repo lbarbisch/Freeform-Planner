@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { createContext, lazy, Suspense, useContext, useEffect, useRef, useState } from 'react';
 import { deriveNetlist, setProjectName } from '../core';
 import { SchematicView } from '../schematic/SchematicView';
 
@@ -9,7 +9,7 @@ import { Modal } from './Dialog';
 import { newProject, openExample, openProject, saveProject } from './fileActions';
 import { isTypingTarget } from './keyboard';
 import { defaultSettings, keyLabels, type Settings } from './settings';
-import { apply, dismissNotice, isDirty, redo, setState, setView, undo, useApp, type View } from './store';
+import { apply, dismissNotice, isDirty, redo, setState, setView, undo, useApp, type MenuAction, type View } from './store';
 
 const VIEWS: { id: View; label: string; key: string }[] = [
   { id: 'schematic', label: 'Schematic', key: 'F1' },
@@ -21,6 +21,7 @@ export function App() {
   const view = useApp((s) => s.view);
   const [dialog, setDialog] = useState<'help' | 'settings' | null>(null);
   const dirty = useApp(isDirty);
+  const viewMenus = useApp((s) => s.viewMenus);
 
   // global shortcuts
   useEffect(() => {
@@ -63,30 +64,49 @@ export function App() {
       <header className="topbar">
         <span className="brand">Freeform-Planner</span>
         <ProjectName />
-        <Menu label="File">
-          <button onClick={newProject}>New</button>
-          <button onClick={() => void openProject()} data-testid="menu-open">
-            Open… <kbd>Ctrl+O</kbd>
-          </button>
-          <button onClick={() => void openExample()} data-testid="menu-example">
-            Open example
-          </button>
-          <button onClick={() => void saveProject()} data-testid="menu-save">
-            Save <kbd>Ctrl+S</kbd>
-          </button>
-          <button onClick={() => void saveProject(true)}>
-            Save as… <kbd>Ctrl+Shift+S</kbd>
-          </button>
-        </Menu>
-        <Menu label="Edit">
-          <button onClick={undo}>
-            Undo <kbd>Ctrl+Z</kbd>
-          </button>
-          <button onClick={redo}>
-            Redo <kbd>Ctrl+Y</kbd>
-          </button>
-          <button onClick={() => setDialog('settings')}>Settings…</button>
-        </Menu>
+        <MenuBar>
+          <Menu label="File">
+            <button onClick={newProject}>New</button>
+            <button onClick={() => void openProject()} data-testid="menu-open">
+              Open… <kbd>Ctrl+O</kbd>
+            </button>
+            <button onClick={() => void openExample()} data-testid="menu-example">
+              Open example
+            </button>
+            <button onClick={() => void saveProject()} data-testid="menu-save">
+              Save <kbd>Ctrl+S</kbd>
+            </button>
+            <button onClick={() => void saveProject(true)}>
+              Save as… <kbd>Ctrl+Shift+S</kbd>
+            </button>
+          </Menu>
+          <Menu label="Edit">
+            <button onClick={undo}>
+              Undo <kbd>Ctrl+Z</kbd>
+            </button>
+            <button onClick={redo}>
+              Redo <kbd>Ctrl+Y</kbd>
+            </button>
+            {viewMenus && viewMenus.edit.length > 0 && (
+              <>
+                <hr className="menu-sep" />
+                <MenuActions actions={viewMenus.edit} />
+                <hr className="menu-sep" />
+              </>
+            )}
+            <button onClick={() => setDialog('settings')}>Settings…</button>
+          </Menu>
+          {viewMenus && viewMenus.tools.length > 0 && (
+            <Menu label="Tools">
+              <MenuActions actions={viewMenus.tools} />
+            </Menu>
+          )}
+          {viewMenus && viewMenus.view.length > 0 && (
+            <Menu label="View">
+              <MenuActions actions={viewMenus.view} />
+            </Menu>
+          )}
+        </MenuBar>
         <nav className="view-tabs" role="tablist" aria-label="Views">
           {VIEWS.map((v) => (
             <button key={v.id} role="tab" aria-selected={view === v.id} className={view === v.id ? 'active' : ''} data-view={v.id} onClick={() => setView(v.id)} title={v.key}>
@@ -114,28 +134,70 @@ export function App() {
   );
 }
 
-function Menu({ label, children }: { label: string; children: React.ReactNode }) {
-  const [open, setOpen] = useState(false);
+const MenuBarContext = createContext<{ open: string | null; setOpen: (label: string | null) => void }>({ open: null, setOpen: () => undefined });
+
+/** Desktop-style menu bar: once a menu is open by click, hovering another menu opens that one instead. */
+function MenuBar({ children }: { children: React.ReactNode }) {
+  const [open, setOpen] = useState<string | null>(null);
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!open) return;
     const close = (e: PointerEvent) => {
-      if (!ref.current?.contains(e.target as Node)) setOpen(false);
+      if (!ref.current?.contains(e.target as Node)) setOpen(null);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(null);
     };
     window.addEventListener('pointerdown', close);
-    return () => window.removeEventListener('pointerdown', close);
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('pointerdown', close);
+      window.removeEventListener('keydown', onKey);
+    };
   }, [open]);
   return (
-    <div className="menu" ref={ref}>
-      <button className={open ? 'active' : ''} onClick={() => setOpen((o) => !o)} aria-haspopup="menu" aria-expanded={open}>
+    <div className="menubar" ref={ref} role="menubar">
+      <MenuBarContext.Provider value={{ open, setOpen }}>{children}</MenuBarContext.Provider>
+    </div>
+  );
+}
+
+function Menu({ label, children }: { label: string; children: React.ReactNode }) {
+  const { open, setOpen } = useContext(MenuBarContext);
+  const isOpen = open === label;
+  return (
+    <div className="menu">
+      <button
+        className={isOpen ? 'active' : ''}
+        onClick={() => setOpen(isOpen ? null : label)}
+        onPointerEnter={() => open && !isOpen && setOpen(label)}
+        aria-haspopup="menu"
+        aria-expanded={isOpen}
+      >
         {label}
       </button>
-      {open && (
-        <div className="menu-items" role="menu" onClick={() => setOpen(false)}>
+      {isOpen && (
+        <div className="menu-items" role="menu" onClick={() => setOpen(null)}>
           {children}
         </div>
       )}
     </div>
+  );
+}
+
+function MenuActions({ actions }: { actions: MenuAction[] }) {
+  return (
+    <>
+      {actions.map((a) => (
+        <button key={a.label} onClick={a.run} className={a.active ? 'checked' : ''} role="menuitem" data-testid={a.testId}>
+          <span>
+            {a.active !== undefined && <span className="menu-check">{a.active ? '✓' : ''}</span>}
+            {a.label}
+          </span>
+          {a.shortcut && <kbd>{a.shortcut}</kbd>}
+        </button>
+      ))}
+    </>
   );
 }
 

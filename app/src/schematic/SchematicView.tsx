@@ -183,6 +183,28 @@ export function SchematicView() {
     setTool(t);
   }, []);
 
+  // ---------------------------------------------------------------- app bar menus
+
+  useEffect(() => {
+    setState({
+      viewMenus: {
+        edit: [
+          { label: 'Rotate', shortcut: 'R', run: rotateSelected },
+          { label: 'Mirror', shortcut: 'X', run: mirrorSelected },
+          { label: 'Delete', shortcut: 'Del', run: deleteSelected },
+        ],
+        tools: [
+          { label: 'Select', shortcut: 'Esc', active: tool.kind === 'select', run: () => switchTool({ kind: 'select' }) },
+          { label: 'Wire', shortcut: 'W', active: tool.kind === 'wire', run: () => switchTool({ kind: 'wire' }), testId: 'tool-wire' },
+          { label: 'Net label', shortcut: 'L', active: tool.kind === 'label', run: () => switchTool({ kind: 'label' }), testId: 'tool-label' },
+          { label: 'Annotate', run: runAnnotate },
+        ],
+        view: [{ label: 'Zoom to fit', shortcut: 'Home', run: fit }],
+      },
+    });
+  }, [tool, rotateSelected, mirrorSelected, deleteSelected, runAnnotate, switchTool, fit]);
+  useEffect(() => () => setState({ viewMenus: null }), []);
+
   // ---------------------------------------------------------------- keyboard
 
   useEffect(() => {
@@ -356,33 +378,7 @@ export function SchematicView() {
 
   return (
     <div className="schematic-view">
-      <div className="toolbar" role="toolbar" aria-label="Schematic tools">
-        <button className={tool.kind === 'select' ? 'active' : ''} onClick={() => switchTool({ kind: 'select' })} title="Select and move (Esc)">
-          Select
-        </button>
-        <button className={tool.kind === 'wire' ? 'active' : ''} onClick={() => switchTool({ kind: 'wire' })} title="Draw wires (W). Click to add corners, double-click or Esc to finish, / toggles the corner direction" data-testid="tool-wire">
-          Wire
-        </button>
-        <button className={tool.kind === 'label' ? 'active' : ''} onClick={() => switchTool({ kind: 'label' })} title="Place net label (L)" data-testid="tool-label">
-          Net label
-        </button>
-        <span className="sep" />
-        <button onClick={rotateSelected} title="Rotate (R)">
-          Rotate
-        </button>
-        <button onClick={mirrorSelected} title="Mirror (X)">
-          Mirror
-        </button>
-        <button onClick={deleteSelected} title="Delete (Del)">
-          Delete
-        </button>
-        <span className="sep" />
-        <button onClick={runAnnotate} title="Give every part a unique reference">
-          Annotate
-        </button>
-        <button onClick={fit} title="Fit view (Home)">
-          Fit
-        </button>
+      <div className="toolbar">
         <span className="toolbar-hint">{toolHint(tool, draft !== null, horizontalFirst)}</span>
       </div>
       <div className="schematic-body">
